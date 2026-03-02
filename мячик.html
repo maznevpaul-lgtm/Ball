@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bounce Clone</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #87CEEB; /* Небесно-голубой фон */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            touch-action: none; /* Запрет свайпов браузера */
+            user-select: none;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI */
+        #uiLayer {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        /* Наэкранные элементы управления для телефонов */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 5;
+        }
+
+        .d-pad {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 36px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            user-select: none;
+        }
+
+        .btn:active {
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(0.95);
+        }
+
+        /* Экраны */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ff4757;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.2rem;
+            text-align: center;
+            max-width: 80%;
+            margin-bottom: 30px;
+            color: #dfe4ea;
+        }
+
+        button.action-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #218c4b, 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button.action-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #218c4b, 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Скрыть наэкранные кнопки на широких экранах (ПК) */
+        @media (min-width: 800px) {
+            #controls {
+                opacity: 0.5; /* Оставляем полупрозрачными на случай планшета */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="uiLayer">
+        <div id="livesDisplay">Жизни: ❤️❤️❤️</div>
+        <div id="ringsDisplay">Кольца: 0/0</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Наэкранное управление -->
+    <div id="controls">
+        <div class="d-pad">
+            <div id="btnLeft" class="btn">←</div>
+            <div id="btnRight" class="btn">→</div>
+        </div>
+        <div id="btnJump" class="btn">↑</div>
+    </div>
+
+    <!-- Стартовый экран -->
+    <div id="startScreen" class="overlay">
+        <h1>Bounce Classic</h1>
+        <p>Соберите все золотые кольца, чтобы открыть дверь. Берегитесь шипов!<br><br><i>Управление: Кнопки на экране или стрелочки на клавиатуре.</i></p>
+        <button id="startBtn" class="action-btn">Играть</button>
+    </div>
+
+    <!-- Экран смерти (потеря жизни) -->
+    <div id="deathScreen" class="overlay hidden">
+        <h1 style="color: #ff4757;">Ой!</h1>
+        <p>Вы напоролись на колючку.</p>
+        <button id="respawnBtn" class="action-btn">Продолжить</button>
+    </div>
+
+    <!-- Экран Game Over -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <h1 style="color: #ff4757;">Игра Окончена</h1>
+        <p>У вас закончились жизни.</p>
+        <button id="restartBtn" class="action-btn">Начать заново</button>
+    </div>
+
+    <!-- Экран Победы -->
+    <div id="winScreen" class="overlay hidden">
+        <h1 style="color: #2ed573;">Уровень Пройден!</h1>
+        <p>Вы собрали все кольца и дошли до выхода!</p>
+        <button id="nextBtn" class="action-btn">Играть еще раз</button>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Элементы UI
+    const livesDisplay = document.getElementById('livesDisplay');
+    const ringsDisplay = document.getElementById('ringsDisplay');
+    
+    const screens = {
+        start: document.getElementById('startScreen'),
+        death: document.getElementById('deathScreen'),
+        gameOver: document.getElementById('gameOverScreen'),
+        win: document.getElementById('winScreen')
+    };
+
+    // Настройки игры
+    const CELL_SIZE = 40;
+    const GRAVITY = 0.5;
+    const FRICTION = 0.85;
+    const BOUNCINESS = 0.5; // Насколько сильно шарик отскакивает от пола
+    const JUMP_FORCE = -11;
+    const MOVE_SPEED = 1.2;
+    const MAX_SPEED_X = 7;
+    const MAX_SPEED_Y = 15;
+
+    // Состояние игры
+    let gameState = 'START'; // START, PLAYING, DEAD, GAMEOVER, WON
+    let animationId;
+    let camera = { x: 0, y: 0 };
+    let frameCount = 0;
+
+    // Статистика игрока
+    let lives = 3;
+    let ringsTotal = 0;
+    let ringsCollected = 0;
+    
+    // Ввод
+    let keys = { left: false, right: false, up: false };
+
+    // Шарик
+    let ball = {
+        x: 0, y: 0,
+        vx: 0, vy: 0,
+        r: 14,
+        isGrounded: false,
+        startX: 0, startY: 0
+    };
+
+    // Объекты уровня
+    let walls = [];
+    let spikes = [];
+    let rings = [];
+    let lifeBonuses = [];
+    let door = null;
+
+    // Карта уровня
+    // # - Стена, S - Старт, R - Кольцо, L - Жизнь, ^ - Колючки, D - Дверь
+    const levelData = [
+        "##################################################",
+        "#                                                #",
+        "#                                            D   #",
+        "#        R      L                            #   #",
+        "#       ###    ###    R        R             #   #",
+        "#S                   ###      ###           ##   #",
+        "####                                     ####    #",
+        "#  #        ^^^                  ^^      #       #",
+        "#  #^^^    ^^^^^^^^^      ^^^^^^^^^^^    #       #",
+        "##################################################"
+    ];
+
+    function initLevel() {
+        walls = [];
+        spikes = [];
+        rings = [];
+        lifeBonuses = [];
+        door = null;
+        ringsTotal = 0;
+        ringsCollected = 0;
+
+        for (let r = 0; r < levelData.length; r++) {
+            for (let c = 0; c < levelData[r].length; c++) {
+                const char = levelData[r][c];
+                const x = c * CELL_SIZE;
+                const y = r * CELL_SIZE;
+
+                if (char === '#') {
+                    walls.push({ x, y, w: CELL_SIZE, h: CELL_SIZE });
+                } else if (char === '^') {
+                    spikes.push({ x, y, w: CELL_SIZE, h: CELL_SIZE });
+                } else if (char === 'R') {
+                    rings.push({ x: x + CELL_SIZE/2, y: y + CELL_SIZE/2, collected: false });
+                    ringsTotal++;
+                } else if (char === 'L') {
+                    lifeBonuses.push({ x: x + CELL_SIZE/2, y: y + CELL_SIZE/2, collected: false });
+                } else if (char === 'D') {
+                    door = { x, y, w: CELL_SIZE, h: CELL_SIZE * 2 }; // Дверь высотой в 2 блока
+                } else if (char === 'S') {
+                    ball.startX = x + CELL_SIZE/2;
+                    ball.startY = y + CELL_SIZE/2;
+                    resetBall();
+                }
+            }
+        }
+        updateUI();
+    }
+
+    function resetBall() {
+        ball.x = ball.startX;
+        ball.y = ball.startY;
+        ball.vx = 0;
+        ball.vy = 0;
+        camera.x = ball.x - window.innerWidth / 2;
+        camera.y = ball.y - window.innerHeight / 2;
+    }
+
+    function updateUI() {
+        let hearts = '';
+        for(let i=0; i<lives; i++) hearts += '❤️';
+        livesDisplay.innerText = `Жизни: ${hearts}`;
+        ringsDisplay.innerText = `Кольца: ${ringsCollected}/${ringsTotal}`;
+    }
+
+    // Обработка клавиатуры
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'ArrowLeft') keys.left = true;
+        if (e.code === 'ArrowRight') keys.right = true;
+        if (e.code === 'ArrowUp') keys.up = true;
+    });
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'ArrowLeft') keys.left = false;
+        if (e.code === 'ArrowRight') keys.right = false;
+        if (e.code === 'ArrowUp') keys.up = false;
+    });
+
+    // Обработка наэкранных кнопок (для телефонов)
+    function setupTouchBtn(id, key) {
+        const btn = document.getElementById(id);
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+        // На случай, если палец ушел с кнопки
+        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); keys[key] = false; });
+    }
+    setupTouchBtn('btnLeft', 'left');
+    setupTouchBtn('btnRight', 'right');
+    setupTouchBtn('btnJump', 'up');
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Физика и коллизии
+    function updatePhysics() {
+        // Управление по X
+        if (keys.left) ball.vx -= MOVE_SPEED;
+        if (keys.right) ball.vx += MOVE_SPEED;
+        
+        // Трение и лимиты
+        ball.vx *= FRICTION;
+        if (ball.vx > MAX_SPEED_X) ball.vx = MAX_SPEED_X;
+        if (ball.vx < -MAX_SPEED_X) ball.vx = -MAX_SPEED_X;
+        if (Math.abs(ball.vx) < 0.1) ball.vx = 0;
+
+        // Движение по X
+        ball.x += ball.vx;
+        handleWallCollisions(true); // true = ось X
+
+        // Гравитация и прыжок
+        ball.vy += GRAVITY;
+        if (keys.up && ball.isGrounded) {
+            ball.vy = JUMP_FORCE;
+            ball.isGrounded = false;
+            keys.up = false; // Требует повторного нажатия для следующего прыжка (опционально)
+        }
+        
+        if (ball.vy > MAX_SPEED_Y) ball.vy = MAX_SPEED_Y;
+
+        // Движение по Y
+        ball.y += ball.vy;
+        ball.isGrounded = false;
+        handleWallCollisions(false); // false = ось Y
+    }
+
+    // AABB коллизии со стенами (считаем шарик квадратом для простоты скольжения)
+    function handleWallCollisions(isXAxis) {
+        for (let w of walls) {
+            // Проверка пересечения (AABB)
+            if (ball.x - ball.r < w.x + w.w && ball.x + ball.r > w.x &&
+                ball.y - ball.r < w.y + w.h && ball.y + ball.r > w.y) {
+                
+                if (isXAxis) {
+                    if (ball.vx > 0) { // Движение вправо
+                        ball.x = w.x - ball.r;
+                    } else if (ball.vx < 0) { // Движение влево
+                        ball.x = w.x + w.w + ball.r;
+                    }
+                    ball.vx *= -BOUNCINESS; // Отскок от стены
+                } else {
+                    if (ball.vy > 0) { // Падение вниз
+                        ball.y = w.y - ball.r;
+                        ball.isGrounded = true;
+                        
+                        // Отскок от пола
+                        if (ball.vy > 3) {
+                            ball.vy *= -BOUNCINESS;
+                        } else {
+                            ball.vy = 0;
+                        }
+                    } else if (ball.vy < 0) { // Удар головой о потолок
+                        ball.y = w.y + w.h + ball.r;
+                        ball.vy *= -BOUNCINESS;
+                    }
+                }
+            }
+        }
+    }
+
+    function checkInteractions() {
+        // Колючки (проверка по радиусу, чтобы было честно)
+        for (let s of spikes) {
+            // Колючка занимает нижнюю половину клетки
+            let spikeRect = { x: s.x, y: s.y + s.h/2, w: s.w, h: s.h/2 };
+            
+            if (ball.x + ball.r > spikeRect.x && ball.x - ball.r < spikeRect.x + spikeRect.w &&
+                ball.y + ball.r > spikeRect.y && ball.y - ball.r < spikeRect.y + spikeRect.h) {
+                die();
+                return;
+            }
+        }
+
+        // Кольца
+        for (let r of rings) {
+            if (!r.collected) {
+                let dx = ball.x - r.x;
+                let dy = ball.y - r.y;
+                if (Math.sqrt(dx*dx + dy*dy) < ball.r + 15) { // 15 - радиус кольца
+                    r.collected = true;
+                    ringsCollected++;
+                    updateUI();
+                }
+            }
+        }
+
+        // Жизни (бонусы)
+        for (let l of lifeBonuses) {
+            if (!l.collected) {
+                let dx = ball.x - l.x;
+                let dy = ball.y - l.y;
+                if (Math.sqrt(dx*dx + dy*dy) < ball.r + 12) {
+                    l.collected = true;
+                    lives++;
+                    updateUI();
+                }
+            }
+        }
+
+        // Дверь (выход)
+        if (door) {
+            if (ringsCollected === ringsTotal) {
+                // Если коснулись открытой двери
+                if (ball.x + ball.r > door.x && ball.x - ball.r < door.x + door.w &&
+                    ball.y + ball.r > door.y && ball.y - ball.r < door.y + door.h) {
+                    win();
+                }
+            }
+        }
+    }
+
+    function die() {
+        gameState = 'DEAD';
+        lives--;
+        updateUI();
+        
+        if (lives <= 0) {
+            showScreen('gameOver');
+        } else {
+            showScreen('death');
+        }
+    }
+
+    function win() {
+        gameState = 'WON';
+        showScreen('win');
+    }
+
+    function updateCamera() {
+        // Плавное следование камеры за шариком
+        let targetX = ball.x - canvas.width / 2;
+        let targetY = ball.y - canvas.height / 2;
+        
+        camera.x += (targetX - camera.x) * 0.1;
+        camera.y += (targetY - camera.y) * 0.1;
+
+        // Ограничение камеры (чтобы не показывать пустоту за картой)
+        let maxCamX = levelData[0].length * CELL_SIZE - canvas.width;
+        let maxCamY = levelData.length * CELL_SIZE - canvas.height;
+        
+        if (camera.x < 0) camera.x = 0;
+        if (camera.y < 0) camera.y = 0;
+        if (camera.x > maxCamX) camera.x = maxCamX;
+        if (camera.y > maxCamY) camera.y = maxCamY;
+    }
+
+    // Отрисовка
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        // Стены (кирпичи)
+        ctx.fillStyle = '#8B4513';
+        for (let w of walls) {
+            ctx.fillRect(w.x, w.y, w.w, w.h);
+            // Добавим текстуру кирпича
+            ctx.strokeStyle = '#5c2e0b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(w.x, w.y, w.w, w.h);
+        }
+
+        // Колючки (зубья)
+        ctx.fillStyle = '#bdc3c7';
+        for (let s of spikes) {
+            ctx.beginPath();
+            // Рисуем 3 зубца на клетку
+            for(let i=0; i<3; i++) {
+                let startX = s.x + (s.w/3) * i;
+                ctx.moveTo(startX, s.y + s.h);
+                ctx.lineTo(startX + s.w/6, s.y + s.h/2); // Острие
+                ctx.lineTo(startX + s.w/3, s.y + s.h);
+            }
+            ctx.fill();
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.stroke();
+        }
+
+        // Дверь
+        if (door) {
+            if (ringsCollected === ringsTotal) {
+                // Открыта (Зеленая/Светящаяся)
+                ctx.fillStyle = 'rgba(46, 213, 115, 0.5)';
+                ctx.fillRect(door.x, door.y, door.w, door.h);
+                ctx.strokeStyle = '#2ed573';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(door.x, door.y, door.w, door.h);
+            } else {
+                // Закрыта (Красная решетка)
+                ctx.fillStyle = 'rgba(255, 71, 87, 0.3)';
+                ctx.fillRect(door.x, door.y, door.w, door.h);
+                ctx.strokeStyle = '#ff4757';
+                ctx.lineWidth = 4;
+                for(let i=1; i<4; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(door.x + (door.w/4)*i, door.y);
+                    ctx.lineTo(door.x + (door.w/4)*i, door.y + door.h);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Кольца (с анимацией вращения/сплющивания)
+        let ringScale = Math.sin(frameCount * 0.1) * 0.5 + 0.5; // от 0 до 1
+        for (let r of rings) {
+            if (!r.collected) {
+                ctx.beginPath();
+                ctx.ellipse(r.x, r.y, 12 * ringScale + 3, 15, 0, 0, Math.PI*2);
+                ctx.strokeStyle = '#f1c40f'; // Золото
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+        }
+
+        // Бонусы жизней (маленькие сердечки/шарики)
+        for (let l of lifeBonuses) {
+            if (!l.collected) {
+                let floatY = Math.sin(frameCount * 0.1) * 5;
+                
+                ctx.beginPath();
+                ctx.arc(l.x, l.y + floatY, 8, 0, Math.PI*2);
+                ctx.fillStyle = '#ff6b81';
+                ctx.fill();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('+1', l.x, l.y + floatY);
+            }
+        }
+
+        // Шарик (Bounce)
+        if (gameState === 'PLAYING') {
+            // Рисуем тень
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y + ball.r - 2, ball.r, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fill();
+
+            // Сам шарик (радиальный градиент для объема)
+            let grad = ctx.createRadialGradient(ball.x - ball.r/3, ball.y - ball.r/3, 2, ball.x, ball.y, ball.r);
+            grad.addColorStop(0, '#ff9f43'); // Блик
+            grad.addColorStop(0.3, '#ee5253'); // Основной красный
+            grad.addColorStop(1, '#833471'); // Тень
+
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    // Главный цикл
+    function loop() {
+        if (gameState === 'PLAYING') {
+            updatePhysics();
+            checkInteractions();
+            updateCamera();
+        }
+        
+        draw();
+        frameCount++;
+        animationId = requestAnimationFrame(loop);
+    }
+
+    // Управление экранами
+    function hideAllScreens() {
+        Object.values(screens).forEach(s => s.classList.add('hidden'));
+    }
+
+    function showScreen(name) {
+        hideAllScreens();
+        screens[name].classList.remove('hidden');
+    }
+
+    function startGame() {
+        hideAllScreens();
+        if(gameState === 'START' || gameState === 'GAMEOVER' || gameState === 'WON') {
+            lives = 3;
+            initLevel();
+        }
+        // Если возрождаемся после смерти, кольца и уровень не сбрасываются
+        resetBall();
+        keys = { left: false, right: false, up: false }; // Сброс кнопок
+        gameState = 'PLAYING';
+    }
+
+    // Привязка кнопок меню
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('respawnBtn').addEventListener('click', startGame);
+    document.getElementById('restartBtn').addEventListener('click', startGame);
+    document.getElementById('nextBtn').addEventListener('click', startGame);
+
+    // Старт
+    initLevel();
+    draw(); // Первый кадр
+    animationId = requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
