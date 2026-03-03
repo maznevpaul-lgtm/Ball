@@ -188,6 +188,12 @@
     <div id="startScreen" class="overlay">
         <h1>Bounce Classic</h1>
         <p>Соберите все золотые кольца, чтобы открыть дверь. Берегитесь шипов!<br><br><i>Управление: Наклоняйте телефон (гироскоп) для движения, жмите ВВЕРХ для прыжка.</i></p>
+        
+        <div style="margin-bottom: 30px; display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.5); padding: 15px 25px; border-radius: 15px;">
+            <input type="checkbox" id="gyroToggle" style="width: 25px; height: 25px; cursor: pointer;" checked>
+            <label for="gyroToggle" style="font-size: 1.2rem; cursor: pointer; color: #2ed573; font-weight: bold;">Управление гироскопом</label>
+        </div>
+
         <button id="startBtn" class="action-btn">Играть</button>
     </div>
 
@@ -274,40 +280,56 @@
     let rings = [];
     let lifeBonuses = [];
     let jumpBonuses = [];
+    let checkpoints = []; // Добавлен массив для чекпойнтов
     let door = null;
+
+    let floatingTexts = []; // Массив для всплывающих текстов (например "Чекпойнт!")
 
     let levelData = [];
 
     // Процедурная генерация уровней
     function generateLevel(levelIndex) {
         const width = 30 + levelIndex * 10; // С каждым уровнем карта длиннее
-        const height = 12;
+        const height = 12; // Возвращаем старую (меньшую) высоту уровня
         let grid = Array.from({length: height}, () => Array(width).fill(' '));
 
-        // Стены по краям
-        for(let c=0; c<width; c++) { grid[0][c] = '#'; grid[height-1][c] = '#'; }
+        // Стены по краям (верх, лево, право. Низ открыт для пропастей)
+        for(let c=0; c<width; c++) { grid[0][c] = '#'; }
         for(let r=0; r<height; r++) { grid[r][0] = '#'; grid[r][width-1] = '#'; }
 
         // Точка старта и выход
         grid[height-2][2] = 'S';
         grid[height-3][width-3] = 'D';
+        
+        // Надежный пол под стартом и финишем
+        for(let c=1; c<=4; c++) grid[height-1][c] = '#';
+        for(let c=width-4; c<width-1; c++) grid[height-1][c] = '#';
 
         // Генерация ландшафта
         let currentH = height - 2;
+        let checkpointCounter = 0;
+
         for (let c = 5; c < width - 5; c++) {
             grid[currentH][c] = '#'; // Пол
 
             let r = Math.random();
-            if (r < 0.2) {
+            if (r < 0.2 && c < width - 6) {
                 grid[currentH-1][c] = '^'; // Колючка
+                grid[currentH][c+1] = '#'; // Гарантируем безопасный пол после колючки
+                c++; // Пропускаем следующий блок
             } else if (r < 0.4 && c < width - 6) {
-                // Пропасть
+                // Пропасть (убираем пол)
                 grid[currentH][c] = ' ';
                 grid[currentH][c+1] = ' ';
-                grid[currentH-2][c+1] = 'R'; // Кольцо над пропастью (опустил пониже)
+                grid[currentH-2][c+1] = 'R'; // Кольцо над пропастью
                 c++;
-            } else if (r < 0.6) {
-                // Парящая платформа (опустил пониже)
+                // Делаем безопасную площадку для приземления
+                if (c + 1 < width - 5) {
+                    grid[currentH][c+1] = '#';
+                    c++;
+                }
+            } else if (r < 0.6 && c < width - 6) {
+                // Парящая платформа
                 grid[currentH-3][c] = '#';
                 grid[currentH-3][c+1] = '#';
                 if(Math.random() < 0.5) grid[currentH-4][c] = 'R'; // Кольцо на платформе
@@ -315,12 +337,23 @@
             } else if (r < 0.75 && currentH > 5) {
                 currentH--; // Ступенька вверх
                 grid[currentH][c] = '#';
-                if(Math.random() < 0.2) grid[currentH-1][c] = 'J'; // Бонус суперпрыжка перед подъемом
+                if(Math.random() < 0.2) grid[currentH-1][c] = 'J'; // Бонус суперпрыжка
             } else if (r < 0.9 && currentH < height - 2) {
                 currentH++; // Ступенька вниз
                 grid[currentH][c] = '#';
             } else {
-                grid[currentH-1][c] = 'R'; // Кольцо на полу
+                if (Math.random() < 0.6 && c < width - 6) {
+                    grid[currentH-1][c] = 'R'; // Кольцо на полу
+                    grid[currentH][c+1] = '#'; // Гарантируем безопасный пол после кольца
+                    c++; // Пропускаем следующий блок
+                }
+            }
+
+            // Ставим чекпойнт периодически на ровных участках
+            checkpointCounter++;
+            if (checkpointCounter >= 8 && grid[currentH][c] === '#' && grid[currentH-1][c] === ' ') {
+                grid[currentH-1][c] = 'C';
+                checkpointCounter = 0;
             }
         }
 
@@ -339,6 +372,8 @@
         rings = [];
         lifeBonuses = [];
         jumpBonuses = [];
+        checkpoints = [];
+        floatingTexts = [];
         door = null;
         ringsTotal = 0;
         ringsCollected = 0;
@@ -362,6 +397,9 @@
                     lifeBonuses.push({ x: x + CELL_SIZE/2, y: y + CELL_SIZE/2, collected: false });
                 } else if (char === 'J') {
                     jumpBonuses.push({ x: x + CELL_SIZE/2, y: y + CELL_SIZE/2, collected: false });
+                } else if (char === 'C') {
+                    // C - Чекпойнт
+                    checkpoints.push({ x: x + CELL_SIZE/2, y: y + CELL_SIZE, collected: false });
                 } else if (char === 'D') {
                     door = { x, y, w: CELL_SIZE, h: CELL_SIZE * 2 }; // Дверь высотой в 2 блока
                 } else if (char === 'S') {
@@ -425,6 +463,8 @@
 
     // Обработка гироскопа
     function handleOrientation(event) {
+        if (!document.getElementById('gyroToggle').checked) return;
+
         let gamma = event.gamma; 
         let beta = event.beta;
         if (gamma === null) return;
@@ -464,7 +504,7 @@
         if (keys.right) ball.vx += MOVE_SPEED;
         
         // Управление по X (Гироскоп)
-        if (useGyro && tiltX !== 0) {
+        if (useGyro && document.getElementById('gyroToggle').checked && tiltX !== 0) {
             ball.vx += (tiltX / 15) * MOVE_SPEED;
         }
         
@@ -531,14 +571,26 @@
     function checkInteractions() {
         // Колючки (проверка по радиусу, чтобы было честно)
         for (let s of spikes) {
-            // Колючка занимает нижнюю половину клетки
-            let spikeRect = { x: s.x, y: s.y + s.h/2, w: s.w, h: s.h/2 };
+            // Сужаем хитбокс шипов, чтобы можно было подходить к краю кубика
+            let marginX = 8; // Отступ по 8 пикселей с каждой стороны
+            let spikeRect = { 
+                x: s.x + marginX, 
+                y: s.y + s.h/2, 
+                w: s.w - marginX * 2, 
+                h: s.h/2 
+            };
             
             if (ball.x + ball.r > spikeRect.x && ball.x - ball.r < spikeRect.x + spikeRect.w &&
                 ball.y + ball.r > spikeRect.y && ball.y - ball.r < spikeRect.y + spikeRect.h) {
                 die();
                 return;
             }
+        }
+
+        // Пропасть (падение за карту)
+        if (ball.y > levelData.length * CELL_SIZE + 50) {
+            die();
+            return;
         }
 
         // Кольца
@@ -581,6 +633,20 @@
             }
         }
 
+        // Чекпойнты
+        for (let cp of checkpoints) {
+            if (!cp.collected) {
+                let dx = ball.x - cp.x;
+                let dy = ball.y - (cp.y - CELL_SIZE/2);
+                if (Math.sqrt(dx*dx + dy*dy) < ball.r + 20) {
+                    cp.collected = true;
+                    ball.startX = cp.x;
+                    ball.startY = cp.y - CELL_SIZE/2 - ball.r;
+                    floatingTexts.push({ text: 'Чекпойнт!', x: cp.x, y: cp.y - CELL_SIZE - 20, alpha: 1 });
+                }
+            }
+        }
+
         // Дверь (выход)
         if (door) {
             if (ringsCollected === ringsTotal) {
@@ -594,13 +660,14 @@
     }
 
     function die() {
-        gameState = 'DEAD';
         lives--;
         updateUI();
         
         if (lives <= 0) {
+            gameState = 'GAMEOVER'; // ИСПРАВЛЕНО: Правильный статус при конце жизней
             showScreen('gameOver');
         } else {
+            gameState = 'DEAD';
             showScreen('death');
         }
     }
@@ -652,12 +719,15 @@
         ctx.fillStyle = '#bdc3c7';
         for (let s of spikes) {
             ctx.beginPath();
-            // Рисуем 3 зубца на клетку
+            let marginX = 8;
+            let drawW = s.w - marginX * 2;
+            let startBaseX = s.x + marginX;
+            // Рисуем 3 зубца на суженной области, чтобы они визуально соответствовали новому хитбоксу
             for(let i=0; i<3; i++) {
-                let startX = s.x + (s.w/3) * i;
+                let startX = startBaseX + (drawW/3) * i;
                 ctx.moveTo(startX, s.y + s.h);
-                ctx.lineTo(startX + s.w/6, s.y + s.h/2); // Острие
-                ctx.lineTo(startX + s.w/3, s.y + s.h);
+                ctx.lineTo(startX + drawW/6, s.y + s.h/2); // Острие
+                ctx.lineTo(startX + drawW/3, s.y + s.h);
             }
             ctx.fill();
             ctx.strokeStyle = '#7f8c8d';
@@ -741,6 +811,21 @@
             }
         }
 
+        // Чекпойнты (Флажки)
+        for (let cp of checkpoints) {
+            // Древко
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(cp.x - 2, cp.y - CELL_SIZE, 4, CELL_SIZE);
+            
+            // Флаг
+            ctx.fillStyle = cp.collected ? '#2ecc71' : '#e74c3c'; // Зеленый если взят, красный если нет
+            ctx.beginPath();
+            ctx.moveTo(cp.x + 2, cp.y - CELL_SIZE);
+            ctx.lineTo(cp.x + 20, cp.y - CELL_SIZE + 10);
+            ctx.lineTo(cp.x + 2, cp.y - CELL_SIZE + 20);
+            ctx.fill();
+        }
+
         // Шарик (Bounce)
         if (gameState === 'PLAYING') {
             // Рисуем тень
@@ -759,6 +844,19 @@
             ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
             ctx.fillStyle = grad;
             ctx.fill();
+        }
+
+        // Всплывающий текст (Floating Text) для Чекпойнтов
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+            let ft = floatingTexts[i];
+            ctx.fillStyle = `rgba(255, 255, 255, ${ft.alpha})`;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(ft.text, ft.x, ft.y);
+            
+            ft.y -= 1; // Поднимается вверх
+            ft.alpha -= 0.02; // Плавно исчезает
+            if (ft.alpha <= 0) floatingTexts.splice(i, 1);
         }
 
         ctx.restore();
@@ -790,7 +888,9 @@
     function startGame() {
         hideAllScreens();
         if(gameState === 'START') {
-            requestGyro();
+            if (document.getElementById('gyroToggle').checked) {
+                requestGyro();
+            }
         }
 
         if(gameState === 'START' || gameState === 'GAMEOVER') {
