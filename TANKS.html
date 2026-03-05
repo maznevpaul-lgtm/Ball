@@ -135,17 +135,20 @@
         </div>
 
         <!-- Мобильное управление -->
-        <div class="w-full mt-2 mb-4 flex justify-between sm:hidden">
+        <div class="w-full mt-2 mb-4 flex justify-between items-center sm:hidden">
             <div class="controls-grid">
                 <div></div>
                 <div class="btn" id="btn-up">▲</div>
                 <div></div>
                 <div class="btn" id="btn-left">◀</div>
-                <div class="btn" id="btn-down">▼</div>
+                <div></div>
                 <div class="btn" id="btn-right">▶</div>
+                <div></div>
+                <div class="btn" id="btn-down">▼</div>
+                <div></div>
             </div>
             <div class="flex items-center justify-center">
-                <div class="btn-fire" id="btn-fire">ОГОНЬ</div>
+                <div class="btn-fire" id="btn-fire"></div>
             </div>
         </div>
     </div>
@@ -1040,7 +1043,8 @@ function winLevel() {
     sfx.playWin(); // Победная мелодия
 
     level++;
-    lives = 3; // Восстанавливаем жизни
+    // Восстанавливаем жизни минимум до 3, но не забираем, если их больше
+    if (lives < 3) lives = 3; 
     document.getElementById('livesUI').innerText = lives;
 
     let transitionText = document.getElementById('transitionText');
@@ -1170,7 +1174,8 @@ function update(dt) {
                 sfx.playBonus(); // Звук бонуса
 
                 if (bonus.type === 'LIFE') {
-                    lives++; document.getElementById('livesUI').innerText = lives;
+                    if (lives < 6) lives++; 
+                    document.getElementById('livesUI').innerText = lives;
                 } else if (bonus.type === 'SHIELD') {
                     player.shieldTimer = 10000;
                 } else if (bonus.type === 'FIRE') {
