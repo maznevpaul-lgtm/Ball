@@ -13,6 +13,7 @@
             background-color: #87CEEB; /* Небесно-голубой фон */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
+            position: fixed; /* Предотвращает случайную прокрутку страницы на телефонах */
             touch-action: none; /* Запрет свайпов браузера */
             user-select: none;
         }
@@ -88,12 +89,12 @@
         /* Наэкранные элементы управления для телефонов */
         #controls {
             position: absolute;
-            bottom: 20px;
+            bottom: max(40px, env(safe-area-inset-bottom)); /* Подняли кнопки выше от края */
             left: 0;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 max(30px, env(safe-area-inset-left)) 0 max(30px, env(safe-area-inset-right)); /* Отступы по бокам */
             box-sizing: border-box;
             z-index: 5;
         }
@@ -147,7 +148,9 @@
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 8vw, 3rem); /* Адаптивный размер шрифта (не будет вылезать) */
+            text-align: center; /* Центрируем текст жестко */
+            width: 100%;
             margin-bottom: 10px;
             color: #ff4757;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -182,9 +185,50 @@
         }
 
         /* Скрыть наэкранные кнопки на широких экранах (ПК) */
-        @media (min-width: 800px) {
+        @media (min-width: 800px) and (min-height: 600px) {
             #controls {
                 opacity: 0.5; /* Оставляем полупрозрачными на случай планшета */
+            }
+        }
+
+        /* Адаптация для горизонтального режима (ландшафт) на телефонах */
+        @media (orientation: landscape) and (max-height: 600px) {
+            #uiLayer {
+                top: 5px;
+                font-size: 14px;
+            }
+            .ui-center {
+                font-size: 16px;
+            }
+            #homeLink {
+                top: 5px;
+                left: 5px;
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .btn {
+                width: 55px;
+                height: 55px;
+                font-size: 28px;
+            }
+            #controls {
+                bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            h1 {
+                margin-top: 10px;
+            }
+            p {
+                margin-bottom: 15px;
+                font-size: 1rem;
+            }
+            /* Делаем меню настроек компактнее в горизонтальном режиме */
+            #startScreen > div {
+                flex-direction: row !important;
+                padding: 10px 15px !important;
+                gap: 20px !important;
+            }
+            #startScreen label {
+                font-size: 1rem !important;
             }
         }
     </style>

@@ -7,21 +7,23 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px 0; /* Минимальные отступы сверху и снизу */
             background-color: #121212;
             color: #fff;
             font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            justify-content: center; /* Центрируем всю игру по вертикали */
+            height: 100dvh; /* Динамическая высота (решает проблему скрытой панели на смартфонах) */
+            box-sizing: border-box;
             overflow: hidden;
             touch-action: none;
         }
 
         #game-wrapper {
             position: relative;
-            margin-top: 10px;
+            /* Убрали жесткий отступ margin-top, так как игра центрируется сама */
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
             border-radius: 12px;
             overflow: hidden;
@@ -103,7 +105,8 @@
             justify-content: space-between;
             padding: 15px 20px;
             box-sizing: border-box;
-            margin-top: 10px;
+            margin-top: 20px; /* Отступ от стакана */
+            margin-bottom: env(safe-area-inset-bottom, 10px); /* Учитываем "челку" и системные полоски снизу */
         }
 
         .control-group {
@@ -135,15 +138,26 @@
             box-shadow: 0 0px 0 #000;
         }
 
+        /* АДАПТИВНОСТЬ: Увеличение на больших экранах (ПК, Планшеты) */
+        @media (min-height: 900px) and (min-width: 500px) {
+            #game-wrapper { transform: scale(1.15); transform-origin: center top; margin-bottom: 90px; }
+            #mobile-controls button { width: 80px; height: 80px; font-size: 32px; border-radius: 20px; }
+            #mobile-controls { max-width: 480px; }
+        }
+        @media (min-height: 1000px) and (min-width: 600px) {
+            #game-wrapper { transform: scale(1.3); transform-origin: center top; margin-bottom: 180px; }
+        }
+
+        /* АДАПТИВНОСТЬ: Уменьшение на маленьких телефонах */
         @media (max-height: 850px) {
-            #game-wrapper { transform: scale(0.85); transform-origin: top; margin-bottom: -90px; }
+            #game-wrapper { transform: scale(0.85); transform-origin: center top; margin-bottom: -90px; }
         }
         @media (max-height: 700px) {
-            #game-wrapper { transform: scale(0.75); transform-origin: top; margin-bottom: -150px; }
+            #game-wrapper { transform: scale(0.75); transform-origin: center top; margin-bottom: -150px; }
             #mobile-controls button { width: 60px; height: 60px; font-size: 24px; }
         }
         @media (max-height: 600px) {
-            #game-wrapper { transform: scale(0.65); transform-origin: top; margin-bottom: -210px; }
+            #game-wrapper { transform: scale(0.65); transform-origin: center top; margin-bottom: -210px; }
             #mobile-controls button { width: 50px; height: 50px; font-size: 20px; border-radius: 12px; }
             #mobile-controls { padding: 5px 10px; }
         }
@@ -158,7 +172,7 @@
         
         <div id="start-screen">
             <h1 class="green">FLEXIS</h1>
-            <p style="color: #666; margin-bottom: 25px;">Тетрис с физикой</p>
+            <p style="color: #666; margin-bottom: 25px;">тетрис с физикой</p>
             <button class="btn" style="margin-bottom: 15px;" onclick="startGame()">ИГРАТЬ</button>
             <button id="mute-btn" class="btn" onclick="toggleMute()" style="background: #1a1a1a; border: 2px solid #333; font-size: 16px; padding: 10px 30px;">🔊 Звук: ВКЛ</button>
         </div>
