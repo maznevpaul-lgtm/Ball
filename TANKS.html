@@ -561,18 +561,76 @@ class Tank {
         }
 
         if (moving) {
-            let nextX = this.x + dx * this.speed * (dt / 1000);
-            let nextY = this.y + dy * this.speed * (dt / 1000);
+            let purelyForwardX = this.x + dx * this.speed * (dt / 1000);
+            let purelyForwardY = this.y + dy * this.speed * (dt / 1000);
+            
+            let nextX = purelyForwardX;
+            let nextY = purelyForwardY;
 
+            // --- АВТОПОДТЯГИВАНИЕ К ЦЕНТРУ КЛЕТКИ (СКОЛЬЖЕНИЕ НА ПОВОРОТАХ) ---
+            if (this.isPlayer) {
+                // Скорость скольжения вбок чуть выше скорости движения для комфортного поворота
+                const alignSpeed = this.speed * 1.5 * (dt / 1000);
+                
+                if (dy !== 0) { // Движемся по вертикали
+                    let centerCol = Math.floor((this.x + this.w / 2) / TILE_SIZE);
+                    let idealX = centerCol * TILE_SIZE + (TILE_SIZE - this.w) / 2;
+                    let diffX = idealX - this.x;
+                    
+                    if (Math.abs(diffX) > 0.5) {
+                        let testX = this.x + Math.sign(diffX) * Math.min(Math.abs(diffX), alignSpeed);
+                        // Если сдвиг вбок не приводит к коллизии
+                        if (!this.checkCollision(testX, this.y)) {
+                            nextX = testX;
+                        }
+                    }
+                } else if (dx !== 0) { // Движемся по горизонтали
+                    let centerRow = Math.floor((this.y + this.h / 2) / TILE_SIZE);
+                    let idealY = centerRow * TILE_SIZE + (TILE_SIZE - this.h) / 2;
+                    let diffY = idealY - this.y;
+                    
+                    if (Math.abs(diffY) > 0.5) {
+                        let testY = this.y + Math.sign(diffY) * Math.min(Math.abs(diffY), alignSpeed);
+                        if (!this.checkCollision(this.x, testY)) {
+                            nextY = testY;
+                        }
+                    }
+                }
+            }
+
+            // Ограничение границ карты
             if (nextX < 0) nextX = 0;
             if (nextY < 0) nextY = 0;
             if (nextX + this.w > COLS * TILE_SIZE) nextX = COLS * TILE_SIZE - this.w;
             if (nextY + this.h > ROWS * TILE_SIZE) nextY = ROWS * TILE_SIZE - this.h;
+            
+            if (purelyForwardX < 0) purelyForwardX = 0;
+            if (purelyForwardY < 0) purelyForwardY = 0;
+            if (purelyForwardX + this.w > COLS * TILE_SIZE) purelyForwardX = COLS * TILE_SIZE - this.w;
+            if (purelyForwardY + this.h > ROWS * TILE_SIZE) purelyForwardY = ROWS * TILE_SIZE - this.h;
 
+            // Применение движения с умной коллизией
             if (!this.checkCollision(nextX, nextY)) {
-                this.x = nextX; this.y = nextY;
+                // Идеально: едем вперед и подтягиваемся одновременно
+                this.x = nextX; 
+                this.y = nextY;
                 if(!this.isPlayer) this.blockedTimer = 0;
-            } else if (!this.isPlayer) {
+            } else if (!this.checkCollision(purelyForwardX, purelyForwardY)) {
+                // Подтягивание мешает, едем просто прямо
+                this.x = purelyForwardX; 
+                this.y = purelyForwardY;
+                if(!this.isPlayer) this.blockedTimer = 0;
+            } else if (this.isPlayer) {
+                // Ехать вперед нельзя (уперлись в угол), скользим вбок для выравнивания
+                if (nextX !== purelyForwardX && !this.checkCollision(nextX, this.y)) {
+                    this.x = nextX;
+                } else if (nextY !== purelyForwardY && !this.checkCollision(this.x, nextY)) {
+                    this.y = nextY;
+                }
+            }
+
+            // Обработка застревания ИИ
+            if (!this.isPlayer && this.checkCollision(purelyForwardX, purelyForwardY)) {
                 this.blockedTimer += dt;
                 if (this.blockedTimer > 200) {
                     let possibleDirs = [DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT].filter(d => d !== this.dir);
