@@ -210,6 +210,7 @@ const BRICK = 1;
 const STEEL = 2;
 const BASE = 3;
 const ENEMY_BASE = 4;
+const SUBSTATION = 5;
 
 const DIR_UP = 0, DIR_RIGHT = 1, DIR_DOWN = 2, DIR_LEFT = 3;
 const BONUS_TYPES = ['LIFE', 'SHIELD', 'FIRE', 'BASE', 'ALLY', 'TURRET', 'BOMB'];
@@ -321,6 +322,7 @@ let bullets = [];
 let particles = [];
 let bonuses = [];
 let placedMines = [];
+let enemyMines = [];
 let score = 0;
 let lives = 3;
 let continues = 3;
@@ -329,6 +331,7 @@ let level = 1;
 let levelType = 'CLASSIC'; 
 let gameState = 'START'; // START, PLAYING, PAUSED, DYING, LEVEL_TRANSITION, GAMEOVER
 let baseAlive = true;
+let substationAlive = false;
 
 let enemiesToSpawn = 0;
 let enemySpawnTimer = 0;
@@ -340,15 +343,19 @@ let enemyBaseCol = 7;
 let baseDefTimer = 0;
 let mineCooldown = 0;
 
+let playerHasRapidFire = false; // Новая переменная для бесконечной скорострельности
+let lastBossLevel = 0; // Отслеживание последнего уровня с боссом
+
 let savedGrid = [];
 let savedLevelType = 'CLASSIC';
 let savedEnemyBaseCol = 7;
 let savedEnemiesToSpawn = 0;
+let savedEnemyMinesCoords = [];
 
 let lastTime = 0;
 let animationId;
 
-const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, a: false, s: false, d: false, ' ': false, 'b': false, 'B': false };
+const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, a: false, s: false, d: false, W: false, A: false, S: false, D: false, 'ц': false, 'ф': false, 'ы': false, 'в': false, 'Ц': false, 'Ф': false, 'Ы': false, 'В': false, ' ': false, 'b': false, 'B': false, 'и': false, 'И': false };
 let touchDirs = { up: false, down: false, left: false, right: false };
 let touchFire = false;
 let touchMine = false;
@@ -357,7 +364,7 @@ let touchMine = false;
  * СОХРАНЕНИЕ / ЗАГРУЗКА
  */
 function saveGame() {
-    const data = { level, score, lives, continues };
+    const data = { level, score, lives, continues, lastBossLevel, playerHasRapidFire };
     localStorage.setItem('battleCityEvoSave', JSON.stringify(data));
     
     let btn = document.getElementById('saveBtn');
@@ -377,6 +384,8 @@ function loadGame(buttonId) {
         score = data.score;
         lives = data.lives;
         continues = data.continues;
+        lastBossLevel = data.lastBossLevel || 0;
+        playerHasRapidFire = data.playerHasRapidFire || false;
         
         document.getElementById('scoreUI').innerText = score;
         document.getElementById('livesUI').innerText = lives;
@@ -400,24 +409,41 @@ function loadGame(buttonId) {
  */
 function generateLevel() {
     let validLevel = false;
-    levelType = level === 1 ? 'CLASSIC' : (Math.random() > 0.5 ? 'CLASSIC' : 'ASSAULT');
+    
+    // Проверка на уровень Босса (не чаще чем раз в 8 уровней)
+    if (level >= 8 && (level - lastBossLevel) >= 8 && Math.random() < 0.4) {
+        levelType = 'BOSS';
+        lastBossLevel = level;
+    } else {
+        levelType = level === 1 ? 'CLASSIC' : (Math.random() > 0.5 ? 'CLASSIC' : 'ASSAULT');
+    }
     
     if (levelType === 'CLASSIC') {
         ROWS = 15;
         enemiesToSpawn = Math.min(4 + level * 2, 15);
         MAX_ENEMIES_ON_SCREEN = Math.min(3 + Math.floor(level / 3), 6);
-    } else {
+    } else if (levelType === 'ASSAULT') {
         ROWS = Math.floor(Math.random() * 15) + 20; 
         enemiesToSpawn = Math.min(4 + level * 2, 25); 
         MAX_ENEMIES_ON_SCREEN = Math.min(3 + Math.floor(level / 3), 8);
+    } else if (levelType === 'BOSS') {
+        ROWS = 18; 
+        enemiesToSpawn = 0; // Только босс
+        MAX_ENEMIES_ON_SCREEN = 1;
     }
     
     baseAlive = true;
     baseDefTimer = 0;
+    substationAlive = false;
+    enemyMines = [];
     updateObjectiveUI();
+
+    let hasSubstation = levelType === 'ASSAULT' && level >= 2 && Math.random() < 0.4;
+    let hasMines = levelType === 'ASSAULT' && level >= 2 && Math.random() < 0.4;
 
     while (!validLevel) {
         grid = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+        enemyMines = [];
         let safeZones = [];
 
         if (levelType === 'CLASSIC') {
@@ -426,7 +452,7 @@ function generateLevel() {
             grid[13][6] = BRICK; grid[13][7] = BRICK; grid[13][8] = BRICK;
             safeZones.push({r: 14, c: 4}); 
             safeZones.push({r: 0, c: 0}, {r: 0, c: 7}, {r: 0, c: 14}); 
-        } else {
+        } else if (levelType === 'ASSAULT') {
             enemyBaseCol = Math.floor(Math.random() * 9) + 3;
             grid[1][enemyBaseCol] = ENEMY_BASE;
             for(let r=0; r<=2; r++) {
@@ -437,6 +463,33 @@ function generateLevel() {
             }
             safeZones.push({r: ROWS - 1, c: 7}); 
             safeZones.push({r: 4, c: 2}, {r: 4, c: 7}, {r: 4, c: 12}); 
+            
+            if (hasSubstation) {
+                let subR = Math.floor(Math.random() * (ROWS - 12)) + 6;
+                let subC = Math.floor(Math.random() * (COLS - 4)) + 2;
+                grid[subR][subC] = SUBSTATION;
+                for(let r=subR-1; r<=subR+1; r++) {
+                    for(let c=subC-1; c<=subC+1; c++) {
+                        if (r>=0 && r<ROWS && c>=0 && c<COLS && grid[r][c] === EMPTY && Math.random() > 0.3) {
+                            grid[r][c] = (Math.random() > 0.5) ? BRICK : STEEL;
+                        }
+                    }
+                }
+                substationAlive = true;
+            }
+        } else if (levelType === 'BOSS') {
+            // Арена босса
+            grid[17][7] = BASE;
+            grid[17][6] = BRICK; grid[17][8] = BRICK;
+            grid[16][6] = BRICK; grid[16][7] = BRICK; grid[16][8] = BRICK;
+            safeZones.push({r: 17, c: 4}); // игрок
+            safeZones.push({r: 2, c: 7});  // босс
+            
+            // Симметричные колонны для укрытия
+            for (let r = 4; r < 14; r += 3) {
+                grid[r][3] = STEEL; grid[r][11] = STEEL;
+                grid[r][4] = BRICK; grid[r][10] = BRICK;
+            }
         }
 
         for (let r = 0; r < ROWS; r++) {
@@ -446,13 +499,27 @@ function generateLevel() {
                 for (let zone of safeZones) {
                     if (Math.abs(r - zone.r) <= 1 && Math.abs(c - zone.c) <= 1) { inSafeZone = true; break; }
                 }
-                if (!inSafeZone) {
+                if (!inSafeZone && levelType !== 'BOSS') { // На арене босса нет лишнего рандомного мусора
                     let rand = Math.random();
                     if (rand < 0.20) grid[r][c] = BRICK; 
                     else if (rand < 0.28) grid[r][c] = STEEL;
                 }
             }
         }
+        
+        if (levelType === 'ASSAULT' && hasMines) {
+            let mineCount = Math.floor(Math.random() * 4) + 3;
+            let attempts = 0;
+            while (enemyMines.length < mineCount && attempts < 50) {
+                attempts++;
+                let r = Math.floor(Math.random() * (ROWS - 10)) + 5; 
+                let c = Math.floor(Math.random() * COLS);
+                if (grid[r][c] === EMPTY) {
+                    enemyMines.push(new Mine(c * TILE_SIZE + TILE_SIZE/2, r * TILE_SIZE + TILE_SIZE/2, true));
+                }
+            }
+        }
+
         validLevel = checkLevelPlayability();
     }
 
@@ -460,12 +527,23 @@ function generateLevel() {
     savedLevelType = levelType;
     savedEnemyBaseCol = enemyBaseCol;
     savedEnemiesToSpawn = enemiesToSpawn;
+    savedEnemyMinesCoords = enemyMines.map(m => ({x: m.x, y: m.y}));
 }
 
 function checkLevelPlayability() {
     let visited = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
-    let startR = levelType === 'CLASSIC' ? 14 : ROWS - 1; let startC = levelType === 'CLASSIC' ? 4 : 7;
+    let startR = levelType === 'CLASSIC' ? 14 : (levelType === 'BOSS' ? 17 : ROWS - 1); 
+    let startC = levelType === 'CLASSIC' ? 4 : (levelType === 'BOSS' ? 4 : 7);
     let queue = [{ r: startR, c: startC }]; visited[startR][startC] = true;
+
+    let subR = -1, subC = -1;
+    if (levelType === 'ASSAULT') {
+        for (let r=0; r<ROWS; r++) {
+            for(let c=0; c<COLS; c++) {
+                if (grid[r][c] === SUBSTATION) { subR = r; subC = c; break; }
+            }
+        }
+    }
 
     while (queue.length > 0) {
         let curr = queue.shift();
@@ -479,10 +557,18 @@ function checkLevelPlayability() {
         }
     }
 
-    if (levelType === 'CLASSIC') {
-        if (!visited[0][0] || !visited[0][7] || !visited[0][14] || !visited[13][7]) return false;
+    if (levelType === 'CLASSIC' || levelType === 'BOSS') {
+        if (!visited[0][7]) return false; // Хотя бы проход к центру верха
     } else {
         if (!visited[2][enemyBaseCol] && !visited[1][enemyBaseCol-1] && !visited[1][enemyBaseCol+1]) return false;
+        if (subR !== -1) {
+            let reachable = false;
+            for (let dir of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                let nr = subR + dir[0]; let nc = subC + dir[1];
+                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && visited[nr][nc]) reachable = true;
+            }
+            if (!reachable) return false;
+        }
     }
     return true; 
 }
@@ -492,9 +578,17 @@ function updateObjectiveUI() {
     if (levelType === 'CLASSIC') {
         objUI.innerText = `ЦЕЛЬ: ЗАЩИТИТЬ БАЗУ (ВРАГОВ: ${enemiesToSpawn + enemies.length})`;
         objUI.className = "w-full text-center mb-2 font-bold text-green-300 bg-gray-800 rounded py-1 border border-green-700 text-[11px] sm:text-xs";
+    } else if (levelType === 'BOSS') {
+        objUI.innerText = `ЦЕЛЬ: УНИЧТОЖИТЬ БОССА!`;
+        objUI.className = "w-full text-center mb-2 font-bold text-yellow-300 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
     } else {
-        objUI.innerText = `ЦЕЛЬ: ПРОРВАТЬСЯ К КРАСНОМУ ФОРТУ`;
-        objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
+        if (substationAlive) {
+            objUI.innerText = `ЦЕЛЬ: УНИЧТОЖИТЬ СИНЮЮ ПОДСТАНЦИЮ!`;
+            objUI.className = "w-full text-center mb-2 font-bold text-blue-300 bg-gray-800 rounded py-1 border border-blue-700 text-[11px] sm:text-xs animate-pulse";
+        } else {
+            objUI.innerText = `ЦЕЛЬ: ПРОРВАТЬСЯ К КРАСНОМУ ФОРТУ`;
+            objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
+        }
     }
 }
 
@@ -502,29 +596,51 @@ function updateObjectiveUI() {
  * КЛАССЫ СУЩНОСТЕЙ
  */
 class Mine {
-    constructor(x, y) {
+    constructor(x, y, isEnemy = false) {
         this.x = x; this.y = y;
         this.radius = 6;
+        this.isEnemy = isEnemy;
         this.markForDeletion = false;
     }
     update(dt) {
-        for (let e of enemies) {
-            if (Math.hypot(e.x + e.w/2 - this.x, e.y + e.h/2 - this.y) < 18) {
-                this.markForDeletion = true;
-                e.markForDeletion = true;
-                createExplosion(this.x, this.y, '#ff0000', 30);
-                sfx.playExplosion(true);
-                score += (e.eType === 'NORMAL' ? 100 : 300);
-                document.getElementById('scoreUI').innerText = score;
-                updateObjectiveUI();
+        if (this.isEnemy) {
+            let targets = [];
+            if (player && !player.markForDeletion) targets.push(player);
+            targets = targets.concat(allies);
+            
+            for (let t of targets) {
+                if (Math.hypot(t.x + t.w/2 - this.x, t.y + t.h/2 - this.y) < 18) {
+                    this.markForDeletion = true;
+                    createExplosion(this.x, this.y, '#ff0000', 30);
+                    sfx.playExplosion(true);
+                    if (t.shieldTimer > 0) {
+                        sfx.playArmorHit();
+                        createExplosion(this.x, this.y, '#3b82f6', 10);
+                    } else {
+                        if (t === player) playerDeath();
+                        else { t.hp = 0; t.markForDeletion = true; }
+                    }
+                }
+            }
+        } else {
+            for (let e of enemies) {
+                if (Math.hypot(e.x + e.w/2 - this.x, e.y + e.h/2 - this.y) < 18) {
+                    this.markForDeletion = true;
+                    e.markForDeletion = true;
+                    createExplosion(this.x, this.y, '#ff0000', 30);
+                    sfx.playExplosion(true);
+                    score += (e.eType === 'NORMAL' ? 100 : 300);
+                    document.getElementById('scoreUI').innerText = score;
+                    updateObjectiveUI();
+                }
             }
         }
     }
     draw(ctx) {
-        ctx.fillStyle = '#ef4444';
+        ctx.fillStyle = this.isEnemy ? '#374151' : '#ef4444';
         ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
         if (Math.floor(Date.now() / 250) % 2 === 0) {
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = this.isEnemy ? '#ef4444' : '#fff';
             ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
         }
     }
@@ -611,16 +727,24 @@ class Turret {
 
 class Tank {
     constructor(x, y, isPlayer, eType = 'NORMAL', isAllyAI = false) {
-        this.w = 28; this.h = 28;
+        this.eType = eType; 
+        this.isBoss = (eType === 'BOSS');
+        this.w = this.isBoss ? 48 : 28; 
+        this.h = this.isBoss ? 48 : 28;
         this.x = x * TILE_SIZE + (TILE_SIZE - this.w)/2; 
         this.y = y * TILE_SIZE + (TILE_SIZE - this.h)/2;
         this.isPlayer = isPlayer; this.isAllyAI = isAllyAI;
-        this.dir = DIR_UP; this.speed = isPlayer && !isAllyAI ? 120 : (isAllyAI ? 100 : 80); 
+        this.dir = DIR_UP; 
+        
+        if (this.isBoss) this.speed = 60;
+        else this.speed = isPlayer && !isAllyAI ? 120 : (isAllyAI ? 100 : 80); 
+        
         this.cooldown = 0; this.markForDeletion = false;
         
-        this.eType = eType; this.hp = isAllyAI ? 3 : 1; 
+        this.hp = isAllyAI ? 3 : (this.isBoss ? 30 : 1); 
+        this.maxHp = this.hp;
         this.shieldTimer = (isPlayer && !isAllyAI) ? 3000 : (isAllyAI ? 2000 : 0); 
-        this.rapidTimer = 0;
+        this.hasRapidFire = (isPlayer && !isAllyAI) ? playerHasRapidFire : false; 
 
         if (!isPlayer || isAllyAI) {
             this.dir = isAllyAI ? DIR_UP : DIR_DOWN;
@@ -634,15 +758,14 @@ class Tank {
     update(dt) {
         if (this.cooldown > 0) this.cooldown -= dt;
         if (this.shieldTimer > 0) this.shieldTimer -= dt;
-        if (this.rapidTimer > 0) this.rapidTimer -= dt;
 
         let dx = 0, dy = 0; let moving = false;
 
         if (this.isPlayer && !this.isAllyAI) {
-            if (keys.ArrowUp || keys.w || touchDirs.up) { dy = -1; this.dir = DIR_UP; moving = true; }
-            else if (keys.ArrowDown || keys.s || touchDirs.down) { dy = 1; this.dir = DIR_DOWN; moving = true; }
-            else if (keys.ArrowLeft || keys.a || touchDirs.left) { dx = -1; this.dir = DIR_LEFT; moving = true; }
-            else if (keys.ArrowRight || keys.d || touchDirs.right) { dx = 1; this.dir = DIR_RIGHT; moving = true; }
+            if (keys.ArrowUp || keys.w || keys.W || keys['ц'] || keys['Ц'] || touchDirs.up) { dy = -1; this.dir = DIR_UP; moving = true; }
+            else if (keys.ArrowDown || keys.s || keys.S || keys['ы'] || keys['Ы'] || touchDirs.down) { dy = 1; this.dir = DIR_DOWN; moving = true; }
+            else if (keys.ArrowLeft || keys.a || keys.A || keys['ф'] || keys['Ф'] || touchDirs.left) { dx = -1; this.dir = DIR_LEFT; moving = true; }
+            else if (keys.ArrowRight || keys.d || keys.D || keys['в'] || keys['В'] || touchDirs.right) { dx = 1; this.dir = DIR_RIGHT; moving = true; }
             
             if ((keys[' '] || touchFire) && this.cooldown <= 0) this.shoot();
             
@@ -672,7 +795,7 @@ class Tank {
             }
             if (this.dir === DIR_UP) dy = -1; if (this.dir === DIR_DOWN) dy = 1;
             if (this.dir === DIR_LEFT) dx = -1; if (this.dir === DIR_RIGHT) dx = 1;
-            if (Math.random() < 0.05 && this.cooldown <= 0) this.shoot();
+            if (Math.random() < (this.isBoss ? 0.08 : 0.05) && this.cooldown <= 0) this.shoot();
         }
 
         if (moving) {
@@ -725,7 +848,17 @@ class Tank {
 
         for (let r = topRow; r <= bottomRow; r++) {
             for (let c = leftCol; c <= rightCol; c++) {
-                if (r >= 0 && r < ROWS && c >= 0 && c < COLS) { if (grid[r][c] !== EMPTY) return true; }
+                if (r >= 0 && r < ROWS && c >= 0 && c < COLS) { 
+                    if (grid[r][c] !== EMPTY) {
+                        // Босс проламывает кирпичи своей массой
+                        if (this.isBoss && grid[r][c] === BRICK) {
+                            grid[r][c] = EMPTY;
+                            createExplosion(c * TILE_SIZE + 16, r * TILE_SIZE + 16, '#ff9900', 5);
+                            continue;
+                        }
+                        return true; 
+                    }
+                }
             }
         }
         const allTanks = [player, ...enemies, ...allies].filter(t => t && t !== this);
@@ -740,39 +873,75 @@ class Tank {
 
     shoot() {
         const activeBullets = bullets.filter(b => b.ownerId === this);
-        let maxBul = (this.isPlayer && !this.isAllyAI) ? (this.rapidTimer > 0 ? 3 : 1) : (this.eType === 'RAPID' ? 2 : 1);
+        let maxBul = (this.isPlayer && !this.isAllyAI) ? (this.hasRapidFire ? 3 : 1) : (this.eType === 'RAPID' ? 2 : (this.isBoss ? 4 : 1));
         if (activeBullets.length >= maxBul) return;
 
-        let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
-        if (this.dir === DIR_UP) { bdy = -1; by = this.y - 4; }
-        if (this.dir === DIR_DOWN) { bdy = 1; by = this.y + this.h + 4; }
-        if (this.dir === DIR_LEFT) { bdx = -1; bx = this.x - 4; }
-        if (this.dir === DIR_RIGHT) { bdx = 1; bx = this.x + this.w + 4; }
+        if (this.isBoss) {
+            let bx1 = this.x + this.w / 2; let by1 = this.y + this.h / 2; let bdx1 = 0, bdy1 = 0;
+            let bx2 = this.x + this.w / 2; let by2 = this.y + this.h / 2; let bdx2 = 0, bdy2 = 0;
+            let offset = 12;
+            
+            if (this.dir === DIR_UP) { bdy1 = -1; by1 -= 20; bdy2 = -1; by2 -= 20; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_DOWN) { bdy1 = 1; by1 += 20; bdy2 = 1; by2 += 20; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_LEFT) { bdx1 = -1; bx1 -= 20; bdx2 = -1; bx2 -= 20; by1 -= offset; by2 += offset; }
+            if (this.dir === DIR_RIGHT) { bdx1 = 1; bx1 += 20; bdx2 = 1; bx2 += 20; by1 -= offset; by2 += offset; }
 
-        bullets.push(new Bullet(bx, by, bdx, bdy, this.isPlayer, this)); sfx.playShoot(this.isPlayer && !this.isAllyAI);
-        if (this.isPlayer && !this.isAllyAI) this.cooldown = this.rapidTimer > 0 ? 150 : 400;
-        else this.cooldown = this.eType === 'RAPID' ? 200 : 500;
+            bullets.push(new Bullet(bx1, by1, bdx1, bdy1, false, this));
+            bullets.push(new Bullet(bx2, by2, bdx2, bdy2, false, this));
+            sfx.playShoot(false);
+            this.cooldown = 800; // Босс стреляет чуть реже, но двойным
+        } else {
+            let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
+            if (this.dir === DIR_UP) { bdy = -1; by = this.y - 4; }
+            if (this.dir === DIR_DOWN) { bdy = 1; by = this.y + this.h + 4; }
+            if (this.dir === DIR_LEFT) { bdx = -1; bx = this.x - 4; }
+            if (this.dir === DIR_RIGHT) { bdx = 1; bx = this.x + this.w + 4; }
+
+            bullets.push(new Bullet(bx, by, bdx, bdy, this.isPlayer, this)); sfx.playShoot(this.isPlayer && !this.isAllyAI);
+            
+            if (this.isPlayer && !this.isAllyAI) this.cooldown = this.hasRapidFire ? 150 : 400;
+            else this.cooldown = this.eType === 'RAPID' ? 200 : 500;
+        }
     }
 
     draw(ctx) {
         ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
         if (this.dir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.dir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.dir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
 
-        if (this.isPlayer && !this.isAllyAI) ctx.fillStyle = '#eab308'; 
-        else if (this.isAllyAI) ctx.fillStyle = '#0ea5e9'; 
-        else if (this.eType === 'FAST') ctx.fillStyle = '#f472b6'; 
-        else if (this.eType === 'ARMORED') ctx.fillStyle = '#14532d'; 
-        else if (this.eType === 'RAPID') ctx.fillStyle = '#f97316'; 
-        else ctx.fillStyle = '#cbd5e1'; 
+        if (this.isBoss) {
+            ctx.fillStyle = '#7f1d1d'; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); // body
+            ctx.fillStyle = '#111'; ctx.fillRect(-this.w/2, -this.h/2, 12, this.h); // left track
+            ctx.fillRect(this.w/2 - 12, -this.h/2, 12, this.h); // right track
+            
+            ctx.fillStyle = '#b91c1c'; // пушки
+            ctx.fillRect(-16, -this.h/2 - 14, 8, 28);
+            ctx.fillRect(8, -this.h/2 - 14, 8, 28);
+            
+            ctx.fillStyle = '#991b1b'; // башня
+            ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+        } else {
+            if (this.isPlayer && !this.isAllyAI) ctx.fillStyle = '#eab308'; 
+            else if (this.isAllyAI) ctx.fillStyle = '#0ea5e9'; 
+            else if (this.eType === 'FAST') ctx.fillStyle = '#f472b6'; 
+            else if (this.eType === 'ARMORED') ctx.fillStyle = '#14532d'; 
+            else if (this.eType === 'RAPID') ctx.fillStyle = '#f97316'; 
+            else ctx.fillStyle = '#cbd5e1'; 
 
-        ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.fillStyle = '#222';
-        ctx.fillRect(-this.w/2, -this.h/2, 6, this.h); ctx.fillRect(this.w/2 - 6, -this.h/2, 6, this.h);
-        ctx.fillStyle = this.isPlayer ? '#16a34a' : '#ef4444'; ctx.fillRect(-3, -this.h/2 - 8, 6, 18);
-        ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+            ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.fillStyle = '#222';
+            ctx.fillRect(-this.w/2, -this.h/2, 6, this.h); ctx.fillRect(this.w/2 - 6, -this.h/2, 6, this.h);
+            ctx.fillStyle = this.isPlayer ? '#16a34a' : '#ef4444'; ctx.fillRect(-3, -this.h/2 - 8, 6, 18);
+            ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); 
+        }
+        ctx.restore();
+
+        if (this.isBoss) {
+            ctx.fillStyle = '#ef4444'; ctx.fillRect(this.x, this.y - 12, this.w, 6);
+            ctx.fillStyle = '#22c55e'; ctx.fillRect(this.x, this.y - 12, this.w * (this.hp / this.maxHp), 6);
+        }
 
         if (this.shieldTimer > 0) {
             ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(this.x + this.w/2, this.y + this.h/2, 20, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(this.x + this.w/2, this.y + this.h/2, this.w/2 + 6, 0, Math.PI * 2); ctx.stroke();
         }
     }
 }
@@ -780,7 +949,7 @@ class Tank {
 class Bullet {
     constructor(x, y, dx, dy, isPlayer, ownerId) {
         this.x = x; this.y = y; this.dx = dx; this.dy = dy;
-        this.speed = (isPlayer && ownerId.rapidTimer > 0) ? 450 : 350;
+        this.speed = (isPlayer && ownerId.hasRapidFire) ? 450 : 350;
         this.isPlayer = isPlayer; this.ownerId = ownerId;
         this.radius = 4; this.markForDeletion = false;
     }
@@ -800,7 +969,17 @@ class Bullet {
                 if (cell === BRICK) { grid[row][col] = EMPTY; sfx.playExplosion(false); }
                 else if (cell === STEEL) { sfx.playArmorHit(); }
                 else if (cell === BASE) { baseAlive = false; createExplosion(this.x, this.y, '#ff0000', 40); sfx.playExplosion(true); levelFailed("БАЗА УНИЧТОЖЕНА!"); return; }
-                else if (cell === ENEMY_BASE && this.isPlayer) { grid[row][col] = EMPTY; createExplosion(this.x, this.y, '#ff00ff', 50); sfx.playExplosion(true); winLevel(); }
+                else if (cell === SUBSTATION && this.isPlayer) {
+                    grid[row][col] = EMPTY; substationAlive = false;
+                    createExplosion(this.x, this.y, '#0ea5e9', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
+                }
+                else if (cell === ENEMY_BASE && this.isPlayer) { 
+                    if (substationAlive) {
+                        sfx.playArmorHit(); createExplosion(this.x, this.y, '#3b82f6', 15);
+                    } else {
+                        grid[row][col] = EMPTY; createExplosion(this.x, this.y, '#ff00ff', 50); sfx.playExplosion(true); winLevel(); 
+                    }
+                }
                 return;
             }
         }
@@ -820,9 +999,9 @@ class Bullet {
                 if (!enemy.markForDeletion && this.checkTankHit(enemy)) {
                     this.markForDeletion = true; enemy.hp--;
                     if (enemy.hp <= 0) {
-                        enemy.markForDeletion = true; score += (enemy.eType === 'NORMAL' ? 100 : 300);
+                        enemy.markForDeletion = true; score += (enemy.isBoss ? 1000 : (enemy.eType === 'NORMAL' ? 100 : 300));
                         document.getElementById('scoreUI').innerText = score;
-                        createExplosion(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff4400', 25); sfx.playExplosion(true);
+                        createExplosion(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff4400', enemy.isBoss ? 80 : 25); sfx.playExplosion(true);
                         updateObjectiveUI();
                         
                         if (Math.random() < 0.20) {
@@ -830,9 +1009,16 @@ class Bullet {
                             if (roll < 0.05) bType = 'BOMB';
                             else if (roll < 0.20) bType = Math.random() < 0.5 ? 'ALLY' : 'TURRET';
                             else { const std = ['LIFE', 'SHIELD', 'FIRE', 'BASE']; bType = std[Math.floor(Math.random() * std.length)]; }
-                            bonuses.push(new Bonus(enemy.x + 4, enemy.y + 4, bType));
+                            bonuses.push(new Bonus(enemy.x + 10, enemy.y + 10, bType));
                         }
-                    } else { createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); }
+                    } else { 
+                        createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); 
+                        // Шанс дропа лута при попадании по броне босса
+                        if (enemy.isBoss && Math.random() < 0.05) {
+                            let dropTypes = ['FIRE', 'LIFE', 'ALLY', 'TURRET', 'SHIELD'];
+                            bonuses.push(new Bonus(this.x, this.y, dropTypes[Math.floor(Math.random() * dropTypes.length)]));
+                        }
+                    }
                     break;
                 }
             }
@@ -890,18 +1076,36 @@ function initGame() {
 }
 
 function initLevel(retry = false) {
-    bullets = []; particles = []; enemies = []; bonuses = []; allies = []; turrets = []; placedMines = [];
+    bullets = []; particles = []; enemies = []; bonuses = []; allies = []; turrets = []; placedMines = []; enemyMines = [];
     document.getElementById('levelUI').innerText = level;
     minesCount = 3; document.getElementById('minesUI').innerText = minesCount; mineCooldown = 0;
     
     if (!retry) generateLevel();
     else {
         grid = savedGrid.map(row => [...row]); levelType = savedLevelType; enemyBaseCol = savedEnemyBaseCol; enemiesToSpawn = savedEnemiesToSpawn;
-        ROWS = grid.length; baseAlive = true; baseDefTimer = 0; updateObjectiveUI();
+        ROWS = grid.length; baseAlive = true; baseDefTimer = 0; 
+        
+        substationAlive = false;
+        for (let r=0; r<ROWS; r++) {
+            for(let c=0; c<COLS; c++) {
+                if (grid[r][c] === SUBSTATION) substationAlive = true;
+            }
+        }
+        enemyMines = savedEnemyMinesCoords.map(c => new Mine(c.x, c.y, true));
+        updateObjectiveUI();
     }
     
-    if (levelType === 'CLASSIC') player = new Tank(4, 14, true); else player = new Tank(7, ROWS - 1, true);
+    if (levelType === 'CLASSIC') player = new Tank(4, 14, true); 
+    else if (levelType === 'ASSAULT') player = new Tank(7, ROWS - 1, true);
+    else if (levelType === 'BOSS') {
+        player = new Tank(4, 17, true);
+        enemies.push(new Tank(7, 2, false, 'BOSS'));
+    }
+    
+    player.hasRapidFire = playerHasRapidFire;
+    
     camera.y = levelType === 'ASSAULT' ? (ROWS * TILE_SIZE - canvas.height) : 0;
+    if (levelType === 'BOSS') camera.y = ROWS * TILE_SIZE - canvas.height;
     
     gameState = 'PLAYING';
     document.getElementById('startScreen').classList.add('hidden');
@@ -959,8 +1163,16 @@ function levelFailed(reason) {
 function playerDeath() {
     createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff0000', 40); sfx.playExplosion(true); sfx.stopEngine();
     player.markForDeletion = true; lives--; document.getElementById('livesUI').innerText = lives;
+    playerHasRapidFire = false; // Теряем скорострельность при смерти
+    
     if (lives <= 0) levelFailed("ТАНКИ КОНЧИЛИСЬ!");
-    else setTimeout(() => { if(gameState === 'PLAYING') player = new Tank(levelType==='CLASSIC'?4:7, levelType==='CLASSIC'?14:ROWS-1, true); }, 1000);
+    else setTimeout(() => { 
+        if(gameState === 'PLAYING') {
+            if (levelType === 'CLASSIC') player = new Tank(4, 14, true);
+            else if (levelType === 'ASSAULT') player = new Tank(7, ROWS-1, true);
+            else if (levelType === 'BOSS') player = new Tank(4, 17, true);
+        }
+    }, 1000);
 }
 
 function gameOver() {
@@ -995,6 +1207,7 @@ function update(dt) {
     }
 
     if (levelType === 'CLASSIC' && enemiesToSpawn <= 0 && enemies.length === 0) { winLevel(); return; }
+    if (levelType === 'BOSS' && enemies.length === 0) { winLevel(); return; }
 
     enemySpawnTimer -= dt; if (enemySpawnTimer <= 0) { spawnEnemy(); enemySpawnTimer = ENEMY_SPAWN_RATE; }
 
@@ -1012,7 +1225,7 @@ function update(dt) {
         player.update(dt);
         
         // Установка мины
-        if ((keys['b'] || keys['B'] || touchMine) && mineCooldown <= 0 && minesCount > 0) {
+        if ((keys['b'] || keys['B'] || keys['и'] || keys['И'] || touchMine) && mineCooldown <= 0 && minesCount > 0) {
             placedMines.push(new Mine(player.x + player.w/2, player.y + player.h/2));
             minesCount--;
             document.getElementById('minesUI').innerText = minesCount;
@@ -1027,13 +1240,14 @@ function update(dt) {
 
                 if (bonus.type === 'LIFE') { if (lives < 6) lives++; document.getElementById('livesUI').innerText = lives; } 
                 else if (bonus.type === 'SHIELD') { player.shieldTimer = 10000; } 
-                else if (bonus.type === 'FIRE') { player.rapidTimer = 10000; } 
+                else if (bonus.type === 'FIRE') { playerHasRapidFire = true; player.hasRapidFire = true; } 
                 else if (bonus.type === 'BASE' && levelType === 'CLASSIC') {
                     baseDefTimer = 15000; let pts = [[14,6], [14,8], [13,6], [13,7], [13,8]];
                     pts.forEach(p => { if (grid[p[0]][p[1]] !== BASE && grid[p[0]][p[1]] !== EMPTY) grid[p[0]][p[1]] = STEEL; });
                 } 
                 else if (bonus.type === 'ALLY') {
-                    let spawnR = levelType === 'CLASSIC' ? 14 : ROWS - 1; let spawnC = levelType === 'CLASSIC' ? 4 : 7;
+                    let spawnR = levelType === 'CLASSIC' ? 14 : (levelType === 'BOSS' ? 17 : ROWS - 1); 
+                    let spawnC = levelType === 'CLASSIC' ? 4 : (levelType === 'BOSS' ? 4 : 7);
                     allies.push(new Tank(spawnC, spawnR, true, 'NORMAL', true));
                 } 
                 else if (bonus.type === 'TURRET') {
@@ -1063,12 +1277,12 @@ function update(dt) {
     
     enemies.forEach(e => e.update(dt)); allies.forEach(a => a.update(dt)); turrets.forEach(t => t.update(dt));
     bullets.forEach(b => b.update(dt)); particles.forEach(p => p.update(dt)); bonuses.forEach(b => b.update(dt));
-    placedMines.forEach(m => m.update(dt));
+    placedMines.forEach(m => m.update(dt)); enemyMines.forEach(m => m.update(dt));
 
     enemies = enemies.filter(e => !e.markForDeletion); allies = allies.filter(a => !a.markForDeletion);
     turrets = turrets.filter(t => !t.markForDeletion); bullets = bullets.filter(b => !b.markForDeletion);
     particles = particles.filter(p => p.life > 0); bonuses = bonuses.filter(b => !b.markForDeletion);
-    placedMines = placedMines.filter(m => !m.markForDeletion);
+    placedMines = placedMines.filter(m => !m.markForDeletion); enemyMines = enemyMines.filter(m => !m.markForDeletion);
     if (player && player.markForDeletion) player = null;
 }
 
@@ -1098,14 +1312,28 @@ function draw() {
                     ctx.beginPath(); ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, TILE_SIZE/2 - 4, 0, Math.PI*2); ctx.fill();
                 } else { ctx.fillStyle = '#555'; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE); }
             }
+            else if (cell === SUBSTATION) {
+                ctx.fillStyle = '#0284c7'; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                ctx.fillStyle = '#0ea5e9'; ctx.beginPath(); 
+                ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 8, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = (Math.floor(Date.now() / 200) % 2 === 0) ? '#fff' : '#7dd3fc';
+                ctx.beginPath(); ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 4, 0, Math.PI*2); ctx.fill();
+            }
             else if (cell === ENEMY_BASE) {
                 ctx.fillStyle = '#b91c1c'; ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE); ctx.fillStyle = '#7f1d1d'; ctx.beginPath(); 
                 ctx.moveTo(px + TILE_SIZE/2, py + 4); ctx.lineTo(px + TILE_SIZE - 4, py + TILE_SIZE - 4); ctx.lineTo(px + 4, py + TILE_SIZE - 4); ctx.fill();
+                
+                if (substationAlive) {
+                    ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, TILE_SIZE/2 + 2, 0, Math.PI*2); ctx.stroke();
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.3)'; ctx.fill();
+                }
             }
         }
     }
 
     placedMines.forEach(m => m.draw(ctx));
+    enemyMines.forEach(m => m.draw(ctx));
     bonuses.forEach(b => b.draw(ctx));
     turrets.forEach(t => t.draw(ctx));
     if (player && !player.markForDeletion) player.draw(ctx);
