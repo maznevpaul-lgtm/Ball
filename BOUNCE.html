@@ -1449,9 +1449,10 @@
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
     document.getElementById('resumeBtn').addEventListener('click', togglePause);
     document.getElementById('saveBtn').addEventListener('click', saveGame);
+    
+    // ИСПРАВЛЕНО: Кнопка выхода теперь ведет на главную страницу с выбором игр
     document.getElementById('quitBtn').addEventListener('click', () => {
-        gameState = 'START';
-        showScreen('start');
+        window.location.href = 'index.html';
     });
 
     // Старт
