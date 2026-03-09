@@ -685,9 +685,9 @@
             setMessage('Новая игра. Возьмите карту.');
           };
 
-          // УМЕНЬШЕННЫЕ КАРТЫ ДЛЯ ЛУЧШЕГО ВМЕЩЕНИЯ НА ЭКРАН
+          // УВЕЛИЧЕННЫЕ КАРТЫ ДЛЯ ЛУЧШЕГО ОБЗОРА
           const Card = ({ card, onClick, isSelected, isSacrifice, isAttacking, isHidden }) => {
-            const cardBaseClass = "w-[min(18vw,9vh)] h-[min(27vw,13.5vh)] sm:w-[9vh] sm:h-[13.5vh] rounded border-2 shrink-0";
+            const cardBaseClass = "w-[min(20vw,10vh)] h-[min(30vw,15vh)] sm:w-[10vh] sm:h-[15vh] rounded border-2 shrink-0";
             
             if (!card && !isHidden) return <div className={`${cardBaseClass} border-dashed border-[#443c30] bg-[#2a241b] opacity-50`} />;
             if (isHidden) return (
@@ -716,28 +716,28 @@
               >
                 <div className="flex justify-end h-[min(2.5vw,1.2vh)] sm:h-[1.2vh] gap-[0.2vh]">
                   {Array.from({ length: card.cost }).map((_, i) => (
-                    <span key={i} className="text-red-700 text-[min(1.8vw,1vh)] sm:text-[1vh] drop-shadow-sm leading-none">🩸</span>
+                    <span key={i} className="text-red-700 text-[min(2vw,1vh)] sm:text-[1vh] drop-shadow-sm leading-none">🩸</span>
                   ))}
                 </div>
                 
                 <div className="flex flex-col items-center flex-1 justify-center -mt-[0.5vh] relative">
-                  <span className="text-[min(5vw,3vh)] sm:text-[3vh] drop-shadow-md leading-none">{card.icon}</span>
-                  <span className="text-[min(1.5vw,0.8vh)] sm:text-[0.8vh] font-bold mt-[0.5vh] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[0.2vh] w-full truncate">{card.name}</span>
+                  <span className="text-[min(5vw,3.5vh)] sm:text-[3.5vh] drop-shadow-md leading-none">{card.icon}</span>
+                  <span className="text-[min(1.8vw,1vh)] sm:text-[1vh] font-bold mt-[0.5vh] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[0.2vh] w-full truncate">{card.name}</span>
                   
-                  <div className="absolute top-[min(5vw,3vh)] sm:top-[3vh] flex gap-[0.5vh] bg-[#2a241b]/90 rounded px-[0.2vh] shadow-sm">
-                    {card.airborne && <span className="text-[min(1.8vw,1vh)] sm:text-[1vh]" title="Воздушный">🕊️</span>}
-                    {card.touchOfDeath && <span className="text-[min(1.8vw,1vh)] sm:text-[1vh]" title="Смертельное касание">☠️</span>}
-                    {card.bloodValue > 1 && <span className="text-[min(1.8vw,1vh)] sm:text-[1vh]" title="Достойная жертва">🩸x{card.bloodValue}</span>}
-                    {card.manyLives && <span className="text-[min(1.8vw,1vh)] sm:text-[1vh]" title="Много жизней">♾️</span>}
+                  <div className="absolute top-[min(5vw,3.5vh)] sm:top-[3.5vh] flex gap-[0.5vh] bg-[#2a241b]/90 rounded px-[0.2vh] shadow-sm">
+                    {card.airborne && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Воздушный">🕊️</span>}
+                    {card.touchOfDeath && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Смертельное касание">☠️</span>}
+                    {card.bloodValue > 1 && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Достойная жертва">🩸x{card.bloodValue}</span>}
+                    {card.manyLives && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Много жизней">♾️</span>}
                   </div>
                 </div>
 
                 <div className="flex justify-between items-end h-[min(3.5vw,1.8vh)] sm:h-[1.8vh] font-bold text-[min(2vw,1.2vh)] sm:text-[1.2vh] leading-none">
                   <div className="flex items-center gap-[0.2vh]">
-                    <span className="text-[min(1.8vw,1vh)] sm:text-[1vh]">⚔️</span>{card.power}
+                    <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]">⚔️</span>{card.power}
                   </div>
                   <div className="flex items-center gap-[0.2vh]">
-                    {card.health}<span className="text-[min(1.8vw,1vh)] sm:text-[1vh]">❤️</span>
+                    {card.health}<span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]">❤️</span>
                   </div>
                 </div>
 
@@ -769,7 +769,7 @@
                 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
               `}</style>
 
-              {/* УМЕНЬШЕННАЯ ВЕРХНЯЯ ПАНЕЛЬ */}
+              {/* ВЕРХНЯЯ ПАНЕЛЬ */}
               <div className="w-full max-w-4xl flex justify-between items-start px-[2vh] mb-[1vh] z-10 relative shrink-0">
                 
                 <div className="flex flex-col gap-[0.5vh] w-1/3">
@@ -830,17 +830,14 @@
                 </div>
               </div>
 
-              {/* СТРОКА СООБЩЕНИЯ */}
-              <div className="text-center h-[min(5vw,2.5vh)] sm:h-[2.5vh] mb-[0.5vh] text-[min(3vw,1.4vh)] sm:text-[1.4vh] text-[#b8a586] animate-pulse z-10 px-2 shrink-0">{message}</div>
-
-              {/* УМЕНЬШЕННОЕ ЦЕНТРАЛЬНОЕ ПОЛЕ */}
+              {/* УВЕЛИЧЕННОЕ ЦЕНТРАЛЬНОЕ ПОЛЕ */}
               <div className="flex-1 flex flex-col justify-evenly items-center w-full max-w-4xl perspective-1000 z-10 px-1 min-h-0 shrink">
                 
                 <div className="flex gap-[1vh] opacity-70 shrink-0">
                   {opponentQueue.map((card, i) => (
-                    <div key={`queue-${i}`} className="w-[min(18vw,9vh)] sm:w-[9vh] h-[min(9vw,4.5vh)] sm:h-[4.5vh] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0">
-                      {card && <span className="text-[min(4vw,2vh)] sm:text-[2vh] mt-[1.5vh] opacity-50">{card.icon}</span>}
-                      {card && <div className="absolute top-0 text-[min(1.5vw,0.8vh)] sm:text-[0.8vh] w-full text-center bg-black/50 text-[#8c7a61]">Грядет</div>}
+                    <div key={`queue-${i}`} className="w-[min(20vw,10vh)] sm:w-[10vh] h-[min(10vw,5vh)] sm:h-[5vh] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0">
+                      {card && <span className="text-[min(4.5vw,2.5vh)] sm:text-[2.5vh] mt-[1.5vh] opacity-50">{card.icon}</span>}
+                      {card && <div className="absolute top-0 text-[min(2vw,1vh)] sm:text-[1vh] w-full text-center bg-black/50 text-[#8c7a61]">Грядет</div>}
                     </div>
                   ))}
                 </div>
@@ -865,9 +862,14 @@
 
               </div>
 
-              {/* УМЕНЬШЕННАЯ ПАНЕЛЬ ИГРОКА */}
+              {/* ПАНЕЛЬ ИГРОКА */}
               <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[1.5vh] pb-[1vh] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-10 relative shrink-0 mt-[1vh]">
                 
+                {/* СТРОКА СООБЩЕНИЯ В ПАНЕЛИ ИГРОКА */}
+                <div className="text-center w-full mb-[1.5vh] text-[min(3.5vw,1.6vh)] sm:text-[1.8vh] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0 border-b border-[#2a241c] pb-[1vh]">
+                  {message}
+                </div>
+
                 <div className="flex justify-between w-full mb-[1.5vh] px-[1vh] items-end">
                   <div className="flex gap-[1.5vh]">
                     <button onClick={() => drawCard(true)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation">
@@ -900,7 +902,7 @@
                   </div>
                 </div>
 
-                <div className="flex flex-row justify-start sm:justify-center overflow-x-auto sm:flex-wrap gap-[0.8vh] w-full p-[0.8vh] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation hide-scrollbar min-h-[min(30vw,15.5vh)] sm:min-h-[15.5vh] shrink-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="flex flex-row justify-start sm:justify-center overflow-x-auto sm:flex-wrap gap-[0.8vh] w-full p-[0.8vh] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation hide-scrollbar min-h-[min(32vw,16vh)] sm:min-h-[16vh] shrink-0" style={{ WebkitOverflowScrolling: 'touch' }}>
                   {playerHand.length === 0 && <span className="m-auto opacity-30 italic text-[min(3vw,1.5vh)] sm:text-[1.5vh]">Рука пуста</span>}
                   {playerHand.map((card) => (
                     <div key={card.id} className="shrink-0">
@@ -910,6 +912,7 @@
                 </div>
               </div>
 
+              {/* --- МОДАЛКИ --- */}
               {showRules && (
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRules(false)}>
                   <div className="bg-[#e6d8ba] text-[#2c241b] border-4 border-[#332c22] p-[3vh] rounded shadow-[0_0_50px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/old-paper.png")` }} onClick={e => e.stopPropagation()}>
