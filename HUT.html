@@ -1081,16 +1081,16 @@
                       </button>
                     </div>
 
-                    {/* Вертикальная колонка предметов (макс. 3) */}
+                    {/* Вертикальная колонка предметов (макс. 3) - Исправлено переполнение */}
                     <div className="flex flex-col gap-[min(1vw,0.5vh)] shrink-0 h-[min(22.5vw,14.25vh)] w-[min(8vw,5vh)]">
                       {items.map((item, i) => (
                         <button key={i} onClick={() => handleItemClick(i)} disabled={phase !== 'play'} title={item.desc} 
-                                className={`flex-1 w-full rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm text-[min(5vw,3vh)]`}>
+                                className={`flex-1 min-h-0 overflow-hidden w-full rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm text-[min(4.5vw,2.5vh)] leading-none`}>
                           {item.icon}
                         </button>
                       ))}
                       {Array.from({ length: 3 - items.length }).map((_, i) => (
-                        <div key={`empty-${i}`} className="flex-1 w-full rounded border border-[#3a3022] bg-[#1e1813] opacity-50 flex items-center justify-center text-[min(1.8vw,1vh)] text-[#6e5d4a]">
+                        <div key={`empty-${i}`} className="flex-1 min-h-0 overflow-hidden w-full rounded border border-[#3a3022] bg-[#1e1813] opacity-50 flex items-center justify-center text-[min(1.8vw,1vh)] text-[#6e5d4a] leading-none">
                           Пусто
                         </div>
                       ))}
