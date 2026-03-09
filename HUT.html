@@ -339,7 +339,7 @@
               if (Math.random() < 0.10 && items.length < 3) {
                 const newItem = ITEMS_DB[Math.floor(Math.random() * ITEMS_DB.length)];
                 setItems([...items, newItem]);
-                setMessage(`Среди белок вы нашли: ${newItem.icon} ${newItem.name}! Можете тянуть карту еще раз.`);
+                setMessage(`Вы нашли: ${newItem.icon} ${newItem.name}! Можете тянуть еще раз.`);
                 return; 
               }
               setPlayerHand([...playerHand, createCard(CARD_TYPES.SQUIRREL)]);
@@ -685,22 +685,22 @@
             setMessage('Новая игра. Возьмите карту.');
           };
 
-          // УВЕЛИЧЕННЫЕ КАРТЫ ДЛЯ ЛУЧШЕГО ОБЗОРА
+          // АБСОЛЮТНО АДАПТИВНАЯ КАРТА (Использует min(vw, vh), чтобы никогда не вылезать за экран)
           const Card = ({ card, onClick, isSelected, isSacrifice, isAttacking, isHidden }) => {
-            const cardBaseClass = "w-[min(20vw,10vh)] h-[min(30vw,15vh)] sm:w-[10vh] sm:h-[15vh] rounded border-2 shrink-0";
+            const cardBaseClass = "w-[min(17vw,11vh)] h-[min(25.5vw,16.5vh)] rounded-[0.5vh] border-[1.5px] border-[#111] shrink-0";
             
             if (!card && !isHidden) return <div className={`${cardBaseClass} border-dashed border-[#443c30] bg-[#2a241b] opacity-50`} />;
             if (isHidden) return (
-              <div className={`${cardBaseClass} border-[#111] bg-[#2a241b] flex items-center justify-center shadow-lg relative overflow-hidden`}>
+              <div className={`${cardBaseClass} bg-[#2a241b] flex items-center justify-center shadow-lg relative overflow-hidden`}>
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
-                <span className="text-[min(8vw,4vh)] sm:text-[4vh]">🌲</span>
+                <span className="text-[min(8vw,4vh)]">🌲</span>
               </div>
             );
 
             return (
               <div 
                 onClick={onClick}
-                className={`${cardBaseClass} flex flex-col justify-between p-[0.4vh] shadow-md transition-all duration-300 select-none cursor-pointer relative overflow-hidden
+                className={`${cardBaseClass} flex flex-col justify-between p-[min(0.5vw,0.4vh)] shadow-md transition-all duration-300 select-none cursor-pointer relative overflow-hidden
                   ${isSelected ? 'border-yellow-500 scale-105 shadow-yellow-900/50 -translate-y-2 animate-pulse' : 'border-[#111]'}
                   ${isSacrifice ? 'border-red-600 animate-pulse' : ''}
                   ${isAttacking ? 'scale-110 z-10 border-red-500 shadow-red-500/50' : ''}
@@ -714,36 +714,36 @@
                    touchAction: 'manipulation'
                 }}
               >
-                <div className="flex justify-end h-[min(2.5vw,1.2vh)] sm:h-[1.2vh] gap-[0.2vh]">
+                <div className="flex justify-end h-[min(2.5vw,1.5vh)] gap-[min(0.5vw,0.2vh)]">
                   {Array.from({ length: card.cost }).map((_, i) => (
-                    <span key={i} className="text-red-700 text-[min(2vw,1vh)] sm:text-[1vh] drop-shadow-sm leading-none">🩸</span>
+                    <span key={i} className="text-red-700 text-[min(2vw,1.2vh)] drop-shadow-sm leading-none">🩸</span>
                   ))}
                 </div>
                 
-                <div className="flex flex-col items-center flex-1 justify-center -mt-[0.5vh] relative">
-                  <span className="text-[min(5vw,3.5vh)] sm:text-[3.5vh] drop-shadow-md leading-none">{card.icon}</span>
-                  <span className="text-[min(1.8vw,1vh)] sm:text-[1vh] font-bold mt-[0.5vh] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[0.2vh] w-full truncate">{card.name}</span>
+                <div className="flex flex-col items-center flex-1 justify-center -mt-[min(1vw,0.5vh)] relative">
+                  <span className="text-[min(5.5vw,3.5vh)] drop-shadow-md leading-none">{card.icon}</span>
+                  <span className="text-[min(1.8vw,1.1vh)] font-bold mt-[min(0.5vw,0.3vh)] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[min(0.2vw,0.2vh)] w-full truncate">{card.name}</span>
                   
-                  <div className="absolute top-[min(5vw,3.5vh)] sm:top-[3.5vh] flex gap-[0.5vh] bg-[#2a241b]/90 rounded px-[0.2vh] shadow-sm">
-                    {card.airborne && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Воздушный">🕊️</span>}
-                    {card.touchOfDeath && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Смертельное касание">☠️</span>}
-                    {card.bloodValue > 1 && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Достойная жертва">🩸x{card.bloodValue}</span>}
-                    {card.manyLives && <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]" title="Много жизней">♾️</span>}
+                  <div className="absolute top-[min(5.5vw,3.5vh)] flex gap-[min(0.5vw,0.5vh)] bg-[#2a241b]/90 rounded px-[min(0.5vw,0.2vh)] shadow-sm">
+                    {card.airborne && <span className="text-[min(1.8vw,1.1vh)]" title="Воздушный">🕊️</span>}
+                    {card.touchOfDeath && <span className="text-[min(1.8vw,1.1vh)]" title="Смертельное касание">☠️</span>}
+                    {card.bloodValue > 1 && <span className="text-[min(1.8vw,1.1vh)]" title="Достойная жертва">🩸x{card.bloodValue}</span>}
+                    {card.manyLives && <span className="text-[min(1.8vw,1.1vh)]" title="Много жизней">♾️</span>}
                   </div>
                 </div>
 
-                <div className="flex justify-between items-end h-[min(3.5vw,1.8vh)] sm:h-[1.8vh] font-bold text-[min(2vw,1.2vh)] sm:text-[1.2vh] leading-none">
-                  <div className="flex items-center gap-[0.2vh]">
-                    <span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]">⚔️</span>{card.power}
+                <div className="flex justify-between items-end h-[min(3vw,2vh)] font-bold text-[min(2.2vw,1.4vh)] leading-none">
+                  <div className="flex items-center gap-[min(0.5vw,0.2vh)]">
+                    <span className="text-[min(1.8vw,1.2vh)]">⚔️</span>{card.power}
                   </div>
-                  <div className="flex items-center gap-[0.2vh]">
-                    {card.health}<span className="text-[min(1.8vw,1.2vh)] sm:text-[1.2vh]">❤️</span>
+                  <div className="flex items-center gap-[min(0.5vw,0.2vh)]">
+                    {card.health}<span className="text-[min(1.8vw,1.2vh)]">❤️</span>
                   </div>
                 </div>
 
                 {isSacrifice && (
                   <div className="absolute inset-0 bg-red-900/40 flex items-center justify-center">
-                    <span className="text-red-600 text-[min(8vw,5vh)] sm:text-[5vh] font-black drop-shadow-lg animate-bounce">X</span>
+                    <span className="text-red-600 text-[min(8vw,5vh)] font-black drop-shadow-lg animate-bounce">X</span>
                   </div>
                 )}
               </div>
@@ -751,7 +751,7 @@
           };
 
           return (
-            <div className="h-[100dvh] w-full bg-[#14120f] text-[#d4c3a3] font-mono flex flex-col items-center py-[1vh] selection:bg-red-900 overflow-hidden relative touch-manipulation overscroll-none"
+            <div className="h-[100dvh] w-full bg-[#14120f] text-[#d4c3a3] font-mono flex flex-col items-center justify-between selection:bg-red-900 overflow-hidden relative touch-manipulation overscroll-none"
                  style={{ backgroundImage: `radial-gradient(circle at center, #26211a 0%, #0a0907 100%)`, WebkitTapHighlightColor: 'transparent' }}>
               
               <style>{`
@@ -770,79 +770,79 @@
               `}</style>
 
               {/* ВЕРХНЯЯ ПАНЕЛЬ */}
-              <div className="w-full max-w-4xl flex justify-between items-start px-[2vh] mb-[1vh] z-10 relative shrink-0">
+              <div className="w-full max-w-4xl flex justify-between items-start px-[min(3vw,2vh)] mt-[min(2vw,1.5vh)] z-10 shrink-0">
                 
-                <div className="flex flex-col gap-[0.5vh] w-1/3">
-                  <div className="flex items-center gap-[1.5vh]">
-                    <a href="index.html" className="text-[2.5vh] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer text-white no-underline" title="В меню">🏠</a>
-                    <button onClick={() => setShowRules(true)} className="text-[2.5vh] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Правила">📖</button>
-                    <button onClick={handleManualSave} className="text-[2.5vh] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Сохранить игру">💾</button>
+                <div className="flex flex-col gap-[min(1vw,0.5vh)] w-1/3">
+                  <div className="flex items-center gap-[min(2vw,1.5vh)]">
+                    <a href="index.html" className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer text-white no-underline" title="В меню">🏠</a>
+                    <button onClick={() => setShowRules(true)} className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Правила">📖</button>
+                    <button onClick={handleManualSave} className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Сохранить игру">💾</button>
                   </div>
-                  <div className="text-[1.4vh] font-bold tracking-widest text-[#8c7a61] border-b border-[#8c7a61] pb-[0.2vh] uppercase w-fit mt-[0.5vh]">
+                  <div className="text-[min(2.5vw,1.5vh)] font-bold tracking-widest text-[#8c7a61] border-b border-[#8c7a61] pb-[min(0.5vw,0.2vh)] uppercase w-fit mt-[min(1vw,0.5vh)]">
                     Лесная Хижина
                   </div>
-                  <div className="flex items-center gap-[0.5vh] bg-[#1a1612] px-[1vh] py-[0.2vh] rounded border border-[#3a3022] w-fit mt-[0.5vh]" title="Жизни тени">
-                    <span className="text-[1vh]">ТЕНЬ:</span> {Array.from({length: 3}).map((_, i) => <span key={`e-life-${i}`} className={`text-[1.5vh] ${i < enemyLives ? 'opacity-100 text-red-500' : 'opacity-20 grayscale'}`}>🕯️</span>)}
+                  <div className="flex items-center gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(1.5vw,1vh)] py-[min(0.5vw,0.2vh)] rounded border border-[#3a3022] w-fit mt-[min(1vw,0.5vh)]" title="Жизни тени">
+                    <span className="text-[min(2vw,1.2vh)]">ТЕНЬ:</span> {Array.from({length: 3}).map((_, i) => <span key={`e-life-${i}`} className={`text-[min(3vw,1.5vh)] ${i < enemyLives ? 'opacity-100 text-red-500' : 'opacity-20 grayscale'}`}>🕯️</span>)}
                   </div>
                 </div>
 
-                <div ref={eyesContainerRef} className="absolute left-1/2 -translate-x-1/2 top-[0.5vh] flex gap-[2vh] justify-center items-center opacity-85 mix-blend-screen z-0 pointer-events-none">
-                  <div className="anim-eyes flex gap-[2vh]">
-                    <div className="w-[6vh] h-[3vh] bg-[#050403] rounded-full overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,1)] flex items-center justify-center border-t border-[#222]">
+                <div ref={eyesContainerRef} className="absolute left-1/2 -translate-x-1/2 top-[min(1vw,0.5vh)] flex gap-[min(3vw,2vh)] justify-center items-center opacity-85 mix-blend-screen z-0 pointer-events-none">
+                  <div className="anim-eyes flex gap-[min(3vw,2vh)]">
+                    <div className="w-[min(8vw,6vh)] h-[min(4vw,3vh)] bg-[#050403] rounded-full overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,1)] flex items-center justify-center border-t border-[#222]">
                        <div ref={leftPupilRef} 
-                            className={`w-[1.5vh] h-[1.5vh] rounded-full ${eyeReaction ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-[#e6d8ba] shadow-[0_0_5px_white]'}`}
+                            className={`w-[min(2vw,1.5vh)] h-[min(2vw,1.5vh)] rounded-full ${eyeReaction ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-[#e6d8ba] shadow-[0_0_5px_white]'}`}
                             style={{ transform: `translate(var(--px, 0px), var(--py, 0px)) ${eyeReaction ? 'scale(2)' : 'scale(1)'}`, transition: 'transform 0.05s ease-out, background-color 0.3s, box-shadow 0.3s' }}>
                        </div>
                     </div>
-                    <div className="w-[6vh] h-[3vh] bg-[#050403] rounded-full overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,1)] flex items-center justify-center border-t border-[#222]">
+                    <div className="w-[min(8vw,6vh)] h-[min(4vw,3vh)] bg-[#050403] rounded-full overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,1)] flex items-center justify-center border-t border-[#222]">
                        <div ref={rightPupilRef} 
-                            className={`w-[1.5vh] h-[1.5vh] rounded-full ${eyeReaction ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-[#e6d8ba] shadow-[0_0_5px_white]'}`}
+                            className={`w-[min(2vw,1.5vh)] h-[min(2vw,1.5vh)] rounded-full ${eyeReaction ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-[#e6d8ba] shadow-[0_0_5px_white]'}`}
                             style={{ transform: `translate(var(--px, 0px), var(--py, 0px)) ${eyeReaction ? 'scale(2)' : 'scale(1)'}`, transition: 'transform 0.05s ease-out, background-color 0.3s, box-shadow 0.3s' }}>
                        </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-[0.5vh] items-end w-1/3">
-                  <button onClick={() => setIsSoundEnabled(!isSoundEnabled)} className="text-[2.5vh] opacity-80 hover:opacity-100 transition-all hover:scale-110 drop-shadow-md" title="Звук">
+                <div className="flex flex-col gap-[min(1vw,0.5vh)] items-end w-1/3">
+                  <button onClick={() => setIsSoundEnabled(!isSoundEnabled)} className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 transition-all hover:scale-110 drop-shadow-md" title="Звук">
                     {isSoundEnabled ? '🔊' : '🔇'}
                   </button>
                   
-                  <div className={`flex items-center bg-[#0a0a0a] border border-[#332c22] rounded-full p-[0.3vh] w-[12vh] relative h-[1.2vh] shadow-inner mt-[0.5vh] ${shakeScale ? 'anim-shake' : ''}`}>
-                     <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-[#443c30] z-10 -ml-[1px]"></div>
+                  <div className={`flex items-center bg-[#0a0a0a] border border-[#332c22] rounded-full p-[min(0.5vw,0.3vh)] w-[min(25vw,14vh)] relative h-[min(2vw,1.2vh)] shadow-inner mt-[min(1vw,0.5vh)] ${shakeScale ? 'anim-shake' : ''}`}>
+                     <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-[#443c30] z-10 -ml-[0.5px]"></div>
                      <div 
                         className={`h-full rounded-full transition-all duration-500 ease-in-out ${scale > 0 ? 'bg-green-800/80' : 'bg-red-800/80'}`}
                         style={{ width: `${Math.abs(scale) * 10}%`, marginLeft: scale < 0 ? `${50 - Math.abs(scale) * 10}%` : '50%' }}
                      />
                      <div className="absolute inset-0 flex justify-between px-1 items-center z-20 w-full pointer-events-none opacity-30">
-                        {Array.from({length: 11}).map((_, i) => <div key={i} className="w-[0.3vh] h-[0.3vh] rounded-full bg-white"></div>)}
+                        {Array.from({length: 11}).map((_, i) => <div key={i} className="w-[min(0.5vw,0.3vh)] h-[min(0.5vw,0.3vh)] rounded-full bg-white"></div>)}
                      </div>
                   </div>
 
-                  <div className="flex gap-[0.5vh] bg-[#1e1813] p-[0.5vh] border border-[#3a3022] rounded shadow-inner mt-[0.5vh]" title="Предметы противника">
+                  <div className="flex gap-[min(1vw,0.5vh)] bg-[#1e1813] p-[min(1vw,0.5vh)] border border-[#3a3022] rounded shadow-inner mt-[min(1vw,0.5vh)]" title="Предметы противника">
                     {enemyItems.map((item, i) => (
-                      <div key={`e-item-${i}`} className="w-[2.5vh] h-[2.5vh] rounded border border-[#4a3f31] bg-[#1a1612] flex items-center justify-center text-[1.5vh] opacity-90 shadow-sm">
+                      <div key={`e-item-${i}`} className="w-[min(5vw,3vh)] h-[min(5vw,3vh)] rounded border border-[#4a3f31] bg-[#1a1612] flex items-center justify-center text-[min(3vw,1.5vh)] opacity-90 shadow-sm">
                         {item.icon}
                       </div>
                     ))}
-                    {enemyItems.length === 0 && <div className="text-[1vh] text-[#6e5d4a] px-1 whitespace-nowrap leading-none pt-1">Пусто</div>}
+                    {enemyItems.length === 0 && <div className="text-[min(2vw,1vh)] text-[#6e5d4a] px-1 whitespace-nowrap leading-none pt-1">Пусто</div>}
                   </div>
                 </div>
               </div>
 
-              {/* УВЕЛИЧЕННОЕ ЦЕНТРАЛЬНОЕ ПОЛЕ */}
-              <div className="flex-1 flex flex-col justify-evenly items-center w-full max-w-4xl perspective-1000 z-10 px-1 min-h-0 shrink">
+              {/* ЦЕНТРАЛЬНОЕ ПОЛЕ БОЯ */}
+              <div className="flex-1 flex flex-col justify-evenly items-center w-full max-w-4xl perspective-1000 z-10 px-1 min-h-0 py-[min(1vw,1vh)]">
                 
-                <div className="flex gap-[1vh] opacity-70 shrink-0">
+                <div className="flex gap-[min(1.5vw,1vh)] opacity-70 shrink-0">
                   {opponentQueue.map((card, i) => (
-                    <div key={`queue-${i}`} className="w-[min(20vw,10vh)] sm:w-[10vh] h-[min(10vw,5vh)] sm:h-[5vh] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0">
-                      {card && <span className="text-[min(4.5vw,2.5vh)] sm:text-[2.5vh] mt-[1.5vh] opacity-50">{card.icon}</span>}
-                      {card && <div className="absolute top-0 text-[min(2vw,1vh)] sm:text-[1vh] w-full text-center bg-black/50 text-[#8c7a61]">Грядет</div>}
+                    <div key={`queue-${i}`} className="w-[min(17vw,11vh)] h-[min(8.5vw,5.5vh)] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0">
+                      {card && <span className="text-[min(4vw,2.5vh)] mt-[min(1.5vw,1vh)] opacity-50">{card.icon}</span>}
+                      {card && <div className="absolute top-0 text-[min(1.5vw,0.9vh)] w-full text-center bg-black/50 text-[#8c7a61]">Грядет</div>}
                     </div>
                   ))}
                 </div>
 
-                <div className="flex gap-[1vh] p-[1vh] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0" style={{ '--attack-dir': -1 }}>
+                <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0" style={{ '--attack-dir': -1 }}>
                   {opponentBoard.map((card, i) => (
                     <div key={`opp-${i}`} onClick={() => handleOpponentBoardClick(i)}>
                       <Card card={card} isAttacking={attackingSlot?.side === 'opponent' && attackingSlot?.index === i} />
@@ -852,7 +852,7 @@
 
                 <div className="w-[90%] h-px bg-gradient-to-r from-transparent via-[#4a3f31] to-transparent shadow-[0_0_5px_rgba(74,63,49,0.5)] shrink-0"></div>
 
-                <div className="flex gap-[1vh] p-[1vh] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0" style={{ '--attack-dir': 1 }}>
+                <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0" style={{ '--attack-dir': 1 }}>
                   {playerBoard.map((card, i) => (
                     <div key={`pl-slot-${i}`} onClick={() => handleBoardClick(i)}>
                       <Card card={card} isSacrifice={sacrifices.includes(i)} isAttacking={attackingSlot?.side === 'player' && attackingSlot?.index === i} />
@@ -863,51 +863,50 @@
               </div>
 
               {/* ПАНЕЛЬ ИГРОКА */}
-              <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[1.5vh] pb-[1vh] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-10 relative shrink-0 mt-[1vh]">
+              <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[min(2vw,1.5vh)] pb-[calc(env(safe-area-inset-bottom)+min(1.5vw,1vh))] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-10 shrink-0 mt-auto">
                 
                 {/* СТРОКА СООБЩЕНИЯ В ПАНЕЛИ ИГРОКА */}
-                <div className="text-center w-full mb-[1.5vh] text-[min(3.5vw,1.6vh)] sm:text-[1.8vh] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0 border-b border-[#2a241c] pb-[1vh]">
+                <div className="text-center w-full mb-[min(2vw,1.5vh)] text-[min(3.5vw,1.6vh)] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0 border-b border-[#2a241c] pb-[min(1.5vw,1vh)]">
                   {message}
                 </div>
 
-                <div className="flex justify-between w-full mb-[1.5vh] px-[1vh] items-end">
-                  <div className="flex gap-[1.5vh]">
-                    <button onClick={() => drawCard(true)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation">
-                      <div className="absolute -top-[2vh] left-1/2 -translate-x-1/2 text-[1vh] text-[#8c7a61] opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">Белка</div>
-                      <Card isHidden={true} />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[4vh]">🐿️</div>
+                <div className="flex justify-between w-full mb-[min(2vw,1.5vh)] px-[min(1.5vw,1vh)] items-center gap-[min(2vw,1vh)]">
+                  <div className="flex gap-[min(1.5vw,1.5vh)] shrink-0">
+                    <button onClick={() => drawCard(true)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(17vw,11vh)] h-[min(25.5vw,16.5vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
+                      <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">Белка</div>
+                      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(8vw,5vh)]">🐿️</div>
                     </button>
-                    <button onClick={() => drawCard(false)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation">
-                       <div className="absolute -top-[2vh] left-1/2 -translate-x-1/2 text-[1vh] text-[#8c7a61] opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Колода ({deck.length})</div>
-                      <Card isHidden={true} />
+                    <button onClick={() => drawCard(false)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(17vw,11vh)] h-[min(25.5vw,16.5vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
+                       <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Колода ({deck.length})</div>
+                      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(8vw,5vh)]">🌲</div>
                     </button>
                   </div>
 
-                  <div className="flex gap-[0.5vh] bg-[#1e1813] p-[0.5vh] border border-[#3a3022] rounded shadow-inner mb-[1vh]">
+                  <div className="flex gap-[min(1vw,0.5vh)] bg-[#1e1813] p-[min(1vw,0.5vh)] border border-[#3a3022] rounded shadow-inner shrink-0">
                     {items.map((item, i) => (
-                      <button key={i} onClick={() => handleItemClick(i)} disabled={phase !== 'play'} title={item.desc} className={`w-[4.5vh] h-[4.5vh] rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center text-[2.5vh] transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm`}>
+                      <button key={i} onClick={() => handleItemClick(i)} disabled={phase !== 'play'} title={item.desc} className={`w-[min(10vw,5.5vh)] h-[min(10vw,5.5vh)] rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center text-[min(5vw,2.8vh)] transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm`}>
                         {item.icon}
                       </button>
                     ))}
-                    {items.length === 0 && <div className="w-[4.5vh] h-[4.5vh] flex items-center justify-center opacity-20 text-[0.8vh] text-center leading-tight">Нет<br/>вещей</div>}
+                    {items.length === 0 && <div className="w-[min(10vw,5.5vh)] h-[min(10vw,5.5vh)] flex items-center justify-center opacity-20 text-[min(2vw,1vh)] text-center leading-tight">Нет<br/>вещей</div>}
                   </div>
 
-                  <div className="flex flex-col items-end gap-[1vh] mb-[1vh]">
-                    <div className="flex items-center gap-[0.5vh] bg-[#1a1612] px-[1vh] py-[0.5vh] rounded border border-[#3a3022] font-bold" title="Ваши жизни">
-                       <span className="text-[1vh]">ВЫ:</span> {Array.from({length: 3}).map((_, i) => <span key={`p-life-${i}`} className={`text-[1.5vh] ${i < playerLives ? 'opacity-100' : 'opacity-20 grayscale'}`}>🕯️</span>)}
+                  <div className="flex flex-col items-end gap-[min(1.5vw,1vh)] shrink-0">
+                    <div className="flex items-center gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(2vw,1vh)] py-[min(1vw,0.5vh)] rounded border border-[#3a3022] font-bold" title="Ваши жизни">
+                       <span className="text-[min(2.2vw,1.2vh)]">ВЫ:</span> {Array.from({length: 3}).map((_, i) => <span key={`p-life-${i}`} className={`text-[min(3vw,1.6vh)] ${i < playerLives ? 'opacity-100' : 'opacity-20 grayscale'}`}>🕯️</span>)}
                     </div>
-                    <button onClick={endTurn} disabled={phase !== 'play'} className="h-[4.5vh] px-[2vh] rounded border border-[#5c4a35] bg-[#2a2116] hover:bg-[#3d3121] text-[#d4c3a3] font-bold tracking-widest uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-[0.5vh] shadow-[0_0_10px_rgba(0,0,0,0.5)] group touch-manipulation text-[1.2vh]">
-                      <span className={`text-[2vh] inline-block ${isBellRinging ? 'anim-bell' : 'group-hover:anim-bell'}`}>🔔</span> <span className="hidden sm:inline">Завершить ход</span><span className="sm:hidden">Ход</span>
+                    <button onClick={endTurn} disabled={phase !== 'play'} className="h-[min(10vw,5.5vh)] px-[min(3vw,2vh)] rounded border border-[#5c4a35] bg-[#2a2116] hover:bg-[#3d3121] text-[#d4c3a3] font-bold tracking-widest uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-[min(1vw,0.5vh)] shadow-[0_0_10px_rgba(0,0,0,0.5)] group touch-manipulation text-[min(2.5vw,1.4vh)]">
+                      <span className={`text-[min(4vw,2vh)] inline-block ${isBellRinging ? 'anim-bell' : 'group-hover:anim-bell'}`}>🔔</span> Ход
                     </button>
                   </div>
                 </div>
 
-                <div className="flex flex-row justify-start sm:justify-center overflow-x-auto sm:flex-wrap gap-[0.8vh] w-full p-[0.8vh] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation hide-scrollbar min-h-[min(32vw,16vh)] sm:min-h-[16vh] shrink-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  {playerHand.length === 0 && <span className="m-auto opacity-30 italic text-[min(3vw,1.5vh)] sm:text-[1.5vh]">Рука пуста</span>}
+                <div className="flex flex-row justify-start sm:justify-center overflow-x-auto w-full p-[min(1.5vw,1vh)] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation hide-scrollbar shrink-0 min-h-[min(29vw,18.5vh)] gap-[min(1vw,0.8vh)]" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  {playerHand.length === 0 && <span className="m-auto opacity-30 italic text-[min(3vw,1.5vh)]">Рука пуста</span>}
                   {playerHand.map((card) => (
-                    <div key={card.id} className="shrink-0">
-                      <Card card={card} isSelected={selectedHandCard?.id === card.id} onClick={() => handleHandClick(card)} />
-                    </div>
+                    <Card key={card.id} card={card} isSelected={selectedHandCard?.id === card.id} onClick={() => handleHandClick(card)} />
                   ))}
                 </div>
               </div>
