@@ -101,24 +101,29 @@
     <div id="game-wrapper" class="px-2 sm:px-0 flex flex-col pb-4 sm:pb-0">
         <!-- Кнопки управления окном -->
         <div class="w-full flex justify-between items-center mb-2">
-            <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-600 transition-colors shadow text-xs flex items-center gap-1 no-underline cursor-pointer">
+            <button onclick="window.location.href='index.html';" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer" id="lbl_backToMenu">
                 🏠 В меню
-            </a>
-            <button id="headerPauseBtn" class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded border-2 border-blue-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer hidden">
-                ⏸️ Пауза
             </button>
+            <div class="flex gap-2">
+                <button id="langToggleBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-500 transition-colors shadow text-xs flex items-center cursor-pointer">
+                    🌐 EN
+                </button>
+                <button id="headerPauseBtn" class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded border-2 border-blue-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer hidden" id="lbl_pauseBtn">
+                    ⏸️ Пауза
+                </button>
+            </div>
         </div>
 
         <!-- Верхний интерфейс -->
         <div class="w-full flex justify-between items-center mb-1 px-1 text-[11px] sm:text-xs font-bold">
-            <div class="text-yellow-400">СЧЕТ: <span id="scoreUI">0</span></div>
-            <div class="text-blue-300">УР: <span id="levelUI">1</span></div>
+            <div class="text-yellow-400"><span id="lbl_score">СЧЕТ:</span> <span id="scoreUI">0</span></div>
+            <div class="text-blue-300"><span id="lbl_lvl">УР:</span> <span id="levelUI">1</span></div>
             <div class="text-green-400">♥: <span id="livesUI">3</span></div>
             <div class="text-purple-400">🔄: <span id="continuesUI">3</span></div>
             <div class="text-orange-400">💣: <span id="minesUI">3</span></div>
         </div>
-        <div class="w-full text-center mb-2 font-bold text-gray-300 bg-gray-800 rounded py-1 border border-gray-600 text-[11px] sm:text-xs">
-            <span id="objectiveUI">ЦЕЛЬ: УНИЧТОЖИТЬ ВСЕХ (ОСТАЛОСЬ 5)</span>
+        <div class="w-full text-center mb-2 font-bold text-gray-300 bg-gray-800 rounded py-1 border border-gray-600 text-[11px] sm:text-xs" id="objectiveUI">
+            ЦЕЛЬ: УНИЧТОЖИТЬ ВСЕХ (ОСТАЛОСЬ 5)
         </div>
 
         <!-- Контейнер игры -->
@@ -127,18 +132,18 @@
             
             <!-- Стартовый экран -->
             <div id="startScreen" class="overlay">
-                <h1 class="text-4xl font-bold text-yellow-500 mb-2 tracking-widest">ТАНКИ</h1>
-                <h2 class="text-xl text-white mb-4">КАМПАНИЯ</h2>
+                <h1 class="text-4xl font-bold text-yellow-500 mb-2 tracking-widest" id="lbl_title">ТАНКИ</h1>
+                <h2 class="text-xl text-white mb-4" id="lbl_campaign">КАМПАНИЯ</h2>
                 <div class="flex flex-col gap-3 w-full max-w-[240px]">
                     <button id="startBtn" class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-3 px-4 rounded border-4 border-yellow-700 text-lg transition-colors">
                         НОВАЯ ИГРА
                     </button>
                     <div class="flex gap-2">
-                        <button id="startLoadBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-2 rounded border-4 border-blue-700 text-sm transition-colors" title="Загрузить из браузера">
+                        <button id="startLoadBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-2 rounded border-4 border-blue-700 text-sm transition-colors">
                             ПРОДОЛЖИТЬ
                         </button>
-                        <label class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-2 rounded border-4 border-purple-700 text-[10px] leading-tight transition-colors text-center cursor-pointer flex items-center justify-center" title="Загрузить из файла (.json)">
-                            ФАЙЛ СОХРАНЕНИЯ
+                        <label class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-2 rounded border-4 border-purple-700 text-[10px] leading-tight transition-colors text-center cursor-pointer flex items-center justify-center">
+                            <span id="lbl_saveFileStart">ФАЙЛ СОХРАНЕНИЯ</span>
                             <input type="file" id="fileLoadStart" class="hidden" accept=".json">
                         </label>
                     </div>
@@ -150,13 +155,13 @@
 
             <!-- Экран Паузы -->
             <div id="pauseScreen" class="overlay hidden backdrop-blur-sm">
-                <h1 class="text-4xl font-bold text-white mb-6 tracking-widest">ПАУЗА</h1>
+                <h1 class="text-4xl font-bold text-white mb-6 tracking-widest" id="lbl_pauseTitle">ПАУЗА</h1>
                 <div class="flex flex-col gap-3 w-full max-w-[240px]">
                     <button id="resumeBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded border-4 border-blue-700 text-lg mb-2">
                         ПРОДОЛЖИТЬ
                     </button>
                     
-                    <div class="text-xs text-gray-300 text-center mt-1 border-b border-gray-600 pb-1">Кэш браузера</div>
+                    <div class="text-xs text-gray-300 text-center mt-1 border-b border-gray-600 pb-1" id="lbl_cacheTitle">Кэш браузера</div>
                     <div class="flex gap-2">
                         <button id="saveBtn" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-2 rounded border-4 border-green-700 text-xs">
                             СОХРАНИТЬ
@@ -166,13 +171,13 @@
                         </button>
                     </div>
 
-                    <div class="text-xs text-gray-300 text-center mt-2 border-b border-gray-600 pb-1">Файл на устройстве</div>
+                    <div class="text-xs text-gray-300 text-center mt-2 border-b border-gray-600 pb-1" id="lbl_deviceTitle">Файл на устройстве</div>
                     <div class="flex gap-2">
                         <button id="exportBtn" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 px-2 rounded border-4 border-teal-700 text-xs">
                             СКАЧАТЬ
                         </button>
                         <label class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-2 rounded border-4 border-purple-700 text-xs text-center cursor-pointer flex items-center justify-center">
-                            ЗАГРУЗИТЬ
+                            <span id="lbl_fileLoadPause">ЗАГРУЗИТЬ</span>
                             <input type="file" id="fileLoadPause" class="hidden" accept=".json">
                         </label>
                     </div>
@@ -181,13 +186,13 @@
 
             <!-- Экран перехода между уровнями -->
             <div id="transitionScreen" class="overlay hidden">
-                <h1 class="text-3xl font-bold text-green-400 mb-4 whitespace-pre-line" id="transitionText">УРОВЕНЬ ПРОЙДЕН!</h1>
+                <h1 class="text-3xl font-bold text-green-400 mb-4 whitespace-pre-line text-center" id="transitionText">УРОВЕНЬ ПРОЙДЕН!</h1>
             </div>
 
             <!-- Экран проигрыша -->
             <div id="gameOverScreen" class="overlay hidden">
-                <h1 class="text-4xl font-bold text-red-500 mb-2">МИССИЯ ПРОВАЛЕНА</h1>
-                <p class="text-xl mb-6">Итоговый счет: <span id="finalScore" class="text-yellow-400">0</span></p>
+                <h1 class="text-4xl font-bold text-red-500 mb-2 text-center" id="lbl_gameOverTitle">МИССИЯ ПРОВАЛЕНА</h1>
+                <p class="text-xl mb-6"><span id="lbl_finalScore">Итоговый счет:</span> <span id="finalScore" class="text-yellow-400">0</span></p>
                 <button id="restartBtn" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded border-4 border-gray-400 text-xl transition-colors">
                     В МЕНЮ
                 </button>
@@ -208,13 +213,105 @@
                 <div></div>
             </div>
             <div class="flex items-center justify-center gap-2">
-                <div class="btn-mine text-center" id="btn-mine">МИНА<br>(B/И)</div>
+                <div class="btn-mine text-center" id="btn-mineContainer"><span id="lbl_mineBtn">МИНА<br>(B/И)</span></div>
                 <div class="btn-fire" id="btn-fire"></div>
             </div>
         </div>
     </div>
 
 <script>
+/**
+ * ЛОКАЛИЗАЦИЯ (I18N)
+ */
+const i18n = {
+    ru: {
+        score: "СЧЕТ:", lvl: "УР:",
+        objDefend: "ЦЕЛЬ: ЗАЩИТИТЬ БАЗУ (ВРАГОВ: {n})",
+        objBoss: "ЦЕЛЬ: УНИЧТОЖИТЬ БОССА!",
+        objSub: "ЦЕЛЬ: УНИЧТОЖИТЬ СИНЮЮ ПОДСТАНЦИЮ!",
+        objFort: "ЦЕЛЬ: ПРОРВАТЬСЯ К КРАСНОМУ ФОРТУ",
+        title: "ТАНКИ", campaign: "КАМПАНИЯ",
+        newGame: "НОВАЯ ИГРА", continue: "ПРОДОЛЖИТЬ", saveFile: "ФАЙЛ СОХРАНЕНИЯ",
+        soundOn: "ЗВУК: ВКЛ", soundOff: "ЗВУК: ВЫКЛ",
+        pauseTitle: "ПАУЗА", resume: "ПРОДОЛЖИТЬ", cacheTitle: "Кэш браузера",
+        save: "СОХРАНИТЬ", load: "ЗАГРУЗИТЬ", deviceTitle: "Файл на устройстве", download: "СКАЧАТЬ",
+        levelCleared: "УРОВЕНЬ ПРОЙДЕН!<br><br><span class='text-white text-xl'>ПРИГОТОВЬТЕСЬ К УРОВНЮ {n}</span>",
+        missionFailed: "МИССИЯ ПРОВАЛЕНА", finalScore: "Итоговый счет:",
+        toMenu: "В МЕНЮ", backToMenu: "🏠 В меню", pauseBtn: "⏸️ Пауза",
+        mineBtn: "МИНА<br>(B/И)", baseDestroyed: "БАЗА УНИЧТОЖЕНА!", outOfTanks: "ТАНКИ КОНЧИЛИСЬ!",
+        attemptsLeft: "<br><br><span class='text-white text-xl'>ОСТАЛОСЬ ПОПЫТОК: {n}</span>",
+        success: "УСПЕШНО!", loaded: "ЗАГРУЖЕНО!", noSaves: "НЕТ СОХРАНЕНИЙ", downloaded: "СКАЧАНО!",
+        saveError: "Ошибка чтения файла сохранения! Возможно файл поврежден.",
+        langToggle: "🌐 EN"
+    },
+    en: {
+        score: "SCORE:", lvl: "LVL:",
+        objDefend: "OBJECTIVE: DEFEND BASE (ENEMIES: {n})",
+        objBoss: "OBJECTIVE: DESTROY THE BOSS!",
+        objSub: "OBJECTIVE: DESTROY BLUE SUBSTATION!",
+        objFort: "OBJECTIVE: BREAK THROUGH TO RED FORT",
+        title: "BATTLE CITY", campaign: "CAMPAIGN",
+        newGame: "NEW GAME", continue: "CONTINUE", saveFile: "SAVE FILE",
+        soundOn: "SOUND: ON", soundOff: "SOUND: OFF",
+        pauseTitle: "PAUSE", resume: "RESUME", cacheTitle: "Browser Cache",
+        save: "SAVE", load: "LOAD", deviceTitle: "Device File", download: "DOWNLOAD",
+        levelCleared: "LEVEL CLEARED!<br><br><span class='text-white text-xl'>GET READY FOR LEVEL {n}</span>",
+        missionFailed: "MISSION FAILED", finalScore: "Final Score:",
+        toMenu: "TO MENU", backToMenu: "🏠 Menu", pauseBtn: "⏸️ Pause",
+        mineBtn: "MINE<br>(B)", baseDestroyed: "BASE DESTROYED!", outOfTanks: "OUT OF TANKS!",
+        attemptsLeft: "<br><br><span class='text-white text-xl'>ATTEMPTS LEFT: {n}</span>",
+        success: "SUCCESS!", loaded: "LOADED!", noSaves: "NO SAVES", downloaded: "DOWNLOADED!",
+        saveError: "Error reading save file! It might be corrupted.",
+        langToggle: "🌐 RU"
+    }
+};
+
+let currentLang = localStorage.getItem('tanksLang') || 'ru';
+const t = (key, params = {}) => {
+    let str = i18n[currentLang][key] || key;
+    for (let p in params) str = str.replace(`{${p}}`, params[p]);
+    return str;
+};
+
+function updateStaticUI() {
+    document.documentElement.lang = currentLang;
+    document.getElementById('lbl_score').innerHTML = t('score');
+    document.getElementById('lbl_lvl').innerHTML = t('lvl');
+    document.getElementById('lbl_title').innerHTML = t('title');
+    document.getElementById('lbl_campaign').innerHTML = t('campaign');
+    document.getElementById('startBtn').innerHTML = t('newGame');
+    document.getElementById('startLoadBtn').innerHTML = t('continue');
+    document.getElementById('lbl_saveFileStart').innerHTML = t('saveFile');
+    
+    let btn = document.getElementById('muteBtn');
+    if (sfx.isMuted) btn.innerText = t('soundOff'); else btn.innerText = t('soundOn');
+    
+    document.getElementById('lbl_pauseTitle').innerHTML = t('pauseTitle');
+    document.getElementById('resumeBtn').innerHTML = t('resume');
+    document.getElementById('lbl_cacheTitle').innerHTML = t('cacheTitle');
+    document.getElementById('saveBtn').innerHTML = t('save');
+    document.getElementById('pauseLoadBtn').innerHTML = t('load');
+    document.getElementById('lbl_deviceTitle').innerHTML = t('deviceTitle');
+    document.getElementById('exportBtn').innerHTML = t('download');
+    document.getElementById('lbl_fileLoadPause').innerHTML = t('load');
+    
+    document.getElementById('lbl_gameOverTitle').innerHTML = t('missionFailed');
+    document.getElementById('lbl_finalScore').innerHTML = t('finalScore');
+    document.getElementById('restartBtn').innerHTML = t('toMenu');
+    document.getElementById('lbl_backToMenu').innerHTML = t('backToMenu');
+    document.getElementById('headerPauseBtn').innerHTML = t('pauseBtn');
+    document.getElementById('lbl_mineBtn').innerHTML = t('mineBtn');
+    document.getElementById('langToggleBtn').innerHTML = t('langToggle');
+    
+    updateObjectiveUI();
+}
+
+document.getElementById('langToggleBtn').addEventListener('click', () => {
+    currentLang = currentLang === 'ru' ? 'en' : 'ru';
+    localStorage.setItem('tanksLang', currentLang);
+    updateStaticUI();
+});
+
 /**
  * НАСТРОЙКИ И КОНСТАНТЫ
  */
@@ -405,7 +502,7 @@ function saveGame() {
     
     let btn = document.getElementById('saveBtn');
     let old = btn.innerText;
-    btn.innerText = 'УСПЕШНО!';
+    btn.innerText = t('success');
     setTimeout(() => { btn.innerText = old; }, 2000);
 }
 
@@ -427,7 +524,7 @@ function loadGame(buttonId) {
         document.getElementById('livesUI').innerText = lives;
         document.getElementById('continuesUI').innerText = continues;
         
-        btn.innerText = 'ЗАГРУЖЕНО!';
+        btn.innerText = t('loaded');
         setTimeout(() => { 
             btn.innerText = old; 
             document.getElementById('pauseScreen').classList.add('hidden');
@@ -435,7 +532,7 @@ function loadGame(buttonId) {
             if (gameState === 'PAUSED') togglePause();
         }, 500);
     } else {
-        btn.innerText = 'НЕТ СОХРАНЕНИЙ';
+        btn.innerText = t('noSaves');
         setTimeout(() => { btn.innerText = old; }, 2000);
     }
 }
@@ -624,17 +721,17 @@ function checkLevelPlayability() {
 function updateObjectiveUI() {
     const objUI = document.getElementById('objectiveUI');
     if (levelType === 'CLASSIC') {
-        objUI.innerText = `ЦЕЛЬ: ЗАЩИТИТЬ БАЗУ (ВРАГОВ: ${enemiesToSpawn + enemies.length})`;
+        objUI.innerText = t('objDefend', {n: enemiesToSpawn + enemies.length});
         objUI.className = "w-full text-center mb-2 font-bold text-green-300 bg-gray-800 rounded py-1 border border-green-700 text-[11px] sm:text-xs";
     } else if (levelType === 'BOSS') {
-        objUI.innerText = `ЦЕЛЬ: УНИЧТОЖИТЬ БОССА!`;
+        objUI.innerText = t('objBoss');
         objUI.className = "w-full text-center mb-2 font-bold text-yellow-300 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
     } else {
         if (substationAlive) {
-            objUI.innerText = `ЦЕЛЬ: УНИЧТОЖИТЬ СИНЮЮ ПОДСТАНЦИЮ!`;
+            objUI.innerText = t('objSub');
             objUI.className = "w-full text-center mb-2 font-bold text-blue-300 bg-gray-800 rounded py-1 border border-blue-700 text-[11px] sm:text-xs animate-pulse";
         } else {
-            objUI.innerText = `ЦЕЛЬ: ПРОРВАТЬСЯ К КРАСНОМУ ФОРТУ`;
+            objUI.innerText = t('objFort');
             objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
         }
     }
@@ -931,7 +1028,7 @@ class Tank {
                             createExplosion(c * TILE_SIZE + 16, r * TILE_SIZE + 16, '#ff9900', 5);
                             continue;
                         }
-                        return true; // Вода тоже блокирует движение
+                        return true; 
                     }
                 }
             }
@@ -948,7 +1045,6 @@ class Tank {
 
     shoot() {
         if (this.isPlayer && !this.isAllyAI && this.weaponLevel >= 2) {
-            // Лазерный выстрел
             let bx = this.x + this.w / 2; let by = this.y + this.h / 2;
             let stepX = 0, stepY = 0;
             if (this.dir === DIR_UP) stepY = -4;
@@ -968,14 +1064,14 @@ class Tank {
                     let cell = grid[cRow][cCol];
                     if (cell === STEEL || cell === BASE || cell === SUBSTATION || (cell === ENEMY_BASE && this.isPlayer)) {
                         hitWall = true;
-                        if (cell === BASE) { baseAlive = false; levelFailed("БАЗА УНИЧТОЖЕНА!"); }
+                        if (cell === BASE) { baseAlive = false; levelFailed(t('baseDestroyed')); }
                         if (cell === ENEMY_BASE && !substationAlive) { grid[cRow][cCol] = EMPTY; winLevel(); }
                         if (cell === SUBSTATION) { grid[cRow][cCol] = EMPTY; substationAlive = false; updateObjectiveUI(); }
                         createExplosion(curX, curY, '#ffaa00', 10);
                         break;
                     } else if (cell === BRICK) {
                         grid[cRow][cCol] = EMPTY; createExplosion(cCol*TILE_SIZE+16, cRow*TILE_SIZE+16, '#ff9900', 5);
-                    } // Вода пропускает лазер
+                    } 
                 }
                 
                 for (let e of enemies) {
@@ -1005,7 +1101,6 @@ class Tank {
             return;
         }
 
-        // Обычные пули
         const activeBullets = bullets.filter(b => b.ownerId === this);
         let maxBul = (this.isPlayer && !this.isAllyAI) ? (this.weaponLevel >= 1 ? 3 : 1) : (this.eType === 'RAPID' ? 2 : (this.isBoss ? 4 : 1));
         if (activeBullets.length >= maxBul) return;
@@ -1041,10 +1136,9 @@ class Tank {
     draw(ctx) {
         ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
         
-        // Замороженные враги
         if (!this.isPlayer && !this.isAllyAI && timeStopTimer > 0) {
             ctx.globalAlpha = 0.8;
-            ctx.fillStyle = '#60a5fa'; // Голубоватый ледяной оттенок
+            ctx.fillStyle = '#60a5fa'; 
             ctx.fillRect(-this.w/2 - 2, -this.h/2 - 2, this.w + 4, this.h + 4);
             ctx.globalAlpha = 1.0;
         }
@@ -1106,12 +1200,11 @@ class Bullet {
         let col = Math.floor(this.x / TILE_SIZE); let row = Math.floor(this.y / TILE_SIZE);
         if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
             let cell = grid[row][col];
-            // Пули пролетают над водой (WATER)
             if (cell !== EMPTY && cell !== WATER) {
                 this.markForDeletion = true; createExplosion(this.x, this.y, '#ff9900', 10);
                 if (cell === BRICK) { grid[row][col] = EMPTY; sfx.playExplosion(false); }
                 else if (cell === STEEL) { sfx.playArmorHit(); }
-                else if (cell === BASE) { baseAlive = false; createExplosion(this.x, this.y, '#ff0000', 40); sfx.playExplosion(true); levelFailed("БАЗА УНИЧТОЖЕНА!"); return; }
+                else if (cell === BASE) { baseAlive = false; createExplosion(this.x, this.y, '#ff0000', 40); sfx.playExplosion(true); levelFailed(t('baseDestroyed')); return; }
                 else if (cell === SUBSTATION && this.isPlayer) {
                     grid[row][col] = EMPTY; substationAlive = false;
                     createExplosion(this.x, this.y, '#0ea5e9', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
@@ -1282,7 +1375,7 @@ function winLevel() {
     level++;
     if (lives < 3) lives = 3; document.getElementById('livesUI').innerText = lives;
     let transitionText = document.getElementById('transitionText');
-    transitionText.innerHTML = `УРОВЕНЬ ПРОЙДЕН!<br><br><span class="text-white text-xl">ПРИГОТОВЬТЕСЬ К УРОВНЮ ${level}</span>`;
+    transitionText.innerHTML = t('levelCleared', {n: level});
     document.getElementById('transitionScreen').classList.remove('hidden');
     setTimeout(() => { initLevel(false); }, 3500); 
 }
@@ -1296,7 +1389,7 @@ function levelFailed(reason) {
             continues--; document.getElementById('continuesUI').innerText = continues;
             gameState = 'LEVEL_TRANSITION';
             let transitionText = document.getElementById('transitionText');
-            transitionText.innerHTML = `${reason}<br><br><span class="text-white text-xl">ОСТАЛОСЬ ПОПЫТОК: ${continues}</span>`;
+            transitionText.innerHTML = reason + t('attemptsLeft', {n: continues});
             document.getElementById('transitionScreen').classList.remove('hidden');
             setTimeout(() => { lives = 3; document.getElementById('livesUI').innerText = lives; initLevel(true); }, 3500);
         } else gameOver();
@@ -1308,7 +1401,7 @@ function playerDeath() {
     player.markForDeletion = true; lives--; document.getElementById('livesUI').innerText = lives;
     playerWeaponLevel = 0; 
     
-    if (lives <= 0) levelFailed("ТАНКИ КОНЧИЛИСЬ!");
+    if (lives <= 0) levelFailed(t('outOfTanks'));
     else setTimeout(() => { 
         if(gameState === 'PLAYING') {
             if (levelType === 'CLASSIC') player = new Tank(4, 14, true);
@@ -1427,7 +1520,7 @@ function update(dt) {
             if (camera.y < 0) camera.y = 0; if (camera.y > ROWS * TILE_SIZE - canvas.height) camera.y = ROWS * TILE_SIZE - canvas.height;
         } else if (levelType === 'CLASSIC') {
             camera.y = 0;
-        } // У босса камера зафиксирована в initLevel
+        } 
     }
     
     enemies.forEach(e => e.update(dt)); allies.forEach(a => a.update(dt)); turrets.forEach(t => t.update(dt));
@@ -1555,7 +1648,7 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     
     let btn = document.getElementById('exportBtn');
     let old = btn.innerText;
-    btn.innerText = 'СКАЧАНО!';
+    btn.innerText = t('downloaded');
     setTimeout(() => { btn.innerText = old; }, 2000);
 });
 
@@ -1588,7 +1681,7 @@ const handleFileLoad = (event) => {
                 lastTime = performance.now();
             }
         } catch (err) {
-            alert("Ошибка чтения файла сохранения! Возможно файл поврежден.");
+            alert(t('saveError'));
         }
         event.target.value = ''; 
     };
@@ -1600,13 +1693,8 @@ document.getElementById('fileLoadPause').addEventListener('change', handleFileLo
 
 document.getElementById('muteBtn').addEventListener('click', (e) => {
     sfx.isMuted = !sfx.isMuted;
-    const btn = e.target;
-    if (sfx.isMuted) {
-        btn.innerText = 'ЗВУК: ВЫКЛ'; btn.classList.replace('bg-green-600', 'bg-red-600'); btn.classList.replace('hover:bg-green-500', 'hover:bg-red-500'); btn.classList.replace('border-green-700', 'border-red-700');
-    } else {
-        btn.innerText = 'ЗВУК: ВКЛ'; btn.classList.replace('bg-red-600', 'bg-green-600'); btn.classList.replace('hover:bg-red-500', 'hover:bg-green-500'); btn.classList.replace('border-red-700', 'border-green-700');
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
+    updateStaticUI();
+    if (!sfx.isMuted && audioCtx.state === 'suspended') audioCtx.resume();
 });
 
 // Глобальная обработка тачей для "скольжения" (D-PAD)
@@ -1667,6 +1755,9 @@ setupMouseBtn('btn-left', () => touchDirs.left = true, () => touchDirs.left = fa
 setupMouseBtn('btn-right', () => touchDirs.right = true, () => touchDirs.right = false);
 setupMouseBtn('btn-fire', () => touchFire = true, () => touchFire = false);
 setupMouseBtn('btn-mine', () => touchMine = true, () => touchMine = false);
+
+// Инициализация UI
+updateStaticUI();
 
 </script>
 </body>
