@@ -102,7 +102,7 @@
               scissors: { name: 'Ножницы', desc: 'Уничтожает карту противника' }
             },
             rules: [
-              '<strong>🌲 Карта Леса:</strong> Выбирайте путь. ⚔️ Бой (Разбойники), 🎴 Карта в колоду, 🎒 Предмет. В конце вас ждет 💀 Босс (Тень)!',
+              '<strong>🌲 Карта Леса:</strong> Выбирайте путь. ⚔️ Бой (Разбойники), 🎴 Карта в колоду, 🎒 Предмет. В конце вас ждет 💀 Босс (Тень)! Путь разветвляется.',
               '<strong>🎴 Начало хода:</strong> Возьмите карту из <strong>Колоды</strong> (звери) ИЛИ возьмите <strong>Белку</strong> (бесплатная жертва).',
               '<strong>🩸 Жертвоприношение:</strong> Выберите карту в руке, кликните по жертве на доске, а затем на пустой слот.',
               '<strong>⚖️ Бой:</strong> Карты бьют в слот напротив (или по весам). Раунд завершен, когда одна из сторон перевешивает чашу на 5 урона.',
@@ -204,7 +204,7 @@
               scissors: { name: 'Scissors', desc: 'Destroys an enemy card' }
             },
             rules: [
-              '<strong>🌲 Woodland Map:</strong> Choose path: ⚔️ Battle (Bandits), 🎴 Card, 🎒 Item. At the end is the 💀 Boss (Shadow)!',
+              '<strong>🌲 Woodland Map:</strong> Choose path: ⚔️ Battle (Bandits), 🎴 Card, 🎒 Item. Paths branch out. At the end is the 💀 Boss!',
               '<strong>🎴 Draw Phase:</strong> Draw a card from the <strong>Deck</strong> OR draw a <strong>Squirrel</strong> (free sacrifice).',
               '<strong>🩸 Sacrifice:</strong> Beasts cost blood. Select a card, click creatures to sacrifice, then click an empty slot.',
               '<strong>⚖️ Combat:</strong> Click "Ring". Cards attack straight ahead. Round ends when scales tip by 5 damage.',
@@ -269,32 +269,82 @@
           return deck;
         };
 
+        // --- ГЕНЕРАТОР КАРТЫ СЛУЧАЙНОЙ ДЛИНЫ И ДЕРЕВА ---
+        const getX = (nIndex, total) => total === 1 ? 50 : total === 2 ? (nIndex === 0 ? 35 : 65) : (nIndex === 0 ? 20 : nIndex === 1 ? 50 : 80);
+        const ROW_HEIGHT = 15; // Расстояние между узлами в vh
+
         const generateMap = () => {
           const numRows = Math.floor(Math.random() * 5) + 7; 
           const map = [];
           let nodeId = 0;
-          for (let i = 0; i < numRows - 1; i++) {
-             if (i === 0) {
-                 map.push([{ type: 'BATTLE', id: nodeId++ }]);
-                 continue;
+
+          const getRandomType = () => {
+             const r = Math.random();
+             if (r > 0.65) return 'CARD';
+             if (r > 0.4) return 'ITEM';
+             return 'BATTLE';
+          };
+
+          for (let i = 0; i < numRows; i++) {
+             const isStart = i === 0;
+             const isBoss = i === numRows - 1;
+             let numNodes = 1;
+
+             if (!isStart && !isBoss) {
+                 numNodes = Math.random() > 0.5 ? 2 : (Math.random() > 0.85 ? 3 : 1);
              }
-             
-             const numNodes = Math.random() > 0.6 ? 2 : 1;
+
              const row = [];
              for (let j = 0; j < numNodes; j++) {
-                 const rand = Math.random();
-                 let type = 'BATTLE';
-                 if (rand > 0.7) type = 'CARD';
-                 else if (rand > 0.5) type = 'ITEM';
-                 
-                 if (j === 1 && row[0].type === type) {
+                 let type = isStart ? 'BATTLE' : (isBoss ? 'BOSS' : getRandomType());
+                 if (j > 0 && row.some(n => n.type === type)) {
                      type = type === 'BATTLE' ? 'CARD' : 'BATTLE';
                  }
-                 row.push({ type, id: nodeId++ });
+                 row.push({ type, id: nodeId++, children: [], col: j });
              }
              map.push(row);
           }
-          map.push([{ type: 'BOSS', id: nodeId++ }]);
+
+          // Построение связей
+          for (let i = 0; i < numRows - 1; i++) {
+              const currRow = map[i];
+              const nextRow = map[i+1];
+
+              if (currRow.length === 1 && nextRow.length === 1) {
+                  currRow[0].children.push(0);
+              } else if (currRow.length === 1 && nextRow.length === 2) {
+                  currRow[0].children.push(0, 1);
+              } else if (currRow.length === 1 && nextRow.length === 3) {
+                  currRow[0].children.push(0, 1, 2);
+              } else if (currRow.length === 2 && nextRow.length === 1) {
+                  currRow[0].children.push(0);
+                  currRow[1].children.push(0);
+              } else if (currRow.length === 2 && nextRow.length === 2) {
+                  currRow[0].children.push(0);
+                  currRow[1].children.push(1);
+                  if (Math.random() > 0.6) currRow[0].children.push(1);
+                  if (Math.random() > 0.6) currRow[1].children.push(0);
+              } else if (currRow.length === 2 && nextRow.length === 3) {
+                  currRow[0].children.push(0, 1);
+                  currRow[1].children.push(1, 2);
+              } else if (currRow.length === 3 && nextRow.length === 1) {
+                  currRow[0].children.push(0);
+                  currRow[1].children.push(0);
+                  currRow[2].children.push(0);
+              } else if (currRow.length === 3 && nextRow.length === 2) {
+                  currRow[0].children.push(0);
+                  currRow[1].children.push(0, 1);
+                  currRow[2].children.push(1);
+              } else if (currRow.length === 3 && nextRow.length === 3) {
+                  currRow[0].children.push(0);
+                  currRow[1].children.push(1);
+                  currRow[2].children.push(2);
+                  if (Math.random() > 0.5) currRow[0].children.push(1);
+                  if (Math.random() > 0.5) currRow[1].children.push(0);
+                  if (Math.random() > 0.5) currRow[1].children.push(2);
+                  if (Math.random() > 0.5) currRow[2].children.push(1);
+              }
+          }
           return map;
         };
 
@@ -419,6 +469,7 @@
                 if (parsed.isSoundEnabled === undefined) parsed.isSoundEnabled = true;
                 if (!parsed.mapData) parsed.mapData = generateMap();
                 if (parsed.mapRow === undefined) parsed.mapRow = 0;
+                if (!parsed.mapPath) parsed.mapPath = [];
                 if (!parsed.masterDeck) parsed.masterDeck = generateStartingDeck();
                 return parsed;
               }
@@ -437,6 +488,7 @@
               masterDeck: generateStartingDeck(),
               mapData: generateMap(),
               mapRow: 0,
+              mapPath: [], 
               deck: [],
               playerHand: [],
               playerBoard: [null, null, null, null],
@@ -459,6 +511,7 @@
           const [masterDeck, setMasterDeck] = useState(initialData.masterDeck);
           const [mapData, setMapData] = useState(initialData.mapData);
           const [mapRow, setMapRow] = useState(initialData.mapRow);
+          const [mapPath, setMapPath] = useState(initialData.mapPath);
 
           const [deck, setDeck] = useState(initialData.deck);
           const [playerHand, setPlayerHand] = useState(initialData.playerHand);
@@ -486,7 +539,6 @@
           const eyesContainerRef = useRef(null);
           const leftPupilRef = useRef(null);
           const rightPupilRef = useRef(null);
-          const mapEndRef = useRef(null);
 
           const toggleLang = () => {
              const newLang = lang === 'ru' ? 'en' : 'ru';
@@ -501,12 +553,6 @@
             if(reactionTimeout.current) clearTimeout(reactionTimeout.current);
             reactionTimeout.current = setTimeout(() => setEyeReaction(false), 400);
           };
-
-          useEffect(() => {
-             if ((phase === 'map' || phase === 'map_card_choice') && mapEndRef.current) {
-                 mapEndRef.current.scrollIntoView({ behavior: 'smooth' });
-             }
-          }, [mapRow, phase]);
 
           useEffect(() => {
             let idleTimeout;
@@ -591,7 +637,7 @@
           const handleManualSave = () => {
             const stateToSave = {
               phase, message, scale, items, deck, playerHand, playerBoard, opponentBoard, opponentQueue,
-              playerLives, enemyLives, enemyItems, isSoundEnabled, masterDeck, mapData, mapRow, isBoss
+              playerLives, enemyLives, enemyItems, isSoundEnabled, masterDeck, mapData, mapRow, mapPath, isBoss
             };
             localStorage.setItem('inscryption_save', JSON.stringify(stateToSave));
             setMessage(t.msgSaved);
@@ -618,6 +664,7 @@
                 setMasterDeck(parsed.masterDeck || generateStartingDeck());
                 setMapData(parsed.mapData || generateMap());
                 setMapRow(parsed.mapRow || 0);
+                setMapPath(parsed.mapPath || []);
                 setDeck(parsed.deck || []);
                 setPlayerHand(parsed.playerHand || []);
                 setPlayerBoard(parsed.playerBoard || [null, null, null, null]);
@@ -640,9 +687,14 @@
             }
           };
 
-          const startNode = (node) => {
+          // --- ЛОГИКА КАРТЫ ---
+          const startNode = (node, rIndex, nIndex) => {
             playSound('card_heavy', isSoundEnabled);
             triggerEyeReaction();
+
+            const newPath = [...mapPath];
+            newPath[rIndex] = nIndex;
+            setMapPath(newPath);
             
             if (node.type === 'BATTLE' || node.type === 'BOSS') {
                 const bossMode = node.type === 'BOSS';
@@ -1206,6 +1258,7 @@
           const restartGame = () => {
             setMasterDeck(generateStartingDeck());
             setMapData(generateMap());
+            setMapPath([]);
             setMapRow(0);
             setDeck([]);
             setPlayerHand([]);
@@ -1239,7 +1292,7 @@
             </div>
           );
 
-          // Адаптивная карта на чистых min(vw, vh) пропорциях
+          // Возвращен полностью адаптивный размер (никаких sm: классов ломающих адаптив)
           const Card = ({ card, onClick, isSelected, isSacrifice, isAttacking, isHidden }) => {
             const cardBaseClass = "w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded-[0.5vh] border-[1.5px] border-[#111] shrink-0";
             
@@ -1257,12 +1310,12 @@
               <div 
                 onClick={onClick}
                 className={`${cardBaseClass} flex flex-col justify-between p-[min(0.4vw,0.3vh)] shadow-lg transition-all duration-300 select-none cursor-pointer relative overflow-hidden
-                  ${isSelected ? 'border-yellow-500 scale-105 shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-pulse' : 'border-[#111] hover:border-[#4a4231]'}
-                  ${isSacrifice ? 'border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.6)] animate-pulse' : ''}
+                  ${isSelected ? 'border-yellow-500 scale-105 shadow-[0_0_15px_rgba(234,179,8,0.6)] anim-node-pulse' : 'border-[#111] hover:border-[#4a4231]'}
+                  ${isSacrifice ? 'border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.6)] anim-node-pulse' : ''}
                   ${isAttacking ? 'scale-110 z-10 border-red-500 shadow-red-500/50' : ''}
                   ${card?.isPunished ? 'anim-punish' : (card?.isDying ? 'anim-die' : '')}
                   ${activeItem?.type === 'scissors' && !isSelected && !isHidden ? 'hover:border-blue-500 hover:shadow-blue-900/50 cursor-crosshair' : ''}
-                  bg-[#e6d8ba] text-[#2c241b]
+                  bg-[#e6d8ba] text-[#2c241b] z-10
                 `}
                 style={{
                    backgroundImage: `url("https://www.transparenttextures.com/patterns/old-paper.png")`,
@@ -1310,6 +1363,9 @@
             );
           };
 
+          // MAP_TOTAL_HEIGHT рассчитывается для плавной прокрутки
+          const MAP_TOTAL_HEIGHT = mapData.length * ROW_HEIGHT + 40;
+
           return (
             <div className="h-[100dvh] w-full bg-[#14120f] text-[#d4c3a3] font-mono flex flex-col items-center justify-between selection:bg-red-900 overflow-hidden relative touch-manipulation overscroll-none"
                  style={{ backgroundImage: `radial-gradient(circle at center, #26211a 0%, #0a0907 100%)`, WebkitTapHighlightColor: 'transparent' }}>
@@ -1329,18 +1385,36 @@
                   100% { filter: drop-shadow(0 0 0px red) brightness(0); transform: scale(0.5) translateY(40px); opacity: 0; }
                 }
 
-                @keyframes emergeFog {
-                  0% { opacity: 0; transform: translateY(40px) scale(0.8); filter: blur(10px); }
-                  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                @keyframes fadeIn {
+                  0% { opacity: 0; filter: blur(3px); }
+                  100% { opacity: 0.4; filter: blur(0); }
+                }
+
+                @keyframes nodePulse {
+                  0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(234,179,8,0.4); }
+                  50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(234,179,8,1); }
+                }
+
+                @keyframes bossPulse {
+                  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(220,38,38,0.6); }
+                  50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(220,38,38,1); }
+                }
+                
+                @keyframes pulseLine {
+                  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 4px rgba(234,179,8,0.4)); }
+                  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(234,179,8,1)); }
                 }
 
                 .anim-shake { animation: shakeScale 0.2s ease-in-out 2; }
                 .anim-shake-vertical { animation: shakeScaleVertical 0.2s ease-in-out 2; }
                 .anim-die { animation: die 0.5s ease-in forwards; }
-                .anim-punish { animation: punish 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 50; }
+                .anim-punish { animation: punish 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 60; }
                 .anim-bell { animation: bellRing 0.5s ease-in-out; }
                 .anim-eyes { animation: blink 8s infinite; }
-                .anim-emerge { animation: emergeFog 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+                .anim-fade-in { animation: fadeIn 1.2s ease-out forwards; }
+                .anim-node-pulse { animation: nodePulse 2s infinite; }
+                .anim-boss-pulse { animation: bossPulse 2s infinite; }
+                .anim-pulse-line { animation: pulseLine 2s infinite; }
                 
                 .hide-scrollbar::-webkit-scrollbar { display: none; }
                 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -1407,46 +1481,152 @@
 
               {/* ОСНОВНОЙ КОНТЕНТ (КАРТА ИЛИ ПОЛЕ БОЯ) */}
               {phase === 'map' || phase === 'map_card_choice' ? (
-                <div className="flex-1 flex flex-col items-center justify-start w-full max-w-2xl z-10 px-[min(3vw,2vh)] py-[min(4vw,2.5vh)] relative bg-[#1a1612] border-y border-[#3a3022] shadow-[inset_0_0_50px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar">
-                   <h2 className="text-[min(6vw,4vh)] font-black text-[#8c7a61] mb-[min(2vw,1vh)] tracking-widest mt-[min(2vw,1vh)]">{t.mapTitle}</h2>
-                   <div className="text-[#6e5d4a] text-[min(3vw,1.5vh)] mb-[min(5vw,3vh)] animate-pulse text-center">{t.mapUnknown}</div>
+                <div className="flex-1 flex flex-col w-full max-w-2xl z-10 relative bg-[#1a1612] border-y border-[#3a3022] shadow-[inset_0_0_50px_rgba(0,0,0,0.8)] overflow-hidden mt-[min(1vw,1vh)]">
                    
-                   <div className="flex flex-col-reverse gap-[min(8vw,6vh)] relative w-full items-center pb-[min(5vw,3vh)] pt-[min(8vw,5vh)] mt-auto">
-                      <div ref={mapEndRef} className="absolute top-0 w-full h-1"></div>
-                      <div className="absolute top-0 left-0 right-0 h-[min(20vw,12vh)] bg-gradient-to-b from-[#1a1612] via-[#1a1612]/90 to-transparent z-20 pointer-events-none"></div>
-                      <div className="absolute top-[min(5vw,3vh)] bottom-0 w-1 bg-gradient-to-t from-[#3a3022] to-transparent left-1/2 -translate-x-1/2 z-0 opacity-50"></div>
-                      
-                      {mapData.slice(0, mapRow + 1).map((row, rIndex) => {
-                         const isCurrentRow = rIndex === mapRow;
-                         const isPassed = rIndex < mapRow;
-                         return (
-                            <div key={rIndex} className={`flex gap-[min(12vw,8vh)] relative z-10 ${isCurrentRow ? 'anim-emerge' : ''}`}>
-                               {row.map((node, nIndex) => (
-                                  <button
-                                     key={nIndex}
-                                     onClick={() => isCurrentRow && startNode(node)}
-                                     title={node.type}
-                                     className={`w-[min(12vw,9vh)] h-[min(12vw,9vh)] rounded-full border-[min(0.5vw,0.3vh)] flex items-center justify-center text-[min(6vw,4vh)] transition-all shadow-lg
-                                        ${isCurrentRow ? 'border-yellow-500 bg-[#2a241c] hover:scale-110 cursor-pointer animate-pulse shadow-[0_0_20px_rgba(234,179,8,0.5)]' : ''}
-                                        ${isPassed ? 'border-[#4a3f31] bg-[#110e0c] opacity-30 cursor-default' : ''}
-                                        ${node.type === 'BOSS' && isCurrentRow ? 'w-[min(16vw,12vh)] h-[min(16vw,12vh)] border-red-900 bg-red-950/50 text-[min(8vw,6vh)] shadow-[0_0_30px_rgba(220,38,38,0.6)]' : ''}
-                                     `}
-                                  >
-                                     {NODE_ICONS[node.type]}
-                                  </button>
-                               ))}
-                            </div>
-                         );
-                      })}
+                   {/* Фиксированный заголовок карты с туманом поверх скролла */}
+                   <div className="absolute top-0 inset-x-0 z-40 bg-gradient-to-b from-[#1a1612] via-[#1a1612]/95 to-transparent pt-[min(4vw,2.5vh)] pb-[min(10vw,6vh)] text-center pointer-events-none">
+                      <h2 className="text-[min(6vw,4vh)] font-black text-[#8c7a61] tracking-widest">{t.mapTitle}</h2>
+                      <div className="text-[#6e5d4a] text-[min(3vw,1.5vh)] animate-pulse mt-[min(1vw,0.5vh)]">{t.mapUnknown}</div>
+                   </div>
+                   
+                   <div className="w-full h-full relative overflow-hidden">
+                       <div 
+                           className="absolute bottom-0 w-full transition-transform duration-1000 ease-in-out" 
+                           style={{ 
+                               height: `${MAP_TOTAL_HEIGHT}vh`,
+                               transform: `translateY(${mapRow * ROW_HEIGHT}vh)`
+                           }}
+                       >
+                          {/* SVG Линии путей */}
+                          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                             <line x1="50%" y1="100%" x2="50%" y2={`${100 - (20 / MAP_TOTAL_HEIGHT * 100)}%`} 
+                                   stroke={mapRow === 0 ? "#ca8a04" : "#a16207"} 
+                                   strokeWidth={mapRow === 0 ? "5" : "6"} 
+                                   className={mapRow === 0 ? "anim-pulse-line transition-all duration-1000" : "opacity-100 transition-all duration-1000"} 
+                                   strokeLinecap="round" />
+                             
+                             {mapData.map((row, rIndex) => {
+                                 if (rIndex > mapRow) return null; 
+                                 if (rIndex === mapData.length - 1) return null;
+
+                                 return row.map((node, nIndex) => {
+                                     return node.children.map((childCol) => {
+                                         const nextRow = mapData[rIndex + 1];
+                                         const isNextBoss = nextRow[childCol].type === 'BOSS';
+                                         
+                                         const y1_vh = rIndex * ROW_HEIGHT + 20 + 4.5;
+                                         const y2_vh = (rIndex + 1) * ROW_HEIGHT + 20 + (isNextBoss ? 6 : 4.5);
+                                         
+                                         const y1 = 100 - (y1_vh / MAP_TOTAL_HEIGHT * 100);
+                                         const y2 = 100 - (y2_vh / MAP_TOTAL_HEIGHT * 100);
+                                         
+                                         const x1 = getX(nIndex, row.length);
+                                         const x2 = getX(childCol, nextRow.length);
+
+                                         let isTaken = false;
+                                         let isActivePath = false;
+                                         let isFuturePath = false;
+
+                                         if (rIndex < mapRow - 1) {
+                                             if (mapPath[rIndex] === nIndex && mapPath[rIndex+1] === childCol) isTaken = true;
+                                         } else if (rIndex === mapRow - 1) {
+                                             if (mapPath[rIndex] === nIndex && node.children.includes(childCol)) isActivePath = true;
+                                         } else if (rIndex === mapRow) {
+                                             const isReachable = mapRow === 0 ? (nIndex === 0) : mapData[mapRow - 1][mapPath[mapRow - 1]]?.children.includes(nIndex);
+                                             if (isReachable && node.children.includes(childCol)) isFuturePath = true;
+                                         }
+
+                                         if (!isTaken && !isActivePath && !isFuturePath) return null;
+
+                                         let lineClass = "";
+                                         let strokeColor = "#8c7a61";
+                                         let strokeWidth = "3";
+
+                                         if (isTaken) {
+                                             strokeColor = "#a16207";
+                                             strokeWidth = "6";
+                                             lineClass = "opacity-100";
+                                         } else if (isActivePath) {
+                                             strokeColor = "#ca8a04";
+                                             strokeWidth = "5";
+                                             lineClass = "anim-pulse-line";
+                                         } else if (isFuturePath) {
+                                             lineClass = "opacity-40 anim-fade-in";
+                                         }
+
+                                         return (
+                                             <line
+                                                 key={`${rIndex}-${nIndex}-${childCol}`}
+                                                 x1={`${x1}%`} y1={`${y1}%`} x2={`${x2}%`} y2={`${y2}%`}
+                                                 stroke={strokeColor}
+                                                 strokeWidth={strokeWidth}
+                                                 className={`transition-all duration-1000 ${lineClass}`}
+                                                 strokeLinecap="round"
+                                             />
+                                         );
+                                     });
+                                 });
+                             })}
+                          </svg>
+
+                          {/* Узлы (Кнопки) */}
+                          {mapData.map((row, rIndex) => {
+                             const isCurrentRow = rIndex === mapRow;
+                             const isPassedRow = rIndex < mapRow;
+                             const isFutureRow = rIndex === mapRow + 1;
+
+                             if (rIndex > mapRow + 1) return null;
+
+                             return row.map((node, nIndex) => {
+                                let state = 'hidden';
+                                
+                                if (isPassedRow) {
+                                    if (mapPath[rIndex] === nIndex) state = 'passed';
+                                } else if (isCurrentRow) {
+                                    const isReachable = mapRow === 0 ? (nIndex === 0) : mapData[mapRow - 1][mapPath[mapRow - 1]]?.children.includes(nIndex);
+                                    if (isReachable) state = 'active';
+                                } else if (isFutureRow) {
+                                    const isReachable = mapData[mapRow].some((pNode, pIndex) => {
+                                        const parentReachable = mapRow === 0 ? (pIndex === 0) : mapData[mapRow - 1][mapPath[mapRow - 1]]?.children.includes(pIndex);
+                                        return parentReachable && pNode.children.includes(nIndex);
+                                    });
+                                    if (isReachable) state = 'future';
+                                }
+
+                                if (state === 'hidden') return null;
+
+                                return (
+                                    <div key={node.id} 
+                                         className={`absolute flex justify-center items-center transition-all duration-1000 ${state === 'active' ? 'z-20' : 'z-10'}`}
+                                         style={{
+                                             bottom: `${rIndex * ROW_HEIGHT + 20}vh`,
+                                             left: `${getX(nIndex, row.length)}%`,
+                                             transform: 'translateX(-50%)'
+                                         }}>
+                                        <button
+                                           onClick={() => state === 'active' && startNode(node, rIndex, nIndex)}
+                                           disabled={state !== 'active'}
+                                           title={node.type}
+                                           className={`rounded-full border-[0.4vh] flex items-center justify-center transition-all duration-300
+                                              ${node.type === 'BOSS' ? 'w-[12vh] h-[12vh] text-[6vh]' : 'w-[9vh] h-[9vh] text-[4vh]'}
+                                              ${state === 'active' ? (node.type === 'BOSS' ? 'border-red-500 bg-red-950/80 anim-boss-pulse cursor-pointer' : 'border-yellow-500 bg-[#2a241c] anim-node-pulse cursor-pointer') : ''}
+                                              ${state === 'passed' ? 'border-[#a16207] bg-[#1a1612] opacity-60 cursor-default shadow-none scale-90' : ''}
+                                              ${state === 'future' ? 'border-[#4a3f31] bg-[#110e0c] opacity-40 cursor-not-allowed scale-75' : ''}
+                                           `}
+                                        >
+                                           {NODE_ICONS[node.type]}
+                                        </button>
+                                    </div>
+                                );
+                             });
+                          })}
+                       </div>
                    </div>
                 </div>
               ) : (
                 <React.Fragment>
-                  <div className="text-center w-full mb-[min(1.5vw,1vh)] text-[min(3vw,1.4vh)] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0">
-                    {message}
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-evenly items-center w-full max-w-4xl perspective-1000 z-10 px-1 min-h-0 shrink py-[min(1vw,1vh)] relative">
+                  {/* ИГРОВОЕ ПОЛЕ */}
+                  <div className="flex-1 flex flex-col justify-center items-center gap-[min(2vw,1.5vh)] w-full max-w-4xl perspective-1000 z-10 px-1 py-[min(1vw,1vh)] relative shrink-0">
                     
                     <div className="absolute right-[min(2vw,1vh)] top-1/2 -translate-y-1/2 h-[min(45vw,35vh)] w-[min(8vw,4.5vh)] flex flex-col items-center justify-between bg-[#1a1612] border-2 border-[#3a3022] rounded-full p-[min(1vw,0.5vh)] shadow-[0_0_20px_rgba(0,0,0,0.8)] z-20 pointer-events-none">
                       <div className="text-[min(3.5vw,2vh)] mb-[min(1vw,0.5vh)] opacity-80" title={t.yourAdvantage}>⚖️</div>
@@ -1492,10 +1672,15 @@
 
                   </div>
 
-                  {/* ПАНЕЛЬ ИГРОКА (Адаптивная, без скроллов) */}
+                  {/* ПАНЕЛЬ ИГРОКА */}
                   <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[min(1.5vw,1vh)] pb-[calc(env(safe-area-inset-bottom)+min(1vw,0.5vh))] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-30 shrink-0 mt-auto">
                     
-                    <div className="flex justify-between w-full mb-[min(1.5vw,1vh)] px-[min(1.5vw,1vh)] items-center gap-[min(2vw,1vh)]">
+                    {/* СТРОКА СООБЩЕНИЯ В ПАНЕЛИ ИГРОКА */}
+                    <div className="text-center w-full mb-[min(1.5vw,1vh)] text-[min(3vw,1.4vh)] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0 border-b border-[#2a241c] pb-[min(1vw,0.5vh)]">
+                      {message}
+                    </div>
+
+                    <div className="flex justify-between w-full mb-[min(1vw,0.5vh)] px-[min(1.5vw,1vh)] items-center gap-[min(2vw,1vh)]">
                       
                       {/* ЛЕВАЯ ЧАСТЬ: КОЛОДЫ + КОЛОНКА ПРЕДМЕТОВ */}
                       <div className="flex gap-[min(2vw,1.5vh)] items-center shrink-0">
@@ -1552,7 +1737,7 @@
                         const isSelected = selectedHandCard?.id === card.id;
                         return (
                           <div key={card.id} 
-                               className={`relative transition-all duration-300 ease-out hover:z-40 ${isSelected ? '-translate-y-[min(12vw,8vh)] z-50' : 'hover:-translate-y-[min(5vw,3.5vh)]'}`}
+                               className={`relative transition-all duration-300 ease-out hover:z-40 group ${isSelected ? '-translate-y-[min(12vw,8vh)] z-50' : 'hover:-translate-y-[min(5vw,3.5vh)]'}`}
                                style={{ 
                                    marginLeft: getHandMarginLeft(i, playerHand.length),
                                    zIndex: isSelected ? 50 : i 
