@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Лесная Хижина / Leshy's Cabin</title>
-    <!-- Подключаем Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Подключаем React и ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- Подключаем Babel для компиляции JSX прямо в браузере -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-[#14120f] m-0 p-0 overflow-y-auto overflow-x-hidden touch-manipulation overscroll-none hide-scrollbar">
+<body class="bg-[#14120f] m-0 p-0 overflow-hidden touch-manipulation overscroll-none hide-scrollbar">
     
     <div id="root"></div>
 
@@ -23,7 +20,10 @@
         const DICT = {
           ru: {
             title: 'Лесная Хижина',
-            shadow: 'ТЕНЬ:',
+            shadowTitle: 'ТЕНЬ (БОСС):',
+            banditTitle: 'РАЗБОЙНИК:',
+            shadowName: 'Тень',
+            banditName: 'Разбойник',
             you: 'ВЫ:',
             turn: 'Ход',
             emptyHand: 'Рука пуста',
@@ -39,19 +39,28 @@
             rulesTitle: 'Правила Игры',
             victory: 'ПОБЕДА',
             defeat: 'ВЫ ПОГИБЛИ',
-            victoryDesc: 'Все свечи тени погасли. Вы прошли это испытание.',
+            victoryDesc: 'Тень повержена. Вы прошли карту леса.',
             defeatDesc: 'Последняя свеча потухла. Тьма поглотила вас...',
             restart: 'Начать заново',
             squirrel: 'Белка',
             deck: 'Колода',
             yourAdvantage: 'Ваш перевес',
-            shadowAdvantage: 'Перевес тени',
+            shadowAdvantage: 'Перевес врага',
             sigilAirborne: 'Воздушный (Бьет напрямую)',
             sigilTouchOfDeath: 'Смертельное касание',
             sigilWorthySacrifice: 'Достойная жертва (Кровь: {val})',
             sigilManyLives: 'Много жизней',
             sigilMightyLeap: 'Страж (Блокирует Воздушный)',
             sigilSharpQuills: 'Острые иглы (Урон атакующему)',
+            sigilStinky: 'Вонючий (Снижает урон врага напротив на 1)',
+            sigilUnkillable: 'Бессмертный (Возвращается в руку при смерти)',
+            mapTitle: 'КАРТА ЛЕСА',
+            mapUnknown: 'Путь скрыт туманом...',
+            msgMapChoose: 'Выберите следующий шаг...',
+            msgGotItem: 'Вы нашли полезный предмет!',
+            msgInventoryFull: 'Ваши карманы полны. Предмет оставлен в лесу.',
+            msgChooseDraft: 'Выберите новую карту в колоду:',
+            msgDeckUpdated: 'Карта добавлена в колоду!',
             msgDraw: 'Ваш ход. Возьмите карту.',
             msgSaved: '💾 Игра успешно сохранена!',
             msgContinue: 'Продолжайте игру...',
@@ -63,7 +72,7 @@
             msgScissorsSelect: 'Выберите карту противника, чтобы разрезать её.',
             msgScissorsDone: 'Карта противника разрезана!',
             msgScissorsEmpty: 'Здесь нет карты для разрезания.',
-            msgFoundItem: (icon, name) => `Вы нашли: ${icon} ${name}! Можете тянуть еще раз.`,
+            msgFoundItem: (icon, name) => `Среди белок вы нашли: ${icon} ${name}! Вы можете тянуть еще раз.`,
             msgDeckEmpty: 'Колода пуста! От голода вы получаете 1 урон.',
             msgDeathDarkness: 'Тьма поглотила вас... Свеча гаснет навсегда.',
             msgPlayCreatures: 'Сыграйте существ. Выберите карту в руке.',
@@ -73,19 +82,19 @@
             msgNotEnoughBlood: (need, have) => `Не хватает крови! Нужно ${need}, есть ${have}.`,
             msgBloodReady: 'Крови достаточно! Кликните на пульсирующую жертву.',
             msgCombatStart: 'Начинается бой...',
-            msgShadowLosesCandle: 'Тень теряет свечу.',
+            msgEnemyLosesCandle: (name) => `${name} теряет свечу.`,
             msgYouLoseCandle: 'Вы теряете свечу.',
-            msgFoundLoot: (items) => `Найдено: ${items}. Ваш ход.`,
+            msgBattleWon: 'Бой выигран! Путь свободен.',
             msgNewRound: 'Новый раунд. Возьмите карту.',
-            msgShadowTurn: 'Ход тени...',
-            msgShadowUses: (icon, name) => `Тень применяет: ${icon} ${name}!`,
-            msgShadowCandleOut: 'Свеча тени погасла.\nГРЯДЕТ РАСПЛАТА!',
-            msgCandleOutChoice: 'Свеча погасла...\nВыберите подмогу в руку:',
+            msgEnemyTurn: (name) => `Ход: ${name}...`,
+            msgEnemyUses: (name, icon, item) => `${name} применяет: ${icon} ${item}!`,
+            msgEnemyCandleOut: (name) => `Свеча босса (${name}) погасла.\nГРЯДЕТ РАСПЛАТА!`,
+            msgCandleOutChoice: 'Ваша свеча погасла...\nВыберите подмогу в руку:',
             msgPunishment: 'РАСПЛАТА',
             cards: {
               SQUIRREL: 'Белка', STOAT: 'Горностай', FROG: 'Жаба', WOLF: 'Волк', RAVEN: 'Ворон',
               BEAR: 'Гризли', ADDER: 'Гадюка', GOAT: 'Черная Коза', CAT: 'Кошка', URAYULI: 'Ураюли',
-              TURTLE: 'Черепаха', PORCUPINE: 'Дикобраз'
+              TURTLE: 'Черепаха', PORCUPINE: 'Дикобраз', SKUNK: 'Скунс', COCKROACH: 'Таракан', BAT: 'Летучая мышь'
             },
             items: {
               pliers: { name: 'Плоскогубцы', desc: '+1 урон на весы' },
@@ -93,11 +102,11 @@
               scissors: { name: 'Ножницы', desc: 'Уничтожает карту противника' }
             },
             rules: [
-              '<strong>🎴 Начало хода:</strong> Каждый ход начинается с добора. Возьмите карту из <strong>Колоды</strong> (случайный зверь) ИЛИ возьмите <strong>Белку</strong> (бесплатная жертва, не атакует). С небольшим шансом вместе с белкой можно найти предмет!',
-              '<strong>🩸 Жертвоприношение:</strong> Звери требуют крови. Чтобы разыграть карту за 1 каплю, нужно убить 1 свое существо на доске (обычно Белку). Выберите карту в руке, кликните по жертве на доске, а затем на пустой слот.',
-              '<strong>🔔 Бой:</strong> Расставив существ, нажмите кнопку «Ход». Ваши карты и карты тени по очереди бьют в слот напротив. Если врага напротив нет, урон идет напрямую на весы.',
-              '<strong>⚖️ Весы:</strong> Раунд заканчивается, когда одна из сторон наносит на 5 урона больше (полностью перевешивает чашу).',
-              '<strong>🕯️ Свечи и Расплата:</strong> Проигрыш раунда тушит 1 свечу. Если гаснет ваша свеча, вы получаете подмогу (выбор новой карты). Если гаснет свеча тени — она в ярости уничтожает случайные карты на доске! Для победы потушите все 3 свечи врага.',
+              '<strong>🌲 Карта Леса:</strong> Выбирайте путь. ⚔️ Бой (Разбойники), 🎴 Карта в колоду, 🎒 Предмет. В конце вас ждет 💀 Босс (Тень)!',
+              '<strong>🎴 Начало хода:</strong> Возьмите карту из <strong>Колоды</strong> (звери) ИЛИ возьмите <strong>Белку</strong> (бесплатная жертва).',
+              '<strong>🩸 Жертвоприношение:</strong> Выберите карту в руке, кликните по жертве на доске, а затем на пустой слот.',
+              '<strong>⚖️ Бой:</strong> Карты бьют в слот напротив (или по весам). Раунд завершен, когда одна из сторон перевешивает чашу на 5 урона.',
+              '<strong>🕯️ Свечи:</strong> Разбойники имеют 1 свечу. Босс (Тень) — 3 свечи. При потере свечи босс впадает в ярость и стирает ваши карты!',
               '<strong>Сигилы (особые свойства):</strong>'
             ],
             rulesSigils: [
@@ -106,12 +115,17 @@
               '🩸x3 <em>Достойная жертва</em>: Дает сразу 3 крови.',
               '♾️ <em>Много жизней</em>: Не исчезает при жертве.',
               '🛡️ <em>Страж</em>: Блокирует урон от Воздушных карт.',
-              '🌵 <em>Острые иглы</em>: Наносит 1 урон атакующему.'
+              '🌵 <em>Острые иглы</em>: Наносит 1 урон атакующему.',
+              '🤢 <em>Вонючий</em>: Снижает урон карты напротив на 1.',
+              '♻️ <em>Бессмертный</em>: После смерти возвращается в руку.'
             ]
           },
           en: {
             title: 'Leshy\'s Cabin',
-            shadow: 'SHADOW:',
+            shadowTitle: 'SHADOW (BOSS):',
+            banditTitle: 'BANDIT:',
+            shadowName: 'Shadow',
+            banditName: 'Bandit',
             you: 'YOU:',
             turn: 'Ring',
             emptyHand: 'Hand empty',
@@ -127,19 +141,28 @@
             rulesTitle: 'Game Rules',
             victory: 'VICTORY',
             defeat: 'YOU DIED',
-            victoryDesc: 'All shadow candles are out. You survived this trial.',
+            victoryDesc: 'The shadow is defeated. You survived the forest.',
             defeatDesc: 'The last candle went out. Darkness consumed you...',
             restart: 'Restart',
             squirrel: 'Squirrel',
             deck: 'Deck',
             yourAdvantage: 'Your advantage',
-            shadowAdvantage: 'Shadow advantage',
+            shadowAdvantage: 'Enemy advantage',
             sigilAirborne: 'Airborne (Strikes directly)',
             sigilTouchOfDeath: 'Touch of Death',
             sigilWorthySacrifice: 'Worthy Sacrifice (Blood: {val})',
             sigilManyLives: 'Many Lives',
             sigilMightyLeap: 'Mighty Leap (Blocks Airborne)',
             sigilSharpQuills: 'Sharp Quills (Damage attacker)',
+            sigilStinky: 'Stinky (Reduces opposing power by 1)',
+            sigilUnkillable: 'Unkillable (Returns to hand on death)',
+            mapTitle: 'WOODLAND MAP',
+            mapUnknown: 'The path is hidden in fog...',
+            msgMapChoose: 'Choose your next path...',
+            msgGotItem: 'You found a useful item!',
+            msgInventoryFull: 'Pockets are full. Item left behind.',
+            msgChooseDraft: 'Choose a new card for your deck:',
+            msgDeckUpdated: 'Card added to your deck!',
             msgDraw: 'Your turn. Draw a card.',
             msgSaved: '💾 Game successfully saved!',
             msgContinue: 'Continue playing...',
@@ -161,19 +184,19 @@
             msgNotEnoughBlood: (need, have) => `Not enough blood! Need ${need}, have ${have}.`,
             msgBloodReady: 'Enough blood! Click on a pulsating sacrifice.',
             msgCombatStart: 'Combat begins...',
-            msgShadowLosesCandle: 'The shadow loses a candle.',
+            msgEnemyLosesCandle: (name) => `${name} loses a candle.`,
             msgYouLoseCandle: 'You lose a candle.',
-            msgFoundLoot: (items) => `Found: ${items}. Your turn.`,
+            msgBattleWon: 'Battle won! The path is clear.',
             msgNewRound: 'New round. Draw a card.',
-            msgShadowTurn: 'Shadow\'s turn...',
-            msgShadowUses: (icon, name) => `Shadow uses: ${icon} ${name}!`,
-            msgShadowCandleOut: 'Shadow candle went out.\nRETRIBUTION COMES!',
-            msgCandleOutChoice: 'Your candle went out...\nChoose reinforcements:',
+            msgEnemyTurn: (name) => `${name}'s turn...`,
+            msgEnemyUses: (name, icon, item) => `${name} uses: ${icon} ${item}!`,
+            msgEnemyCandleOut: (name) => `Boss candle (${name}) went out.\nRETRIBUTION COMES!`,
+            msgCandleOutChoice: 'Your candle went out...\nChoose immediate reinforcements:',
             msgPunishment: 'RETRIBUTION',
             cards: {
               SQUIRREL: 'Squirrel', STOAT: 'Stoat', FROG: 'Bullfrog', WOLF: 'Wolf', RAVEN: 'Raven',
               BEAR: 'Grizzly', ADDER: 'Adder', GOAT: 'Black Goat', CAT: 'Cat', URAYULI: 'Urayuli',
-              TURTLE: 'River Snapper', PORCUPINE: 'Porcupine'
+              TURTLE: 'River Snapper', PORCUPINE: 'Porcupine', SKUNK: 'Skunk', COCKROACH: 'Cockroach', BAT: 'Bat'
             },
             items: {
               pliers: { name: 'Pliers', desc: '+1 damage to scales' },
@@ -181,11 +204,11 @@
               scissors: { name: 'Scissors', desc: 'Destroys an enemy card' }
             },
             rules: [
-              '<strong>🎴 Draw Phase:</strong> Start your turn by drawing a card. Choose from the <strong>Deck</strong> (beasts) OR draw a <strong>Squirrel</strong> (free sacrifice, 0 power). There is a small chance to find an item with a squirrel!',
-              '<strong>🩸 Sacrifice:</strong> Beasts cost blood. To play a 1-blood beast, sacrifice 1 creature on your board (usually a Squirrel). Select a card in your hand, click the creature to sacrifice, and then an empty slot.',
-              '<strong>🔔 Combat:</strong> When ready, click "Ring". Cards attack the slot directly opposite them. If the opposite slot is empty, damage is dealt directly to the scales.',
-              '<strong>⚖️ Scales:</strong> You win the round if you deal 5 more damage than the opponent, tipping the scales completely.',
-              '<strong>🕯️ Candles & Retribution:</strong> Losing a round extinguishes 1 candle. If your candle dies, you choose a new reinforcement card. If the shadow\'s candle dies, it furiously destroys cards on the board! Extinguish 3 enemy candles to win.',
+              '<strong>🌲 Woodland Map:</strong> Choose path: ⚔️ Battle (Bandits), 🎴 Card, 🎒 Item. At the end is the 💀 Boss (Shadow)!',
+              '<strong>🎴 Draw Phase:</strong> Draw a card from the <strong>Deck</strong> OR draw a <strong>Squirrel</strong> (free sacrifice).',
+              '<strong>🩸 Sacrifice:</strong> Beasts cost blood. Select a card, click creatures to sacrifice, then click an empty slot.',
+              '<strong>⚖️ Combat:</strong> Click "Ring". Cards attack straight ahead. Round ends when scales tip by 5 damage.',
+              '<strong>🕯️ Candles:</strong> Bandits have 1 candle. The Boss has 3. If a boss loses a candle, it furiously destroys cards!',
               '<strong>Sigils (Special Abilities):</strong>'
             ],
             rulesSigils: [
@@ -194,12 +217,13 @@
               '🩸x3 <em>Worthy Sacrifice</em>: Provides 3 blood instead of 1.',
               '♾️ <em>Many Lives</em>: Does not die when sacrificed.',
               '🛡️ <em>Mighty Leap</em>: Blocks damage from Airborne cards.',
-              '🌵 <em>Sharp Quills</em>: Deals 1 damage to the attacker.'
+              '🌵 <em>Sharp Quills</em>: Deals 1 damage to the attacker.',
+              '🤢 <em>Stinky</em>: Reduces opposing card\'s power by 1.',
+              '♻️ <em>Unkillable</em>: Returns to hand after dying.'
             ]
           }
         };
 
-        // --- БАЗА ДАННЫХ КАРТ ---
         const CARD_TYPES = {
           SQUIRREL: { typeId: 'SQUIRREL', cost: 0, power: 0, health: 1, type: 'resource', icon: '🐿️' },
           STOAT: { typeId: 'STOAT', cost: 1, power: 1, health: 2, type: 'beast', icon: '🦦' },
@@ -212,7 +236,10 @@
           CAT: { typeId: 'CAT', cost: 1, power: 1, health: 1, type: 'beast', icon: '🐈', manyLives: true },
           URAYULI: { typeId: 'URAYULI', cost: 4, power: 7, health: 7, type: 'beast', icon: '👹' },
           TURTLE: { typeId: 'TURTLE', cost: 1, power: 0, health: 4, type: 'beast', icon: '🐢', mightyLeap: true },
-          PORCUPINE: { typeId: 'PORCUPINE', cost: 1, power: 1, health: 2, type: 'beast', icon: '🦔', sharpQuills: true }
+          PORCUPINE: { typeId: 'PORCUPINE', cost: 1, power: 1, health: 2, type: 'beast', icon: '🦔', sharpQuills: true },
+          SKUNK: { typeId: 'SKUNK', cost: 1, power: 0, health: 3, type: 'beast', icon: '🦨', stinky: true },
+          COCKROACH: { typeId: 'COCKROACH', cost: 2, power: 1, health: 1, type: 'beast', icon: '🪳', unkillable: true },
+          BAT: { typeId: 'BAT', cost: 2, power: 2, health: 1, type: 'beast', icon: '🦇', airborne: true }
         };
 
         const ITEMS_DB = [
@@ -220,6 +247,8 @@
           { id: 'bottle', icon: '🍾' },
           { id: 'scissors', icon: '✂️' }
         ];
+
+        const NODE_ICONS = { BATTLE: '⚔️', CARD: '🎴', ITEM: '🎒', BOSS: '💀' };
 
         const createCard = (type) => ({ ...type, id: Math.random().toString(36).substr(2, 9) });
 
@@ -232,25 +261,52 @@
           return newArray;
         };
 
-        const generateDeck = () => {
+        const generateStartingDeck = () => {
           const deck = [
             createCard(CARD_TYPES.STOAT), createCard(CARD_TYPES.STOAT),
-            createCard(CARD_TYPES.FROG), createCard(CARD_TYPES.TURTLE),
-            createCard(CARD_TYPES.RAVEN), createCard(CARD_TYPES.WOLF),
-            createCard(CARD_TYPES.WOLF), createCard(CARD_TYPES.ADDER),
-            createCard(CARD_TYPES.BEAR), createCard(CARD_TYPES.GOAT),
-            createCard(CARD_TYPES.CAT), createCard(CARD_TYPES.URAYULI),
-            createCard(CARD_TYPES.PORCUPINE)
+            createCard(CARD_TYPES.FROG), createCard(CARD_TYPES.WOLF)
           ];
-          return shuffleArray(deck);
+          return deck;
         };
 
-        const generateRandomQueue = () => {
+        const generateMap = () => {
+          const numRows = Math.floor(Math.random() * 5) + 7; 
+          const map = [];
+          let nodeId = 0;
+          for (let i = 0; i < numRows - 1; i++) {
+             if (i === 0) {
+                 map.push([{ type: 'BATTLE', id: nodeId++ }]);
+                 continue;
+             }
+             
+             const numNodes = Math.random() > 0.6 ? 2 : 1;
+             const row = [];
+             for (let j = 0; j < numNodes; j++) {
+                 const rand = Math.random();
+                 let type = 'BATTLE';
+                 if (rand > 0.7) type = 'CARD';
+                 else if (rand > 0.5) type = 'ITEM';
+                 
+                 if (j === 1 && row[0].type === type) {
+                     type = type === 'BATTLE' ? 'CARD' : 'BATTLE';
+                 }
+                 row.push({ type, id: nodeId++ });
+             }
+             map.push(row);
+          }
+          map.push([{ type: 'BOSS', id: nodeId++ }]);
+          return map;
+        };
+
+        const generateRandomQueue = (isBoss) => {
           const q = [null, null, null, null];
+          const enemyTypes = isBoss 
+            ? [CARD_TYPES.BEAR, CARD_TYPES.RAVEN, CARD_TYPES.WOLF, CARD_TYPES.ADDER, CARD_TYPES.PORCUPINE, CARD_TYPES.BAT, CARD_TYPES.COCKROACH]
+            : [CARD_TYPES.STOAT, CARD_TYPES.FROG, CARD_TYPES.RAVEN, CARD_TYPES.BAT, CARD_TYPES.TURTLE, CARD_TYPES.SKUNK];
+          
           let hasEnemy = false;
-          const enemyTypes = [CARD_TYPES.STOAT, CARD_TYPES.FROG, CARD_TYPES.RAVEN, CARD_TYPES.WOLF, CARD_TYPES.ADDER, CARD_TYPES.TURTLE, CARD_TYPES.PORCUPINE];
           for(let i=0; i<4; i++) {
-            if(Math.random() > 0.6) {
+            if(Math.random() > (isBoss ? 0.4 : 0.6)) {
               q[i] = createCard(enemyTypes[Math.floor(Math.random() * enemyTypes.length)]);
               hasEnemy = true;
             }
@@ -259,7 +315,6 @@
           return q;
         };
 
-        // Генерация до 3 случайных предметов
         const generateRandomItems = (max = 3) => {
           const count = Math.floor(Math.random() * (max + 1));
           const newItems = [];
@@ -269,7 +324,6 @@
           return newItems;
         };
 
-        // Вспомогательная функция для миграции старых сохранений
         const getTypeId = (card) => {
            if (!card) return null;
            if (card.typeId) return card.typeId;
@@ -353,54 +407,61 @@
         };
 
         function App() {
+          const [lang, setLang] = useState(() => localStorage.getItem('inscryption_lang') || 'ru');
+          const t = DICT[lang];
+
           const [initialData] = useState(() => {
             try {
               const saved = localStorage.getItem('inscryption_save');
               if (saved) {
                 const parsed = JSON.parse(saved);
                 if (parsed.playerLives === undefined) parsed.playerLives = 3;
-                if (parsed.enemyLives === undefined) parsed.enemyLives = 3;
-                if (parsed.enemyItems === undefined) parsed.enemyItems = generateRandomItems(3);
                 if (parsed.isSoundEnabled === undefined) parsed.isSoundEnabled = true;
+                if (!parsed.mapData) parsed.mapData = generateMap();
+                if (parsed.mapRow === undefined) parsed.mapRow = 0;
+                if (!parsed.masterDeck) parsed.masterDeck = generateStartingDeck();
                 return parsed;
               }
             } catch (e) { console.error('Ошибка загрузки сохранения:', e); }
 
-            const d = generateDeck();
             return {
-              phase: 'draw',
-              message: null, // Инициализируем null, чтобы подхватить перевод позже
+              phase: 'map',
+              message: DICT[lang].msgMapChoose,
               scale: 0,
               playerLives: 3,
-              enemyLives: 3,
-              items: generateRandomItems(3),
-              enemyItems: generateRandomItems(3),
+              enemyLives: 1,
+              isBoss: false,
+              items: generateRandomItems(2),
+              enemyItems: generateRandomItems(1),
               isSoundEnabled: true,
-              deck: d,
-              playerHand: [createCard(CARD_TYPES.SQUIRREL), d.pop(), d.pop(), d.pop()],
+              masterDeck: generateStartingDeck(),
+              mapData: generateMap(),
+              mapRow: 0,
+              deck: [],
+              playerHand: [],
               playerBoard: [null, null, null, null],
               opponentBoard: [null, null, null, null],
-              opponentQueue: generateRandomQueue()
+              opponentQueue: [null, null, null, null]
             };
           });
 
-          // Состояние языка
-          const [lang, setLang] = useState(() => localStorage.getItem('inscryption_lang') || 'ru');
-          const t = DICT[lang]; // Текущий словарь
-
           const [phase, setPhase] = useState(initialData.phase);
-          const [message, setMessage] = useState(initialData.message || DICT[lang].msgDraw);
+          const [message, setMessage] = useState(initialData.message);
           const [scale, setScale] = useState(initialData.scale);
           const [playerLives, setPlayerLives] = useState(initialData.playerLives);
           const [enemyLives, setEnemyLives] = useState(initialData.enemyLives);
+          const [isBoss, setIsBoss] = useState(initialData.isBoss || false);
           
           const [items, setItems] = useState(initialData.items);
           const [enemyItems, setEnemyItems] = useState(initialData.enemyItems);
           const [activeItem, setActiveItem] = useState(null);
 
+          const [masterDeck, setMasterDeck] = useState(initialData.masterDeck);
+          const [mapData, setMapData] = useState(initialData.mapData);
+          const [mapRow, setMapRow] = useState(initialData.mapRow);
+
           const [deck, setDeck] = useState(initialData.deck);
           const [playerHand, setPlayerHand] = useState(initialData.playerHand);
-          
           const [playerBoard, setPlayerBoard] = useState(initialData.playerBoard);
           const [opponentBoard, setOpponentBoard] = useState(initialData.opponentBoard);
           const [opponentQueue, setOpponentQueue] = useState(initialData.opponentQueue);
@@ -409,9 +470,9 @@
           const [showRules, setShowRules] = useState(false);
           const [showMenu, setShowMenu] = useState(false);
 
-          // Новые состояния для событий
           const [cardChoices, setCardChoices] = useState(null);
           const [punishment, setPunishment] = useState(null);
+          const [draftCards, setDraftCards] = useState(null);
 
           const [selectedHandCard, setSelectedHandCard] = useState(null);
           const [sacrifices, setSacrifices] = useState([]); 
@@ -425,13 +486,14 @@
           const eyesContainerRef = useRef(null);
           const leftPupilRef = useRef(null);
           const rightPupilRef = useRef(null);
+          const mapEndRef = useRef(null);
 
           const toggleLang = () => {
              const newLang = lang === 'ru' ? 'en' : 'ru';
              setLang(newLang);
              localStorage.setItem('inscryption_lang', newLang);
-             // Сброс базового сообщения при смене языка
-             if (message === DICT[lang].msgDraw) setMessage(DICT[newLang].msgDraw);
+             if (phase === 'map') setMessage(DICT[newLang].msgMapChoose);
+             else if (phase === 'draw') setMessage(DICT[newLang].msgDraw);
           };
 
           const triggerEyeReaction = () => {
@@ -441,23 +503,26 @@
           };
 
           useEffect(() => {
+             if ((phase === 'map' || phase === 'map_card_choice') && mapEndRef.current) {
+                 mapEndRef.current.scrollIntoView({ behavior: 'smooth' });
+             }
+          }, [mapRow, phase]);
+
+          useEffect(() => {
             let idleTimeout;
             let randomLookTimeout;
 
-            // Остановка самостоятельного движения глаз
             const stopIdle = () => {
               clearTimeout(idleTimeout);
               clearTimeout(randomLookTimeout);
             };
 
-            // Функция случайного взгляда
             const lookAround = () => {
               if (!leftPupilRef.current || !rightPupilRef.current) return;
               const isMobile = window.innerWidth < 640;
-              const maxX = isMobile ? 10 : 15;
-              const maxY = isMobile ? 4 : 7;
+              const maxX = isMobile ? 12 : 20;
+              const maxY = isMobile ? 4 : 6;
 
-              // Выбираем случайное направление и расстояние (не дальше 80% от края)
               const angle = Math.random() * Math.PI * 2;
               const distance = Math.random() * 0.8;
 
@@ -469,13 +534,11 @@
               rightPupilRef.current.style.setProperty('--px', `${px}px`);
               rightPupilRef.current.style.setProperty('--py', `${py}px`);
 
-              // Планируем следующий перевод взгляда через 1 - 3 секунды
               randomLookTimeout = setTimeout(lookAround, 1000 + Math.random() * 2000);
             };
 
             const handlePointerMove = (e) => {
-              stopIdle(); // Игрок двигается — прекращаем смотреть по сторонам
-
+              stopIdle();
               if (!eyesContainerRef.current || !leftPupilRef.current || !rightPupilRef.current) return;
 
               let clientX, clientY;
@@ -497,8 +560,8 @@
               const distance = Math.min(Math.hypot(dx, dy) / 300, 1); 
 
               const isMobile = window.innerWidth < 640;
-              const maxX = isMobile ? 10 : 15;
-              const maxY = isMobile ? 4 : 7;
+              const maxX = isMobile ? 12 : 20;
+              const maxY = isMobile ? 4 : 6;
 
               const px = Math.cos(angle) * distance * maxX;
               const py = Math.sin(angle) * distance * maxY;
@@ -508,20 +571,14 @@
               rightPupilRef.current.style.setProperty('--px', `${px}px`);
               rightPupilRef.current.style.setProperty('--py', `${py}px`);
 
-              // Если игрок ничего не делает 3 секунды, глаза снова начнут смотреть по сторонам
-              idleTimeout = setTimeout(() => {
-                lookAround();
-              }, 3000);
+              idleTimeout = setTimeout(lookAround, 3000);
             };
 
             window.addEventListener('mousemove', handlePointerMove);
             window.addEventListener('touchmove', handlePointerMove, { passive: true });
             window.addEventListener('touchstart', handlePointerMove, { passive: true });
 
-            // Запускаем таймер бездействия при старте
-            idleTimeout = setTimeout(() => {
-              lookAround();
-            }, 2000);
+            idleTimeout = setTimeout(lookAround, 2000);
 
             return () => {
               stopIdle();
@@ -534,7 +591,7 @@
           const handleManualSave = () => {
             const stateToSave = {
               phase, message, scale, items, deck, playerHand, playerBoard, opponentBoard, opponentQueue,
-              playerLives, enemyLives, enemyItems, isSoundEnabled
+              playerLives, enemyLives, enemyItems, isSoundEnabled, masterDeck, mapData, mapRow, isBoss
             };
             localStorage.setItem('inscryption_save', JSON.stringify(stateToSave));
             setMessage(t.msgSaved);
@@ -550,13 +607,17 @@
               const saved = localStorage.getItem('inscryption_save');
               if (saved) {
                 const parsed = JSON.parse(saved);
-                setPhase(parsed.phase || 'draw');
+                setPhase(parsed.phase || 'map');
                 setMessage(t.msgLoaded);
                 setScale(parsed.scale || 0);
                 setPlayerLives(parsed.playerLives !== undefined ? parsed.playerLives : 3);
-                setEnemyLives(parsed.enemyLives !== undefined ? parsed.enemyLives : 3);
+                setEnemyLives(parsed.enemyLives !== undefined ? parsed.enemyLives : 1);
+                setIsBoss(parsed.isBoss || false);
                 setItems(parsed.items || []);
                 setEnemyItems(parsed.enemyItems || []);
+                setMasterDeck(parsed.masterDeck || generateStartingDeck());
+                setMapData(parsed.mapData || generateMap());
+                setMapRow(parsed.mapRow || 0);
                 setDeck(parsed.deck || []);
                 setPlayerHand(parsed.playerHand || []);
                 setPlayerBoard(parsed.playerBoard || [null, null, null, null]);
@@ -577,6 +638,62 @@
               setMessage(t.msgLoadError);
               setShowMenu(false);
             }
+          };
+
+          const startNode = (node) => {
+            playSound('card_heavy', isSoundEnabled);
+            triggerEyeReaction();
+            
+            if (node.type === 'BATTLE' || node.type === 'BOSS') {
+                const bossMode = node.type === 'BOSS';
+                setIsBoss(bossMode);
+                setEnemyLives(bossMode ? 3 : 1);
+                setEnemyItems(generateRandomItems(bossMode ? 3 : 1));
+                
+                const newDeck = shuffleArray([...masterDeck]);
+                const initialHand = [createCard(CARD_TYPES.SQUIRREL)];
+                for(let i=0; i<3; i++) {
+                    if(newDeck.length > 0) initialHand.push(newDeck.pop());
+                }
+                
+                setDeck(newDeck);
+                setPlayerHand(initialHand);
+                setPlayerBoard([null, null, null, null]);
+                setOpponentBoard([null, null, null, null]);
+                setOpponentQueue(generateRandomQueue(bossMode));
+                setScale(0);
+                setPhase('draw');
+                setMessage(t.msgDraw);
+            } else if (node.type === 'CARD') {
+                const draftTypes = Object.values(CARD_TYPES).filter(c => c.type !== 'resource');
+                const choices = [];
+                while (choices.length < 3) {
+                    const randomType = draftTypes[Math.floor(Math.random() * draftTypes.length)];
+                    if (!choices.some(c => c.typeId === randomType.typeId)) {
+                        choices.push(createCard(randomType));
+                    }
+                }
+                setDraftCards(choices);
+                setPhase('map_card_choice');
+            } else if (node.type === 'ITEM') {
+                if (items.length < 3) {
+                    const newItem = ITEMS_DB[Math.floor(Math.random() * ITEMS_DB.length)];
+                    setItems([...items, newItem]);
+                    setMessage(t.msgGotItem);
+                } else {
+                    setMessage(t.msgInventoryFull);
+                }
+                setMapRow(r => r + 1);
+            }
+          };
+
+          const handleDraftChoice = (card) => {
+             playSound('card', isSoundEnabled);
+             setMasterDeck([...masterDeck, card]);
+             setDraftCards(null);
+             setMessage(t.msgDeckUpdated);
+             setMapRow(r => r + 1);
+             setPhase('map');
           };
 
           const handleItemClick = (index) => {
@@ -722,7 +839,7 @@
             }
           };
 
-          const handleCardChoice = (selectedCard) => {
+          const handleReinforcementChoice = (selectedCard) => {
             playSound('card', isSoundEnabled);
             setPlayerHand(prev => [...prev, selectedCard]); 
             setCardChoices(null);
@@ -747,66 +864,36 @@
             let currentOppBoard = [...opponentBoard];
             let currentPlayerBoard = [...playerBoard];
             let currentEnemyItems = [...enemyItems];
+            let currentQueue = [...opponentQueue];
+
+            const currentEnemyName = isBoss ? t.shadowName : t.banditName;
 
             const handleRoundEnd = async (winner) => {
               playSound('die', isSoundEnabled);
-              const newEnemyLives = winner === 'player' ? enemyLives - 1 : enemyLives;
-              const newPlayerLives = winner === 'opponent' ? playerLives - 1 : playerLives;
               
               if (winner === 'player') {
-                  setMessage(t.msgShadowLosesCandle);
+                  const newEnemyLives = enemyLives - 1;
                   setEnemyLives(newEnemyLives);
-              } else {
-                  setMessage(t.msgYouLoseCandle);
-                  setPlayerLives(newPlayerLives);
-              }
-              
-              await sleep(2000);
-              
-              if (newEnemyLives <= 0 || newPlayerLives <= 0) {
-                  setPhase('gameover');
-                  setScale(winner === 'player' ? 5 : -5);
-                  return;
-              }
-              
-              setScale(0);
-              currentScale = 0; 
-              
-              let pItems = [...items]; 
-              let eItems = [...currentEnemyItems]; 
-              
-              const numPlayerDrops = Math.floor(Math.random() * 2) + 1; 
-              const numEnemyDrops = Math.floor(Math.random() * 2);      
-              
-              let droppedItemsText = [];
-              for(let i=0; i < numPlayerDrops; i++) {
-                  if (pItems.length < 3) {
-                      const newItem = ITEMS_DB[Math.floor(Math.random() * ITEMS_DB.length)];
-                      pItems.push(newItem);
-                      droppedItemsText.push(t.items[newItem.id].name);
+                  
+                  setMessage(t.msgEnemyLosesCandle(currentEnemyName));
+
+                  await sleep(2000);
+                  
+                  if (newEnemyLives <= 0) {
+                      if (isBoss) {
+                          setPhase('gameover');
+                          setScale(5);
+                      } else {
+                          setMapRow(r => r + 1);
+                          setPhase('map');
+                          setMessage(t.msgMapChoose);
+                      }
+                      return;
                   }
-              }
-              for(let i=0; i < numEnemyDrops; i++) {
-                  if (eItems.length < 3) {
-                      eItems.push(ITEMS_DB[Math.floor(Math.random() * ITEMS_DB.length)]);
-                  }
-              }
-              
-              setItems(pItems);
-              setEnemyItems(eItems);
-              
-              if (winner === 'opponent') {
-                  const draftTypes = Object.values(CARD_TYPES).filter(c => c.type !== 'resource');
-                  const choice1 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
-                  let choice2 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
-                  while(choice1.typeId === choice2.typeId) {
-                       choice2 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
-                  }
-                  setCardChoices([choice1, choice2]);
-                  setPhase('event');
-                  return; 
-              } else if (winner === 'player') {
-                  setPunishment(t.msgShadowCandleOut);
+                  
+                  setScale(0);
+                  currentScale = 0; 
+                  setPunishment(t.msgEnemyCandleOut(currentEnemyName));
                   playSound('bell', isSoundEnabled);
                   await sleep(1200); 
                   setPunishment(null); 
@@ -829,6 +916,9 @@
                           await sleep(800); 
                       }
                       
+                      if (currentPlayerBoard[col] && currentPlayerBoard[col].unkillable) {
+                          setPlayerHand(prev => [...prev, createCard(CARD_TYPES[currentPlayerBoard[col].typeId])]);
+                      }
                       currentPlayerBoard[col] = null;
                       currentOppBoard[col] = null;
                   } else {
@@ -849,77 +939,115 @@
                           await sleep(800);
                       }
 
-                      if (pTarget !== -1) currentPlayerBoard[pTarget] = null;
+                      if (pTarget !== -1) {
+                         if (currentPlayerBoard[pTarget].unkillable) {
+                             setPlayerHand(prev => [...prev, createCard(CARD_TYPES[currentPlayerBoard[pTarget].typeId])]);
+                         }
+                         currentPlayerBoard[pTarget] = null;
+                      }
                       if (oTarget !== -1) currentOppBoard[oTarget] = null;
                   }
 
                   setPlayerBoard([...currentPlayerBoard]);
                   setOpponentBoard([...currentOppBoard]);
                   
-                  if (droppedItemsText.length > 0) {
-                      setMessage(t.msgFoundLoot(droppedItemsText.join(', ')));
-                  } else {
-                      setMessage(t.msgNewRound);
-                  }
+                  setMessage(t.msgNewRound);
                   setPhase('draw');
+              } else {
+                  const newPlayerLives = playerLives - 1;
+                  setMessage(t.msgYouLoseCandle);
+                  setPlayerLives(newPlayerLives);
+
+                  await sleep(2000);
+                  
+                  if (newPlayerLives <= 0) {
+                      setPhase('gameover');
+                      setScale(-5);
+                      return;
+                  }
+
+                  setScale(0);
+                  currentScale = 0;
+
+                  const draftTypes = Object.values(CARD_TYPES).filter(c => c.type !== 'resource');
+                  const choice1 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
+                  let choice2 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
+                  while(choice1.typeId === choice2.typeId) {
+                       choice2 = createCard(draftTypes[Math.floor(Math.random() * draftTypes.length)]);
+                  }
+                  setCardChoices([choice1, choice2]);
+                  setPhase('event');
               }
             };
 
             for (let i = 0; i < 4; i++) {
               const pCard = currentPlayerBoard[i];
               if (pCard && pCard.power > 0) {
-                setAttackingSlot({ side: 'player', index: i });
-                await sleep(400);
-                playSound('hit', isSoundEnabled);
-
+                let effPower = pCard.power;
                 const oCard = currentOppBoard[i];
-                if (oCard && (!pCard.airborne || oCard.mightyLeap)) {
-                  oCard.health -= pCard.power;
-                  if (pCard.touchOfDeath) oCard.health = 0; 
-                  
-                  let pDied = false;
-                  if (oCard.sharpQuills) {
-                    pCard.health -= 1;
-                    if (pCard.health <= 0) pDied = true;
-                  }
-                  
-                  if (oCard.health <= 0) {
-                    currentOppBoard[i] = { ...oCard, isDying: true };
-                  }
-                  if (pDied) {
-                    currentPlayerBoard[i] = { ...pCard, isDying: true };
-                  }
+                if (oCard && oCard.stinky) effPower = Math.max(0, effPower - 1);
 
-                  if (oCard.health <= 0 || pDied) playSound('die', isSoundEnabled);
-                  
-                  setOpponentBoard([...currentOppBoard]);
-                  setPlayerBoard([...currentPlayerBoard]);
+                if (effPower > 0) {
+                    setAttackingSlot({ side: 'player', index: i });
+                    await sleep(400);
+                    playSound('hit', isSoundEnabled);
 
-                  if (oCard.health <= 0 || pDied) {
-                    await sleep(400); 
-                    if (oCard.health <= 0) currentOppBoard[i] = null; 
-                    if (pDied) currentPlayerBoard[i] = null; 
-                  }
-                } else {
-                  currentScale += pCard.power; 
-                  setShakeScale(true);
-                  setTimeout(() => setShakeScale(false), 300);
-                }
-                
-                setOpponentBoard([...currentOppBoard]);
-                setPlayerBoard([...currentPlayerBoard]);
-                setScale(currentScale);
-                setAttackingSlot(null);
-                await sleep(200);
+                    if (oCard && (!pCard.airborne || oCard.mightyLeap)) {
+                      oCard.health -= effPower;
+                      if (pCard.touchOfDeath) oCard.health = 0; 
+                      
+                      let pDied = false;
+                      if (oCard.sharpQuills) {
+                        pCard.health -= 1;
+                        if (pCard.health <= 0) pDied = true;
+                      }
+                      
+                      if (oCard.health <= 0) {
+                        currentOppBoard[i] = { ...oCard, isDying: true };
+                        if (oCard.unkillable) {
+                             for(let qi=0; qi<4; qi++) {
+                                 if(!currentQueue[qi]) { currentQueue[qi] = createCard(CARD_TYPES[oCard.typeId]); break; }
+                             }
+                        }
+                      }
+                      if (pDied) {
+                        currentPlayerBoard[i] = { ...pCard, isDying: true };
+                      }
 
-                if (currentScale >= 5) {
-                  await handleRoundEnd('player');
-                  return; 
+                      if (oCard.health <= 0 || pDied) playSound('die', isSoundEnabled);
+                      
+                      setOpponentBoard([...currentOppBoard]);
+                      setPlayerBoard([...currentPlayerBoard]);
+
+                      if (oCard.health <= 0 || pDied) {
+                        await sleep(400); 
+                        if (oCard.health <= 0) currentOppBoard[i] = null; 
+                        if (pDied) {
+                             currentPlayerBoard[i] = null; 
+                             if (pCard.unkillable) setPlayerHand(prev => [...prev, createCard(CARD_TYPES[pCard.typeId])]);
+                        }
+                      }
+                    } else {
+                      currentScale += effPower; 
+                      setShakeScale(true);
+                      setTimeout(() => setShakeScale(false), 300);
+                    }
+                    
+                    setOpponentBoard([...currentOppBoard]);
+                    setPlayerBoard([...currentPlayerBoard]);
+                    setScale(currentScale);
+                    setAttackingSlot(null);
+                    await sleep(200);
+
+                    if (currentScale >= 5) {
+                      await handleRoundEnd('player');
+                      return; 
+                    }
                 }
               }
             }
 
-            setMessage(t.msgShadowTurn);
+            setMessage(t.msgEnemyTurn(currentEnemyName));
             triggerEyeReaction();
             await sleep(600);
 
@@ -934,7 +1062,7 @@
                 if (item.id === 'bottle' && currentOppBoard.includes(null)) wantToUse = true;
 
                 if (wantToUse && itemsUsedThisTurn < 2) { 
-                    setMessage(t.msgShadowUses(item.icon, t.items[item.id].name));
+                    setMessage(t.msgEnemyUses(currentEnemyName, item.icon, t.items[item.id].name));
                     playSound('card', isSoundEnabled);
                     triggerEyeReaction();
                     itemsUsedThisTurn++;
@@ -944,10 +1072,12 @@
                         playSound('sacrifice', isSoundEnabled);
                         let bestIdx = currentPlayerBoard.findIndex(c => c && c.power >= 1);
                         if (bestIdx !== -1) {
-                            currentPlayerBoard[bestIdx] = { ...currentPlayerBoard[bestIdx], isDying: true };
+                            const scissoredCard = currentPlayerBoard[bestIdx];
+                            currentPlayerBoard[bestIdx] = { ...scissoredCard, isDying: true };
                             setPlayerBoard([...currentPlayerBoard]);
                             await sleep(400);
                             currentPlayerBoard[bestIdx] = null;
+                            if (scissoredCard.unkillable) setPlayerHand(prev => [...prev, createCard(CARD_TYPES[scissoredCard.typeId])]);
                             setPlayerBoard([...currentPlayerBoard]);
                         }
                     } else if (item.id === 'pliers') {
@@ -978,105 +1108,120 @@
                 setEnemyItems(currentEnemyItems);
             }
 
-            let newQueue = [...opponentQueue];
             let dropped = false;
             for (let i = 0; i < 4; i++) {
-              if (!currentOppBoard[i] && newQueue[i]) {
-                currentOppBoard[i] = newQueue[i];
-                newQueue[i] = null;
+              if (!currentOppBoard[i] && currentQueue[i]) {
+                currentOppBoard[i] = currentQueue[i];
+                currentQueue[i] = null;
                 dropped = true;
               }
             }
             if(dropped) playSound('card_heavy', isSoundEnabled);
             setOpponentBoard([...currentOppBoard]);
-            setOpponentQueue([...newQueue]);
+            setOpponentQueue([...currentQueue]);
             await sleep(600);
 
             for (let i = 0; i < 4; i++) {
               const oCard = currentOppBoard[i];
               if (oCard && oCard.power > 0) {
-                setAttackingSlot({ side: 'opponent', index: i });
-                await sleep(400);
-                playSound('hit', isSoundEnabled);
-
+                let effPower = oCard.power;
                 const pCard = currentPlayerBoard[i];
-                if (pCard && (!oCard.airborne || pCard.mightyLeap)) {
-                  pCard.health -= oCard.power;
-                  if (oCard.touchOfDeath) pCard.health = 0; 
-                  
-                  let oDied = false;
-                  if (pCard.sharpQuills) {
-                    oCard.health -= 1;
-                    if (oCard.health <= 0) oDied = true;
-                  }
-                  
-                  if (pCard.health <= 0) {
-                    currentPlayerBoard[i] = { ...pCard, isDying: true };
-                  }
-                  if (oDied) {
-                    currentOppBoard[i] = { ...oCard, isDying: true };
-                  }
+                if (pCard && pCard.stinky) effPower = Math.max(0, effPower - 1);
 
-                  if (pCard.health <= 0 || oDied) playSound('die', isSoundEnabled);
+                if (effPower > 0) {
+                    setAttackingSlot({ side: 'opponent', index: i });
+                    await sleep(400);
+                    playSound('hit', isSoundEnabled);
 
-                  setPlayerBoard([...currentPlayerBoard]);
-                  setOpponentBoard([...currentOppBoard]);
+                    if (pCard && (!oCard.airborne || pCard.mightyLeap)) {
+                      pCard.health -= effPower;
+                      if (oCard.touchOfDeath) pCard.health = 0; 
+                      
+                      let oDied = false;
+                      if (pCard.sharpQuills) {
+                        oCard.health -= 1;
+                        if (oCard.health <= 0) oDied = true;
+                      }
+                      
+                      if (pCard.health <= 0) {
+                        currentPlayerBoard[i] = { ...pCard, isDying: true };
+                      }
+                      if (oDied) {
+                        currentOppBoard[i] = { ...oCard, isDying: true };
+                        if (oCard.unkillable) {
+                             for(let qi=0; qi<4; qi++) {
+                                 if(!currentQueue[qi]) { currentQueue[qi] = createCard(CARD_TYPES[oCard.typeId]); break; }
+                             }
+                        }
+                      }
 
-                  if (pCard.health <= 0 || oDied) {
-                    await sleep(400); 
-                    if (pCard.health <= 0) currentPlayerBoard[i] = null; 
-                    if (oDied) currentOppBoard[i] = null; 
-                  }
-                } else {
-                  currentScale -= oCard.power; 
-                  setShakeScale(true);
-                  setTimeout(() => setShakeScale(false), 300);
-                }
-                
-                setPlayerBoard([...currentPlayerBoard]);
-                setOpponentBoard([...currentOppBoard]);
-                setScale(currentScale);
-                setAttackingSlot(null);
-                await sleep(200);
+                      if (pCard.health <= 0 || oDied) playSound('die', isSoundEnabled);
 
-                if (currentScale <= -5) {
-                  await handleRoundEnd('opponent');
-                  return; 
+                      setPlayerBoard([...currentPlayerBoard]);
+                      setOpponentBoard([...currentOppBoard]);
+
+                      if (pCard.health <= 0 || oDied) {
+                        await sleep(400); 
+                        if (pCard.health <= 0) {
+                            currentPlayerBoard[i] = null; 
+                            if (pCard.unkillable) setPlayerHand(prev => [...prev, createCard(CARD_TYPES[pCard.typeId])]);
+                        }
+                        if (oDied) currentOppBoard[i] = null; 
+                      }
+                    } else {
+                      currentScale -= effPower; 
+                      setShakeScale(true);
+                      setTimeout(() => setShakeScale(false), 300);
+                    }
+                    
+                    setPlayerBoard([...currentPlayerBoard]);
+                    setOpponentBoard([...currentOppBoard]);
+                    setScale(currentScale);
+                    setAttackingSlot(null);
+                    await sleep(200);
+
+                    if (currentScale <= -5) {
+                      await handleRoundEnd('opponent');
+                      return; 
+                    }
                 }
               }
             }
 
             for (let i = 0; i < 4; i++) {
-              if (!newQueue[i] && Math.random() > 0.6) {
-                const enemyTypes = [CARD_TYPES.STOAT, CARD_TYPES.FROG, CARD_TYPES.RAVEN, CARD_TYPES.WOLF, CARD_TYPES.ADDER, CARD_TYPES.TURTLE, CARD_TYPES.PORCUPINE];
+              if (!currentQueue[i] && Math.random() > (isBoss ? 0.4 : 0.6)) {
+                const enemyTypes = isBoss 
+                    ? [CARD_TYPES.BEAR, CARD_TYPES.RAVEN, CARD_TYPES.WOLF, CARD_TYPES.ADDER, CARD_TYPES.PORCUPINE, CARD_TYPES.BAT, CARD_TYPES.COCKROACH]
+                    : [CARD_TYPES.STOAT, CARD_TYPES.FROG, CARD_TYPES.RAVEN, CARD_TYPES.BAT, CARD_TYPES.TURTLE, CARD_TYPES.SKUNK];
                 const randomEnemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-                newQueue[i] = createCard(randomEnemy);
+                currentQueue[i] = createCard(randomEnemy);
               }
             }
-            setOpponentQueue(newQueue);
+            setOpponentQueue([...currentQueue]);
 
             setPhase('draw');
             setMessage(t.msgDraw);
           };
 
           const restartGame = () => {
-            const newDeck = generateDeck();
-            const newHand = [createCard(CARD_TYPES.SQUIRREL), newDeck.pop(), newDeck.pop(), newDeck.pop()];
-            
-            setDeck(newDeck);
-            setPlayerHand(newHand);
+            setMasterDeck(generateStartingDeck());
+            setMapData(generateMap());
+            setMapRow(0);
+            setDeck([]);
+            setPlayerHand([]);
             setPlayerBoard([null, null, null, null]);
             setOpponentBoard([null, null, null, null]);
-            setOpponentQueue(generateRandomQueue());
-            setItems(generateRandomItems(3));
-            setEnemyItems(generateRandomItems(3));
+            setOpponentQueue([null, null, null, null]);
+            setItems(generateRandomItems(2));
+            setEnemyItems([]);
             setPlayerLives(3);
-            setEnemyLives(3);
+            setEnemyLives(1);
+            setIsBoss(false);
             setActiveItem(null);
             setScale(0);
-            setPhase('draw');
+            setPhase('map');
             setShowMenu(false);
-            setMessage(t.msgDraw);
+            setMessage(DICT[lang].msgMapChoose);
           };
 
           const getHandMarginLeft = (index, count) => {
@@ -1094,13 +1239,13 @@
             </div>
           );
 
-          // КОМПАКТНАЯ АДАПТИВНАЯ КАРТА С ПЕРЕВОДОМ
+          // Адаптивная карта на чистых min(vw, vh) пропорциях
           const Card = ({ card, onClick, isSelected, isSacrifice, isAttacking, isHidden }) => {
             const cardBaseClass = "w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded-[0.5vh] border-[1.5px] border-[#111] shrink-0";
             
             if (!card && !isHidden) return <div className={`${cardBaseClass} border-dashed border-[#443c30] bg-[#2a241b] opacity-50`} />;
             if (isHidden) return (
-              <div className={`${cardBaseClass} bg-[#2a241b] flex items-center justify-center shadow-lg relative overflow-hidden`}>
+              <div className={`${cardBaseClass} border-[#111] bg-[#2a241b] flex items-center justify-center shadow-lg relative overflow-hidden`}>
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
                 <span className="text-[min(7vw,3.5vh)]">🌲</span>
               </div>
@@ -1111,7 +1256,7 @@
             return (
               <div 
                 onClick={onClick}
-                className={`${cardBaseClass} flex flex-col justify-between p-[min(0.4vw,0.3vh)] shadow-md transition-all duration-300 select-none cursor-pointer relative overflow-hidden
+                className={`${cardBaseClass} flex flex-col justify-between p-[min(0.4vw,0.3vh)] shadow-lg transition-all duration-300 select-none cursor-pointer relative overflow-hidden
                   ${isSelected ? 'border-yellow-500 scale-105 shadow-[0_0_15px_rgba(234,179,8,0.6)] animate-pulse' : 'border-[#111] hover:border-[#4a4231]'}
                   ${isSacrifice ? 'border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.6)] animate-pulse' : ''}
                   ${isAttacking ? 'scale-110 z-10 border-red-500 shadow-red-500/50' : ''}
@@ -1121,7 +1266,7 @@
                 `}
                 style={{
                    backgroundImage: `url("https://www.transparenttextures.com/patterns/old-paper.png")`,
-                   transform: isAttacking ? 'translateY(calc(-1 * var(--attack-dir, 0) * 10px)) scale(1.1)' : '',
+                   transform: isAttacking ? 'translateY(calc(-1 * var(--attack-dir, 0) * 15px)) scale(1.1)' : '',
                    touchAction: 'manipulation'
                 }}
               >
@@ -1132,6 +1277,8 @@
                     {card.manyLives && <Sigil icon="♾️" title={t.sigilManyLives} />}
                     {card.mightyLeap && <Sigil icon="🛡️" title={t.sigilMightyLeap} />}
                     {card.sharpQuills && <Sigil icon="🌵" title={t.sigilSharpQuills} />}
+                    {card.stinky && <Sigil icon="🤢" title={t.sigilStinky} />}
+                    {card.unkillable && <Sigil icon="♻️" title={t.sigilUnkillable} />}
                 </div>
 
                 <div className="flex justify-end h-[min(2vw,1.2vh)] gap-[min(0.4vw,0.2vh)] relative z-10">
@@ -1142,10 +1289,10 @@
                 
                 <div className="flex flex-col items-center flex-1 justify-center -mt-[min(0.8vw,0.5vh)] relative">
                   <span className="text-[min(4.5vw,3vh)] drop-shadow-md leading-none">{card.icon}</span>
-                  <span className="text-[min(2.2vw,1.3vh)] font-bold mt-[min(0.4vw,0.2vh)] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[min(0.2vw,0.1vh)] w-full truncate">{cardName}</span>
+                  <span className="text-[min(1.5vw,0.9vh)] font-bold mt-[min(0.4vw,0.2vh)] text-center leading-tight uppercase tracking-tighter border-b border-black/30 pb-[min(0.2vw,0.1vh)] w-full truncate px-[min(0.4vw,0.2vh)]">{cardName}</span>
                 </div>
 
-                <div className="flex justify-between items-end h-[min(2.5vw,1.5vh)] font-bold text-[min(1.8vw,1.2vh)] leading-none relative z-10">
+                <div className="flex justify-between items-end h-[min(2.5vw,1.5vh)] font-bold text-[min(1.8vw,1.2vh)] leading-none relative z-10 px-[min(0.4vw,0.2vh)]">
                   <div className="flex items-center gap-[min(0.4vw,0.2vh)]">
                     <span className="text-[min(1.5vw,1vh)]">⚔️</span>{card.power}
                   </div>
@@ -1164,7 +1311,7 @@
           };
 
           return (
-            <div className="min-h-[100dvh] w-full bg-[#14120f] text-[#d4c3a3] font-mono flex flex-col items-center justify-between selection:bg-red-900 relative touch-manipulation overscroll-none"
+            <div className="h-[100dvh] w-full bg-[#14120f] text-[#d4c3a3] font-mono flex flex-col items-center justify-between selection:bg-red-900 overflow-hidden relative touch-manipulation overscroll-none"
                  style={{ backgroundImage: `radial-gradient(circle at center, #26211a 0%, #0a0907 100%)`, WebkitTapHighlightColor: 'transparent' }}>
               
               <style>{`
@@ -1182,22 +1329,26 @@
                   100% { filter: drop-shadow(0 0 0px red) brightness(0); transform: scale(0.5) translateY(40px); opacity: 0; }
                 }
 
+                @keyframes emergeFog {
+                  0% { opacity: 0; transform: translateY(40px) scale(0.8); filter: blur(10px); }
+                  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                }
+
                 .anim-shake { animation: shakeScale 0.2s ease-in-out 2; }
                 .anim-shake-vertical { animation: shakeScaleVertical 0.2s ease-in-out 2; }
                 .anim-die { animation: die 0.5s ease-in forwards; }
                 .anim-punish { animation: punish 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 50; }
                 .anim-bell { animation: bellRing 0.5s ease-in-out; }
                 .anim-eyes { animation: blink 8s infinite; }
+                .anim-emerge { animation: emergeFog 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
                 
                 .hide-scrollbar::-webkit-scrollbar { display: none; }
                 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
               `}</style>
 
-              {/* ВЕРХНЯЯ ПАНЕЛЬ И ГЛАЗА */}
-              <div className="w-full max-w-4xl flex justify-between items-start px-[min(3vw,2vh)] mt-[min(2vw,1vh)] z-20 relative shrink-0">
-                
-                {/* ЛЕВАЯ ЧАСТЬ: Название, Жизни, Меню */}
-                <div className="flex flex-col gap-[min(1vw,0.5vh)] w-[30%] sm:w-1/3">
+              {/* --- ШАПКА --- */}
+              <div className="w-full max-w-4xl flex justify-between items-start px-[min(3vw,2vh)] mt-[min(2vw,1.5vh)] z-20 relative shrink-0">
+                <div className="flex flex-col gap-[min(1vw,0.5vh)] w-1/3">
                   <div className="flex items-center gap-[min(2vw,1.5vh)]">
                     <a href="index.html" className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer text-white no-underline" title="Home">🏠</a>
                     <button onClick={() => setShowRules(true)} className="text-[min(6vw,3vh)] opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Rules">📖</button>
@@ -1206,13 +1357,15 @@
                   <div className="text-[min(2.5vw,1.5vh)] font-bold tracking-widest text-[#8c7a61] border-b border-[#8c7a61] pb-[min(0.5vw,0.2vh)] uppercase w-fit mt-[min(0.5vw,0.2vh)]">
                     {t.title}
                   </div>
-                  <div className="flex items-center gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(1.5vw,1vh)] py-[min(0.5vw,0.2vh)] rounded border border-[#3a3022] w-fit mt-[min(0.5vw,0.2vh)]" title={t.shadow}>
-                    <span className="text-[min(2vw,1.2vh)]">{t.shadow}</span> {Array.from({length: 3}).map((_, i) => <span key={`e-life-${i}`} className={`text-[min(3vw,1.5vh)] ${i < enemyLives ? 'opacity-100 text-red-500' : 'opacity-20 grayscale'}`}>🕯️</span>)}
-                  </div>
+                  {phase !== 'map' && phase !== 'map_card_choice' && (
+                    <div className="flex items-center gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(1.5vw,1vh)] py-[min(0.5vw,0.2vh)] rounded border border-[#3a3022] w-fit mt-[min(0.5vw,0.2vh)]" title={isBoss ? t.shadowTitle : t.banditTitle}>
+                      <span className="text-[min(2vw,1.2vh)]">{isBoss ? t.shadowTitle : t.banditTitle}</span> {Array.from({length: isBoss ? 3 : 1}).map((_, i) => <span key={`e-life-${i}`} className={`text-[min(3vw,1.5vh)] ${i < enemyLives ? 'opacity-100 text-red-500' : 'opacity-20 grayscale'}`}>🕯️</span>)}
+                    </div>
+                  )}
                 </div>
 
                 {/* ГЛАЗА */}
-                <div ref={eyesContainerRef} className="absolute left-1/2 -translate-x-1/2 top-[min(0.5vh,1vw)] flex gap-[min(4vw,3vh)] justify-center items-center opacity-85 mix-blend-screen pointer-events-none">
+                <div ref={eyesContainerRef} className="absolute left-1/2 -translate-x-1/2 top-0 flex gap-[min(4vw,3vh)] justify-center items-center opacity-85 mix-blend-screen pointer-events-none">
                   <div className="anim-eyes flex gap-[min(4vw,3vh)]">
                     <div className="w-[min(12vw,9vh)] h-[min(6vw,4.5vh)] bg-[#050403] rounded-full overflow-hidden relative shadow-[0_0_15px_rgba(0,0,0,1)] flex items-center justify-center border-t border-[#222]">
                        <div ref={leftPupilRef} 
@@ -1229,8 +1382,7 @@
                   </div>
                 </div>
 
-                {/* ПРАВАЯ ЧАСТЬ: Звук, Язык, Предметы противника */}
-                <div className="flex flex-col gap-[min(1vw,0.5vh)] items-end w-[30%] sm:w-1/3">
+                <div className="flex flex-col gap-[min(1vw,0.5vh)] items-end w-1/3">
                   <div className="flex items-center gap-[min(2vw,1.5vh)]">
                     <button onClick={toggleLang} className="text-[min(4.5vw,2.2vh)] font-bold opacity-80 hover:opacity-100 hover:scale-110 transition-all drop-shadow-md cursor-pointer" title="Language">
                       {lang === 'ru' ? '🌐RU' : '🌐EN'}
@@ -1239,153 +1391,188 @@
                       {isSoundEnabled ? '🔊' : '🔇'}
                     </button>
                   </div>
-
-                  <div className="flex gap-[min(0.8vw,0.4vh)] bg-[#1e1813] p-[min(0.8vw,0.4vh)] border border-[#3a3022] rounded shadow-inner mt-[min(0.5vw,0.2vh)] h-[min(6vw,3.5vh)]" title={t.shadow}>
-                    {enemyItems.map((item, i) => (
-                      <div key={`e-item-${i}`} className="h-full aspect-square rounded border border-[#4a3f31] bg-[#1a1612] flex items-center justify-center text-[min(3.5vw,1.8vh)] opacity-90 shadow-sm">
-                        {item.icon}
-                      </div>
-                    ))}
-                    {Array.from({ length: 3 - enemyItems.length }).map((_, i) => (
-                      <div key={`e-empty-${i}`} className="h-full aspect-square rounded border border-[#3a3022] bg-[#1a1612] opacity-30 flex items-center justify-center text-[min(1.5vw,0.8vh)] text-[#6e5d4a]">{t.empty}</div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* ЦЕНТРАЛЬНОЕ ПОЛЕ БОЯ */}
-              <div className="flex-1 flex flex-col justify-center items-center gap-[min(2vw,1.5vh)] w-full max-w-4xl perspective-1000 z-10 px-1 py-[min(1vw,1vh)] relative shrink-0">
-                
-                {/* ВЕРТИКАЛЬНЫЕ ВЕСЫ */}
-                <div className="absolute right-[min(2vw,1vh)] top-1/2 -translate-y-1/2 h-[min(45vw,35vh)] w-[min(8vw,4.5vh)] flex flex-col items-center justify-between bg-[#1a1612] border-2 border-[#3a3022] rounded-full p-[min(1vw,0.5vh)] shadow-[0_0_20px_rgba(0,0,0,0.8)] z-20 pointer-events-none">
-                  <div className="text-[min(3.5vw,2vh)] mb-[min(1vw,0.5vh)] opacity-80" title={t.yourAdvantage}>⚖️</div>
-                  <div className={`relative flex-1 w-full bg-[#050403] rounded-full overflow-hidden shadow-inner ${shakeScale ? 'anim-shake-vertical' : ''}`}>
-                     <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-[#8c7a61] z-10 -mt-[1px]"></div>
-                     <div className="absolute bottom-1/2 w-full bg-gradient-to-t from-green-900 to-green-500 transition-all duration-500 ease-out"
-                          style={{ height: `${scale > 0 ? (scale * 10) : 0}%`, boxShadow: scale > 0 ? '0 0 10px #22c55e' : 'none' }}></div>
-                     <div className="absolute top-1/2 w-full bg-gradient-to-b from-red-900 to-red-600 transition-all duration-500 ease-out"
-                          style={{ height: `${scale < 0 ? (Math.abs(scale) * 10) : 0}%`, boxShadow: scale < 0 ? '0 0 10px #dc2626' : 'none' }}></div>
-                     <div className="absolute inset-0 flex flex-col justify-between py-[min(1vw,0.5vh)] items-center z-20 pointer-events-none opacity-30">
-                        {Array.from({length: 11}).map((_, i) => <div key={i} className={`w-[40%] h-[1px] ${i === 5 ? 'bg-transparent' : 'bg-[#d4c3a3]'}`}></div>)}
-                     </div>
-                  </div>
-                  <div className="text-[min(3.5vw,2vh)] mt-[min(1vw,0.5vh)] opacity-50 grayscale" title={t.shadowAdvantage}>💀</div>
-                </div>
-
-                <div className="flex gap-[min(1.5vw,1vh)] opacity-70 shrink-0">
-                  {opponentQueue.map((card, i) => (
-                    <div key={`queue-${i}`} className="w-[min(15vw,9.5vh)] h-[min(7.5vw,4.75vh)] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0">
-                      {card && <span className="text-[min(4vw,2.5vh)] mt-[min(1.5vw,1vh)] opacity-50">{card.icon}</span>}
-                      {card && <div className="absolute top-0 text-[min(1.5vw,0.9vh)] w-full text-center bg-black/50 text-[#8c7a61]">{t.coming}</div>}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0 z-20" style={{ '--attack-dir': -1 }}>
-                  {opponentBoard.map((card, i) => (
-                    <div key={`opp-${i}`} onClick={() => handleOpponentBoardClick(i)}>
-                      <Card card={card} isAttacking={attackingSlot?.side === 'opponent' && attackingSlot?.index === i} />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="w-[90%] h-px bg-gradient-to-r from-transparent via-[#4a3f31] to-transparent shadow-[0_0_5px_rgba(74,63,49,0.5)] shrink-0 z-20"></div>
-
-                <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0 z-20" style={{ '--attack-dir': 1 }}>
-                  {playerBoard.map((card, i) => (
-                    <div key={`pl-slot-${i}`} onClick={() => handleBoardClick(i)}>
-                      <Card card={card} isSacrifice={sacrifices.includes(i)} isAttacking={attackingSlot?.side === 'player' && attackingSlot?.index === i} />
-                    </div>
-                  ))}
-                </div>
-
-              </div>
-
-              {/* ПАНЕЛЬ ИГРОКА */}
-              <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[min(1.5vw,1vh)] pb-[calc(env(safe-area-inset-bottom)+min(1vw,0.5vh))] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-30 shrink-0">
-                
-                {/* СТРОКА СООБЩЕНИЯ В ПАНЕЛИ ИГРОКА */}
-                <div className="text-center w-full mb-[min(1.5vw,1vh)] text-[min(3vw,1.4vh)] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0 border-b border-[#2a241c] pb-[min(1vw,0.5vh)]">
-                  {message}
-                </div>
-
-                <div className="flex justify-between w-full mb-[min(1vw,0.5vh)] px-[min(1.5vw,1vh)] items-center gap-[min(2vw,1vh)]">
                   
-                  {/* ЛЕВАЯ ЧАСТЬ: КОЛОДЫ + КОЛОНКА ПРЕДМЕТОВ */}
-                  <div className="flex gap-[min(2vw,1.5vh)] items-center shrink-0">
+                  {phase !== 'map' && phase !== 'map_card_choice' && (
+                    <div className="flex gap-[min(0.8vw,0.4vh)] bg-[#1e1813] p-[min(0.8vw,0.4vh)] border border-[#3a3022] rounded shadow-inner mt-[min(0.5vw,0.2vh)] h-[min(6vw,3.5vh)]" title={isBoss ? t.shadowTitle : t.banditTitle}>
+                      {enemyItems.map((item, i) => (
+                        <div key={`e-item-${i}`} className="h-full aspect-square rounded border border-[#4a3f31] bg-[#1a1612] flex items-center justify-center text-[min(3.5vw,1.8vh)] opacity-90 shadow-sm">
+                          {item.icon}
+                        </div>
+                      ))}
+                      {enemyItems.length === 0 && <div className="text-[min(1.5vw,0.8vh)] text-[#6e5d4a] px-1 whitespace-nowrap flex items-center h-full">{t.empty}</div>}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ОСНОВНОЙ КОНТЕНТ (КАРТА ИЛИ ПОЛЕ БОЯ) */}
+              {phase === 'map' || phase === 'map_card_choice' ? (
+                <div className="flex-1 flex flex-col items-center justify-start w-full max-w-2xl z-10 px-[min(3vw,2vh)] py-[min(4vw,2.5vh)] relative bg-[#1a1612] border-y border-[#3a3022] shadow-[inset_0_0_50px_rgba(0,0,0,0.8)] overflow-y-auto hide-scrollbar">
+                   <h2 className="text-[min(6vw,4vh)] font-black text-[#8c7a61] mb-[min(2vw,1vh)] tracking-widest mt-[min(2vw,1vh)]">{t.mapTitle}</h2>
+                   <div className="text-[#6e5d4a] text-[min(3vw,1.5vh)] mb-[min(5vw,3vh)] animate-pulse text-center">{t.mapUnknown}</div>
+                   
+                   <div className="flex flex-col-reverse gap-[min(8vw,6vh)] relative w-full items-center pb-[min(5vw,3vh)] pt-[min(8vw,5vh)] mt-auto">
+                      <div ref={mapEndRef} className="absolute top-0 w-full h-1"></div>
+                      <div className="absolute top-0 left-0 right-0 h-[min(20vw,12vh)] bg-gradient-to-b from-[#1a1612] via-[#1a1612]/90 to-transparent z-20 pointer-events-none"></div>
+                      <div className="absolute top-[min(5vw,3vh)] bottom-0 w-1 bg-gradient-to-t from-[#3a3022] to-transparent left-1/2 -translate-x-1/2 z-0 opacity-50"></div>
+                      
+                      {mapData.slice(0, mapRow + 1).map((row, rIndex) => {
+                         const isCurrentRow = rIndex === mapRow;
+                         const isPassed = rIndex < mapRow;
+                         return (
+                            <div key={rIndex} className={`flex gap-[min(12vw,8vh)] relative z-10 ${isCurrentRow ? 'anim-emerge' : ''}`}>
+                               {row.map((node, nIndex) => (
+                                  <button
+                                     key={nIndex}
+                                     onClick={() => isCurrentRow && startNode(node)}
+                                     title={node.type}
+                                     className={`w-[min(12vw,9vh)] h-[min(12vw,9vh)] rounded-full border-[min(0.5vw,0.3vh)] flex items-center justify-center text-[min(6vw,4vh)] transition-all shadow-lg
+                                        ${isCurrentRow ? 'border-yellow-500 bg-[#2a241c] hover:scale-110 cursor-pointer animate-pulse shadow-[0_0_20px_rgba(234,179,8,0.5)]' : ''}
+                                        ${isPassed ? 'border-[#4a3f31] bg-[#110e0c] opacity-30 cursor-default' : ''}
+                                        ${node.type === 'BOSS' && isCurrentRow ? 'w-[min(16vw,12vh)] h-[min(16vw,12vh)] border-red-900 bg-red-950/50 text-[min(8vw,6vh)] shadow-[0_0_30px_rgba(220,38,38,0.6)]' : ''}
+                                     `}
+                                  >
+                                     {NODE_ICONS[node.type]}
+                                  </button>
+                               ))}
+                            </div>
+                         );
+                      })}
+                   </div>
+                </div>
+              ) : (
+                <React.Fragment>
+                  <div className="text-center w-full mb-[min(1.5vw,1vh)] text-[min(3vw,1.4vh)] font-bold text-[#d4c3a3] animate-pulse z-10 px-2 shrink-0">
+                    {message}
+                  </div>
+
+                  <div className="flex-1 flex flex-col justify-evenly items-center w-full max-w-4xl perspective-1000 z-10 px-1 min-h-0 shrink py-[min(1vw,1vh)] relative">
                     
-                    {/* Колоды */}
-                    <div className="flex gap-[min(1.5vw,1.5vh)] shrink-0">
-                      <button onClick={() => drawCard(true)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
-                        <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">{t.squirrel}</div>
-                        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(7vw,4vh)]">🐿️</div>
-                      </button>
-                      <button onClick={() => drawCard(false)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
-                         <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{t.deck} ({deck.length})</div>
-                        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(7vw,4vh)]">🌲</div>
-                      </button>
+                    <div className="absolute right-[min(2vw,1vh)] top-1/2 -translate-y-1/2 h-[min(45vw,35vh)] w-[min(8vw,4.5vh)] flex flex-col items-center justify-between bg-[#1a1612] border-2 border-[#3a3022] rounded-full p-[min(1vw,0.5vh)] shadow-[0_0_20px_rgba(0,0,0,0.8)] z-20 pointer-events-none">
+                      <div className="text-[min(3.5vw,2vh)] mb-[min(1vw,0.5vh)] opacity-80" title={t.yourAdvantage}>⚖️</div>
+                      <div className={`relative flex-1 w-full bg-[#050403] rounded-full overflow-hidden shadow-inner ${shakeScale ? 'anim-shake-vertical' : ''}`}>
+                         <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-[#8c7a61] z-10 -mt-[1px]"></div>
+                         <div className="absolute bottom-1/2 w-full bg-gradient-to-t from-green-900 to-green-500 transition-all duration-500 ease-out"
+                              style={{ height: `${scale > 0 ? (scale * 10) : 0}%`, boxShadow: scale > 0 ? '0 0 10px #22c55e' : 'none' }}></div>
+                         <div className="absolute top-1/2 w-full bg-gradient-to-b from-red-900 to-red-600 transition-all duration-500 ease-out"
+                              style={{ height: `${scale < 0 ? (Math.abs(scale) * 10) : 0}%`, boxShadow: scale < 0 ? '0 0 10px #dc2626' : 'none' }}></div>
+                         <div className="absolute inset-0 flex flex-col justify-between py-[min(1vw,0.5vh)] items-center z-20 pointer-events-none opacity-30">
+                            {Array.from({length: 11}).map((_, i) => <div key={i} className={`w-[40%] h-[1px] ${i === 5 ? 'bg-transparent' : 'bg-[#d4c3a3]'}`}></div>)}
+                         </div>
+                      </div>
+                      <div className="text-[min(3.5vw,2vh)] mt-[min(1vw,0.5vh)] opacity-50 grayscale" title={t.shadowAdvantage}>💀</div>
                     </div>
 
-                    {/* Вертикальная колонка предметов (макс. 3) */}
-                    <div className="flex flex-col gap-[min(1vw,0.5vh)] shrink-0 h-[min(22.5vw,14.25vh)] w-[min(8vw,5vh)]">
-                      {items.map((item, i) => (
-                        <button key={i} onClick={() => handleItemClick(i)} disabled={phase !== 'play'} title={t.items[item.id].desc} 
-                                className={`flex-1 min-h-0 overflow-hidden w-full rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm text-[min(4.5vw,2.5vh)] leading-none`}>
-                          {item.icon}
-                        </button>
+                    <div className="flex gap-[min(1.5vw,1vh)] opacity-70 shrink-0 relative z-20 pointer-events-none">
+                      {opponentQueue.map((card, i) => (
+                        <div key={`queue-${i}`} className="w-[min(15vw,9.5vh)] h-[min(7.5vw,4.75vh)] border border-dashed border-[#4a3f31] bg-[#1a1612] flex items-center justify-center rounded overflow-hidden relative shrink-0 pointer-events-auto">
+                          {card && <span className="text-[min(4vw,2.5vh)] mt-[min(1.5vw,1vh)] opacity-50">{card.icon}</span>}
+                          {card && <div className="absolute top-0 text-[min(1.5vw,0.9vh)] w-full text-center bg-black/50 text-[#8c7a61]">{t.coming}</div>}
+                        </div>
                       ))}
-                      {Array.from({ length: 3 - items.length }).map((_, i) => (
-                        <div key={`empty-${i}`} className="flex-1 min-h-0 overflow-hidden w-full rounded border border-[#3a3022] bg-[#1e1813] opacity-50 flex items-center justify-center text-[min(1.8vw,1vh)] text-[#6e5d4a] leading-none whitespace-pre-wrap text-center">
-                          {t.noItems}
+                    </div>
+
+                    <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0 z-20" style={{ '--attack-dir': -1 }}>
+                      {opponentBoard.map((card, i) => (
+                        <div key={`opp-${i}`} onClick={() => handleOpponentBoardClick(i)}>
+                          <Card card={card} isAttacking={attackingSlot?.side === 'opponent' && attackingSlot?.index === i} />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="w-[90%] h-px bg-gradient-to-r from-transparent via-[#4a3f31] to-transparent shadow-[0_0_5px_rgba(74,63,49,0.5)] shrink-0 z-20"></div>
+
+                    <div className="flex gap-[min(1.5vw,1vh)] p-[min(1.5vw,1vh)] rounded bg-[#1e1a15] border border-[#2a241c] shadow-xl relative shrink-0 z-20" style={{ '--attack-dir': 1 }}>
+                      {playerBoard.map((card, i) => (
+                        <div key={`pl-slot-${i}`} onClick={() => handleBoardClick(i)}>
+                          <Card card={card} isSacrifice={sacrifices.includes(i)} isAttacking={attackingSlot?.side === 'player' && attackingSlot?.index === i} />
                         </div>
                       ))}
                     </div>
 
                   </div>
 
-                  {/* ПРАВАЯ ЧАСТЬ: ЖИЗНИ + ОГРОМНАЯ КНОПКА ХОДА */}
-                  <div className="flex flex-col gap-[min(1vw,0.6vh)] shrink-0 h-[min(22.5vw,14.25vh)] w-[min(18vw,12vh)]">
-                    <div className="flex items-center justify-between gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(2vw,1vh)] py-[min(0.8vw,0.4vh)] rounded border border-[#3a3022] font-bold shrink-0" title={t.you}>
-                       <span className="text-[min(1.8vw,1vh)] leading-none text-[#8c7a61]">{t.you}</span>
-                       <div className="flex gap-[min(0.5vw,0.2vh)]">
-                           {Array.from({length: 3}).map((_, i) => <span key={`p-life-${i}`} className={`text-[min(2.5vw,1.4vh)] leading-none ${i < playerLives ? 'opacity-100' : 'opacity-20 grayscale'}`}>🕯️</span>)}
-                       </div>
-                    </div>
-                    <button onClick={endTurn} disabled={phase !== 'play'} className="flex-1 w-full rounded border border-[#5c4a35] bg-[#2a2116] hover:bg-[#3d3121] text-[#d4c3a3] font-bold tracking-widest uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-[min(1vw,0.5vh)] shadow-[0_0_10px_rgba(0,0,0,0.5)] group touch-manipulation text-[min(2vw,1.2vh)] px-[min(2vw,1vh)]">
-                      <span className={`text-[min(5vw,3vh)] inline-block leading-none ${isBellRinging ? 'anim-bell' : 'group-hover:anim-bell'}`}>🔔</span> 
-                      <span className="leading-none mt-[min(0.5vw,0.2vh)]">{t.turn}</span>
-                    </button>
-                  </div>
+                  {/* ПАНЕЛЬ ИГРОКА (Адаптивная, без скроллов) */}
+                  <div className="w-full max-w-4xl bg-[#110e0c] border-t border-[#2a241c] p-[min(1.5vw,1vh)] pb-[calc(env(safe-area-inset-bottom)+min(1vw,0.5vh))] rounded-t-xl flex flex-col items-center shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-30 shrink-0 mt-auto">
+                    
+                    <div className="flex justify-between w-full mb-[min(1.5vw,1vh)] px-[min(1.5vw,1vh)] items-center gap-[min(2vw,1vh)]">
+                      
+                      {/* ЛЕВАЯ ЧАСТЬ: КОЛОДЫ + КОЛОНКА ПРЕДМЕТОВ */}
+                      <div className="flex gap-[min(2vw,1.5vh)] items-center shrink-0">
+                        {/* Колоды */}
+                        <div className="flex gap-[min(1.5vw,1.5vh)] shrink-0">
+                          <button onClick={() => drawCard(true)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
+                            <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">{t.squirrel}</div>
+                            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(7vw,4vh)]">🐿️</div>
+                          </button>
+                          <button onClick={() => drawCard(false)} disabled={phase !== 'draw'} className="group relative cursor-pointer disabled:opacity-50 transition-transform hover:-translate-y-1 touch-manipulation w-[min(15vw,9.5vh)] h-[min(22.5vw,14.25vh)] rounded border-[1.5px] border-[#111] bg-[#2a241b]">
+                             <div className="absolute -top-[min(3vw,2vh)] left-1/2 -translate-x-1/2 text-[min(2vw,1.2vh)] text-[#8c7a61] opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{t.deck} ({deck.length})</div>
+                            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay"></div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-80 text-[min(7vw,4vh)]">🌲</div>
+                          </button>
+                        </div>
 
-                </div>
+                        {/* Вертикальная колонка предметов (макс. 3) */}
+                        <div className="flex flex-col gap-[min(1vw,0.5vh)] shrink-0 h-[min(22.5vw,14.25vh)] w-[min(8vw,5vh)]">
+                          {items.map((item, i) => (
+                            <button key={i} onClick={() => handleItemClick(i)} disabled={phase !== 'play'} title={t.items[item.id].desc} 
+                                    className={`flex-1 min-h-0 overflow-hidden w-full rounded border ${activeItem?.itemIndex === i ? 'border-blue-500 bg-blue-900/30' : 'border-[#4a3f31] bg-[#2a241c]'} hover:bg-[#3d3121] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation shadow-sm text-[min(4.5vw,2.5vh)] leading-none`}>
+                              {item.icon}
+                            </button>
+                          ))}
+                          {Array.from({ length: 3 - items.length }).map((_, i) => (
+                            <div key={`empty-${i}`} className="flex-1 min-h-0 overflow-hidden w-full rounded border border-[#3a3022] bg-[#1e1813] opacity-50 flex items-center justify-center text-[min(1.8vw,1vh)] text-[#6e5d4a] leading-none whitespace-pre-wrap text-center">
+                              {t.noItems}
+                            </div>
+                          ))}
+                        </div>
 
-                <div className="flex flex-row justify-center items-end w-full p-[min(1vw,0.5vh)] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation shrink-0 min-h-[min(25vw,16vh)] pt-[min(1.5vw,1vh)]" style={{ WebkitOverflowScrolling: 'touch' }}>
-                  {playerHand.length === 0 && <span className="m-auto opacity-30 italic text-[min(3vw,1.5vh)]">{t.emptyHand}</span>}
-                  {playerHand.map((card, i) => {
-                    const isSelected = selectedHandCard?.id === card.id;
-                    return (
-                      <div key={card.id} 
-                           className={`relative transition-all duration-300 ease-out hover:z-40 ${isSelected ? '-translate-y-[min(12vw,8vh)] z-50' : 'hover:-translate-y-[min(5vw,3.5vh)]'}`}
-                           style={{ 
-                               marginLeft: getHandMarginLeft(i, playerHand.length),
-                               zIndex: isSelected ? 50 : i 
-                           }}>
-                        <Card card={card} isSelected={isSelected} onClick={() => handleHandClick(card)} />
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+
+                      {/* ПРАВАЯ ЧАСТЬ: ЖИЗНИ + ОГРОМНАЯ КНОПКА ХОДА */}
+                      <div className="flex flex-col gap-[min(1vw,0.6vh)] shrink-0 h-[min(22.5vw,14.25vh)] w-[min(18vw,12vh)]">
+                        <div className="flex items-center justify-between gap-[min(1vw,0.5vh)] bg-[#1a1612] px-[min(2vw,1vh)] py-[min(0.8vw,0.4vh)] rounded border border-[#3a3022] font-bold shrink-0" title={t.you}>
+                           <span className="text-[min(1.8vw,1vh)] leading-none text-[#8c7a61]">{t.you}</span>
+                           <div className="flex gap-[min(0.5vw,0.2vh)]">
+                               {Array.from({length: 3}).map((_, i) => <span key={`p-life-${i}`} className={`text-[min(2.5vw,1.4vh)] leading-none ${i < playerLives ? 'opacity-100' : 'opacity-20 grayscale'}`}>🕯️</span>)}
+                           </div>
+                        </div>
+                        <button onClick={endTurn} disabled={phase !== 'play'} className="flex-1 w-full rounded border border-[#5c4a35] bg-[#2a2116] hover:bg-[#3d3121] text-[#d4c3a3] font-bold tracking-widest uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-[min(1vw,0.5vh)] shadow-[0_0_10px_rgba(0,0,0,0.5)] group touch-manipulation text-[min(2vw,1.2vh)] px-[min(2vw,1vh)]">
+                          <span className={`text-[min(5vw,3vh)] inline-block leading-none ${isBellRinging ? 'anim-bell' : 'group-hover:anim-bell'}`}>🔔</span> 
+                          <span className="leading-none mt-[min(0.5vw,0.2vh)]">{t.turn}</span>
+                        </button>
+                      </div>
+
+                    </div>
+
+                    <div className="flex flex-row justify-center items-end w-full p-[min(1vw,0.5vh)] border border-dashed border-[#2a241c] rounded bg-[#0a0806]/50 touch-manipulation shrink-0 min-h-[min(25vw,16vh)] pt-[min(1.5vw,1vh)]" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      {playerHand.length === 0 && <span className="m-auto opacity-30 italic text-[min(3vw,1.5vh)]">{t.emptyHand}</span>}
+                      {playerHand.map((card, i) => {
+                        const isSelected = selectedHandCard?.id === card.id;
+                        return (
+                          <div key={card.id} 
+                               className={`relative transition-all duration-300 ease-out hover:z-40 ${isSelected ? '-translate-y-[min(12vw,8vh)] z-50' : 'hover:-translate-y-[min(5vw,3.5vh)]'}`}
+                               style={{ 
+                                   marginLeft: getHandMarginLeft(i, playerHand.length),
+                                   zIndex: isSelected ? 50 : i 
+                               }}>
+                            <Card card={card} isSelected={isSelected} onClick={() => handleHandClick(card)} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </React.Fragment>
+              )}
 
               {/* --- МОДАЛКИ СЮЖЕТА --- */}
-              {cardChoices && (
-                <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4">
-                  <h2 className="text-[min(4vw,3vh)] font-black text-[#e6d8ba] mb-[min(4vw,3vh)] text-center whitespace-pre-wrap">{t.msgCandleOutChoice}</h2>
-                  <div className="flex gap-[min(4vw,3vh)]">
-                    {cardChoices.map((c, i) => (
-                      <div key={i} className="hover:-translate-y-[min(2vw,1vh)] hover:scale-110 transition-all cursor-pointer" onClick={() => handleCardChoice(c)}>
+              {phase === 'map_card_choice' && draftCards && (
+                <div className="absolute inset-0 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4">
+                  <h2 className="text-[min(5vw,4vh)] font-black text-[#e6d8ba] mb-[min(8vw,6vh)] text-center whitespace-pre-wrap">{t.msgChooseDraft}</h2>
+                  <div className="flex gap-[min(4vw,4vh)]">
+                    {draftCards.map((c, i) => (
+                      <div key={i} className="hover:-translate-y-[min(2vw,2vh)] hover:scale-110 transition-all cursor-pointer" onClick={() => handleDraftChoice(c)}>
                         <Card card={c} />
                       </div>
                     ))}
@@ -1393,7 +1580,19 @@
                 </div>
               )}
 
-              {/* БЫСТРАЯ ТАБЛИЧКА РАСПЛАТЫ */}
+              {phase === 'event' && cardChoices && (
+                <div className="absolute inset-0 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center z-50 p-4">
+                  <h2 className="text-[min(5vw,4vh)] font-black text-[#e6d8ba] mb-[min(8vw,6vh)] text-center whitespace-pre-wrap">{t.msgCandleOutChoice}</h2>
+                  <div className="flex gap-[min(4vw,4vh)]">
+                    {cardChoices.map((c, i) => (
+                      <div key={i} className="hover:-translate-y-[min(2vw,2vh)] hover:scale-110 transition-all cursor-pointer" onClick={() => handleReinforcementChoice(c)}>
+                        <Card card={c} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {punishment && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4 pointer-events-none">
                   <div className="bg-[#1a1612] border-2 border-red-900 p-[3vh] rounded-xl flex flex-col items-center text-center shadow-[0_0_80px_rgba(220,38,38,0.8)] animate-pulse">
@@ -1419,35 +1618,36 @@
               {/* --- МОДАЛКИ ПРАВИЛ --- */}
               {showRules && (
                 <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowRules(false)}>
-                  <div className="bg-[#e6d8ba] text-[#2c241b] border-4 border-[#332c22] p-[3vh] rounded shadow-[0_0_50px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/old-paper.png")` }} onClick={e => e.stopPropagation()}>
-                    <h2 className="text-[3vh] font-black mb-[1.5vh] border-b-2 border-[#332c22] pb-2">{t.rulesTitle}</h2>
-                    <ul className="space-y-[1vh] text-[1.6vh] text-left">
+                  <div className="bg-[#e6d8ba] text-[#2c241b] border-4 border-[#332c22] p-[min(6vw,4vh)] rounded shadow-[0_0_50px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ backgroundImage: `url("https://www.transparenttextures.com/patterns/old-paper.png")` }} onClick={e => e.stopPropagation()}>
+                    <h2 className="text-[min(5vw,4vh)] font-black mb-[min(3vw,2vh)] border-b-2 border-[#332c22] pb-2">{t.rulesTitle}</h2>
+                    <ul className="space-y-[min(2vw,1.5vh)] text-[min(3vw,2vh)] text-left">
                       <li dangerouslySetInnerHTML={{__html: t.rules[0]}} />
                       <li dangerouslySetInnerHTML={{__html: t.rules[1]}} />
                       <li dangerouslySetInnerHTML={{__html: t.rules[2]}} />
                       <li dangerouslySetInnerHTML={{__html: t.rules[3]}} />
+                      <li dangerouslySetInnerHTML={{__html: t.rules[4]}} />
                       <li>
-                        <strong dangerouslySetInnerHTML={{__html: t.rules[4]}} />
+                        <strong dangerouslySetInnerHTML={{__html: t.rules[5]}} />
                         <ul className="pl-4 mt-1 list-disc opacity-80">
                           {t.rulesSigils.map((s, idx) => <li key={idx} dangerouslySetInnerHTML={{__html: s}} />)}
                         </ul>
                       </li>
                     </ul>
-                    <button onClick={() => setShowRules(false)} className="mt-[2vh] px-[2vh] py-[1vh] text-[1.6vh] bg-[#332c22] hover:bg-[#111] text-[#e6d8ba] rounded uppercase tracking-widest transition-colors font-bold w-full">{t.understood}</button>
+                    <button onClick={() => setShowRules(false)} className="mt-[min(4vw,3vh)] px-[min(4vw,3vh)] py-[min(2vw,1.5vh)] text-[min(3vw,2vh)] bg-[#332c22] hover:bg-[#111] text-[#e6d8ba] rounded uppercase tracking-widest transition-colors font-bold w-full">{t.understood}</button>
                   </div>
                 </div>
               )}
 
               {phase === 'gameover' && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                  <div className="bg-[#1a1612] border-2 border-[#4a3f31] p-[3vh] rounded-xl flex flex-col items-center text-center shadow-[0_0_50px_rgba(0,0,0,1)] w-full max-w-md">
-                    <h2 className={`text-[4vh] font-black mb-[1.5vh] ${scale >= 5 ? 'text-green-700' : 'text-red-800'}`}>
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                  <div className="bg-[#1a1612] border-2 border-[#4a3f31] p-[min(6vw,4vh)] rounded-xl flex flex-col items-center text-center shadow-[0_0_50px_rgba(0,0,0,1)] w-full max-w-md">
+                    <h2 className={`text-[min(8vw,5vh)] font-black mb-[min(3vw,2vh)] ${scale >= 5 ? 'text-green-700' : 'text-red-800'}`}>
                       {scale >= 5 ? t.victory : t.defeat}
                     </h2>
-                    <p className="text-[#8c7a61] mb-[3vh] text-[1.6vh]">
+                    <p className="text-[#8c7a61] mb-[min(6vw,4vh)] text-[min(3vw,2vh)]">
                       {scale >= 5 ? t.victoryDesc : t.defeatDesc}
                     </p>
-                    <button onClick={restartGame} className="px-[2vh] py-[1vh] text-[1.6vh] bg-[#2a241c] hover:bg-[#4a3f31] border border-[#8c7a61] text-[#d4c3a3] rounded uppercase tracking-widest transition-colors font-bold touch-manipulation">{t.restart}</button>
+                    <button onClick={restartGame} className="px-[min(4vw,3vh)] py-[min(2vw,1.5vh)] text-[min(3vw,2vh)] bg-[#2a241c] hover:bg-[#4a3f31] border border-[#8c7a61] text-[#d4c3a3] rounded uppercase tracking-widest transition-colors font-bold touch-manipulation">{t.restart}</button>
                   </div>
                 </div>
               )}
