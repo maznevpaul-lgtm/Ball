@@ -102,8 +102,8 @@
         <!-- Кнопки управления окном -->
         <div class="w-full flex justify-between items-center mb-2">
             <div class="flex gap-2">
-                <button onclick="window.location.href='index.html';" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer" id="lbl_backToMenu">
-                    🏠 В меню
+                <button onclick="goHome();" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer" id="lbl_exitBtn">
+                    🏠 Выход
                 </button>
                 <button id="infoBtn" class="bg-cyan-800 hover:bg-cyan-700 text-white font-bold py-1.5 px-3 rounded border-2 border-cyan-600 transition-colors shadow text-xs flex items-center cursor-pointer" title="Энциклопедия">
                     📚
@@ -116,8 +116,8 @@
                 <button id="langToggleBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-1.5 px-3 rounded border-2 border-gray-500 transition-colors shadow text-xs flex items-center cursor-pointer">
                     🌐 EN
                 </button>
-                <button id="headerPauseBtn" class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded border-2 border-blue-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer hidden" id="lbl_pauseBtn">
-                    ⏸️ Пауза
+                <button id="headerPauseBtn" class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded border-2 border-blue-600 transition-colors shadow text-xs flex items-center gap-1 cursor-pointer hidden">
+                    ⏸️ <span id="lbl_pauseBtn">Пауза</span>
                 </button>
             </div>
         </div>
@@ -165,6 +165,9 @@
                     <button id="resumeBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded border-4 border-blue-700 text-lg mb-2">
                         ПРОДОЛЖИТЬ
                     </button>
+                    <button id="pauseToMenuBtn" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-4 border-red-700 text-sm mb-2 transition-colors">
+                        В МЕНЮ ИГРЫ
+                    </button>
                     
                     <div class="text-xs text-gray-300 text-center mt-1 border-b border-gray-600 pb-1" id="lbl_cacheTitle">Кэш браузера</div>
                     <div class="flex gap-2">
@@ -199,7 +202,7 @@
                 <h1 class="text-4xl font-bold text-red-500 mb-2 text-center" id="lbl_gameOverTitle">МИССИЯ ПРОВАЛЕНА</h1>
                 <p class="text-xl mb-6"><span id="lbl_finalScore">Итоговый счет:</span> <span id="finalScore" class="text-yellow-400">0</span></p>
                 <button id="restartBtn" class="bg-white hover:bg-gray-200 text-black font-bold py-3 px-8 rounded border-4 border-gray-400 text-xl transition-colors">
-                    В МЕНЮ
+                    В МЕНЮ ИГРЫ
                 </button>
             </div>
 
@@ -217,7 +220,7 @@
                         <li class="flex items-start gap-2"><span class="text-gray-400 text-lg leading-none">💣</span> <span id="enc_bomb"><b>Бомба:</b> Авиаудар, огромный урон всем врагам.</span></li>
                         <li class="flex items-start gap-2"><span class="text-amber-500 text-lg leading-none">⏱</span> <span id="enc_time"><b>Часы:</b> Замораживает всех врагов на 8 секунд.</span></li>
                     </ul>
-                    <button id="closeInfoBtn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded border-2 border-gray-500 transition-colors" id="lbl_encClose">ЗАКРЫТЬ</button>
+                    <button id="closeInfoBtn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded border-2 border-gray-500 transition-colors">ЗАКРЫТЬ</button>
                 </div>
             </div>
         </div>
@@ -265,9 +268,10 @@ const i18n = {
         save: "СОХРАНИТЬ", load: "ЗАГРУЗИТЬ", deviceTitle: "Файл на устройстве", download: "СКАЧАТЬ",
         levelCleared: "УРОВЕНЬ ПРОЙДЕН!<br><br><span class='text-white text-xl'>ПРИГОТОВЬТЕСЬ К УРОВНЮ {n}</span>",
         missionFailed: "МИССИЯ ПРОВАЛЕНА", finalScore: "Итоговый счет:",
-        toMenu: "В МЕНЮ", backToMenu: "🏠 В меню", pauseBtn: "⏸️ Пауза",
+        exitBtn: "🏠 Выход", pauseBtn: "Пауза", pauseMenuBtn: "В МЕНЮ ИГРЫ", gameOverMenuBtn: "В МЕНЮ ИГРЫ",
         mineBtn: "МИНА<br>(B/И)", baseDestroyed: "БАЗА УНИЧТОЖЕНА!", outOfTanks: "ТАНКИ КОНЧИЛИСЬ!",
         attemptsLeft: "<br><br><span class='text-white text-xl'>ОСТАЛОСЬ ПОПЫТОК: {n}</span>",
+        lastChance: "<br><br><span class='text-red-500 text-xl font-bold'>ПОСЛЕДНЯЯ ПОПЫТКА!</span>",
         success: "УСПЕШНО!", loaded: "ЗАГРУЖЕНО!", noSaves: "НЕТ СОХРАНЕНИЙ", downloaded: "СКАЧАНО!",
         saveError: "Ошибка чтения файла сохранения! Возможно файл поврежден.",
         langToggle: "🌐 EN",
@@ -299,9 +303,10 @@ const i18n = {
         save: "SAVE", load: "LOAD", deviceTitle: "Device File", download: "DOWNLOAD",
         levelCleared: "LEVEL CLEARED!<br><br><span class='text-white text-xl'>GET READY FOR LEVEL {n}</span>",
         missionFailed: "MISSION FAILED", finalScore: "Final Score:",
-        toMenu: "TO MENU", backToMenu: "🏠 Menu", pauseBtn: "⏸️ Pause",
+        exitBtn: "🏠 Exit", pauseBtn: "Pause", pauseMenuBtn: "TO GAME MENU", gameOverMenuBtn: "TO GAME MENU",
         mineBtn: "MINE<br>(B)", baseDestroyed: "BASE DESTROYED!", outOfTanks: "OUT OF TANKS!",
         attemptsLeft: "<br><br><span class='text-white text-xl'>ATTEMPTS LEFT: {n}</span>",
+        lastChance: "<br><br><span class='text-red-500 text-xl font-bold'>FINAL ATTEMPT!</span>",
         success: "SUCCESS!", loaded: "LOADED!", noSaves: "NO SAVES", downloaded: "DOWNLOADED!",
         saveError: "Error reading save file! It might be corrupted.",
         langToggle: "🌐 RU",
@@ -324,6 +329,78 @@ const t = (key, params = {}) => {
     return str;
 };
 
+function resetToStartScreen() {
+    document.getElementById('gameOverScreen').classList.add('hidden');
+    document.getElementById('pauseScreen').classList.add('hidden');
+    document.getElementById('transitionScreen').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+    document.getElementById('headerPauseBtn').classList.add('hidden');
+    gameState = 'START';
+    sfx.stopEngine();
+}
+
+function goHome() {
+    try {
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:' || window.location.protocol === 'file:') {
+            window.location.href = 'index.html';
+        } else {
+            resetToStartScreen();
+        }
+    } catch (e) {
+        resetToStartScreen();
+    }
+}
+
+function goToGameMenu() {
+    resetToStartScreen();
+}
+
+function updateObjectiveUI() {
+    const objUI = document.getElementById('objectiveUI');
+    let activeEnemies = enemies ? enemies.filter(e => !e.markForDeletion).length : 0; 
+
+    if (levelType === 'CLASSIC') {
+        objUI.innerText = t('objDefend', {n: enemiesToSpawn + activeEnemies});
+        objUI.className = "w-full text-center mb-2 font-bold text-green-300 bg-gray-800 rounded py-1 border border-green-700 text-[11px] sm:text-xs";
+    } else if (levelType === 'BOSS') {
+        objUI.innerText = t('objBoss');
+        objUI.className = "w-full text-center mb-2 font-bold text-yellow-300 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
+    } else if (levelType === 'COMMAND') {
+        objUI.innerText = t('objCommand', {n: radarsAlive});
+        objUI.className = "w-full text-center mb-2 font-bold text-cyan-300 bg-gray-800 rounded py-1 border border-cyan-700 text-[11px] sm:text-xs";
+    } else if (levelType === 'STEALTH') {
+        if (assaultMode === 'SUBSTATION' && substationAlive) {
+            objUI.innerText = t('objStealthSub');
+            objUI.className = "w-full text-center mb-2 font-bold text-emerald-400 bg-gray-800 rounded py-1 border border-emerald-700 text-[11px] sm:text-xs animate-pulse";
+        } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
+            objUI.innerText = t('objStealthBtn', {n: buttonsLeft});
+            objUI.className = "w-full text-center mb-2 font-bold text-red-400 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs animate-pulse";
+        } else {
+            objUI.innerText = t('objStealth');
+            objUI.className = "w-full text-center mb-2 font-bold text-emerald-300 bg-gray-800 rounded py-1 border border-emerald-700 text-[11px] sm:text-xs";
+        }
+    } else if (levelType === 'ELECTRO') {
+        if (generatorAlive) {
+            objUI.innerText = t('objElectro');
+            objUI.className = "w-full text-center mb-2 font-bold text-yellow-400 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
+        } else {
+            objUI.innerText = t('objFort');
+            objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
+        }
+    } else {
+        if (assaultMode === 'SUBSTATION' && substationAlive) {
+            objUI.innerText = t('objSub');
+            objUI.className = "w-full text-center mb-2 font-bold text-blue-300 bg-gray-800 rounded py-1 border border-blue-700 text-[11px] sm:text-xs animate-pulse";
+        } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
+            objUI.innerText = t('objMiniBosses', {n: countMiniBosses()});
+            objUI.className = "w-full text-center mb-2 font-bold text-orange-400 bg-gray-800 rounded py-1 border border-orange-700 text-[11px] sm:text-xs animate-pulse";
+        } else {
+            objUI.innerText = t('objFort');
+            objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
+        }
+    }
+}
+
 function updateStaticUI() {
     document.documentElement.lang = currentLang;
     document.getElementById('lbl_score').innerHTML = t('score');
@@ -333,9 +410,6 @@ function updateStaticUI() {
     document.getElementById('startBtn').innerHTML = t('newGame');
     document.getElementById('startLoadBtn').innerHTML = t('continue');
     document.getElementById('lbl_saveFileStart').innerHTML = t('saveFile');
-    
-    let btn = document.getElementById('muteBtn');
-    if (sfx.isMuted) btn.innerText = t('soundOff'); else btn.innerText = t('soundOn');
     
     document.getElementById('lbl_pauseTitle').innerHTML = t('pauseTitle');
     document.getElementById('resumeBtn').innerHTML = t('resume');
@@ -348,14 +422,18 @@ function updateStaticUI() {
     
     document.getElementById('lbl_gameOverTitle').innerHTML = t('missionFailed');
     document.getElementById('lbl_finalScore').innerHTML = t('finalScore');
-    document.getElementById('restartBtn').innerHTML = t('toMenu');
-    document.getElementById('lbl_backToMenu').innerHTML = t('backToMenu');
-    document.getElementById('headerPauseBtn').innerHTML = t('pauseBtn');
     document.getElementById('lbl_mineBtn').innerHTML = t('mineBtn');
     document.getElementById('langToggleBtn').innerHTML = t('langToggle');
 
+    document.getElementById('lbl_exitBtn').innerHTML = t('exitBtn');
+    document.getElementById('lbl_pauseBtn').innerHTML = t('pauseBtn');
+    document.getElementById('pauseToMenuBtn').innerHTML = t('pauseMenuBtn');
+    document.getElementById('restartBtn').innerHTML = t('gameOverMenuBtn');
+
     document.getElementById('lbl_encTitle').innerHTML = t('encTitle');
-    document.getElementById('lbl_encClose').innerHTML = t('encClose');
+    let closeBtn = document.getElementById('closeInfoBtn');
+    if (closeBtn) closeBtn.innerHTML = t('encClose'); 
+    
     document.getElementById('enc_life').innerHTML = t('encLife');
     document.getElementById('enc_shield').innerHTML = t('encShield');
     document.getElementById('enc_fire').innerHTML = t('encFire');
@@ -364,6 +442,9 @@ function updateStaticUI() {
     document.getElementById('enc_turret').innerHTML = t('encTurret');
     document.getElementById('enc_bomb').innerHTML = t('encBomb');
     document.getElementById('enc_time').innerHTML = t('encTime');
+    
+    let muteBtn = document.getElementById('muteBtnHeader');
+    if (muteBtn) muteBtn.innerText = sfx.isMuted ? '🔇' : '🔊';
     
     updateObjectiveUI();
 }
@@ -549,8 +630,6 @@ let exposureTimer = 0;
 let spottedTimer = 0;
 let wasSpottedLastFrame = false;
 
-const countMiniBosses = () => enemies.filter(e => e.isMiniBoss && !e.markForDeletion && e.hp > 0).length;
-
 let enemiesToSpawn = 0;
 let enemySpawnTimer = 0;
 const ENEMY_SPAWN_RATE = 2500;
@@ -582,6 +661,829 @@ let touchDirs = { up: false, down: false, left: false, right: false };
 let touchFire = false;
 let touchMine = false;
 
+
+/**
+ * КЛАССЫ СУЩНОСТЕЙ
+ */
+class Particle {
+    constructor(x, y, color) {
+        this.x = x; this.y = y; this.color = color; const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 80 + 30;
+        this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed; this.life = 1.0; this.decay = Math.random() * 2 + 1;
+    }
+    update(dt) { this.x += this.vx * (dt / 1000); this.y += this.vy * (dt / 1000); this.life -= this.decay * (dt / 1000); }
+    draw(ctx) { ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, 4, 4); ctx.globalAlpha = 1.0; }
+}
+
+function createExplosion(x, y, color, count) { for(let i=0; i<count; i++) particles.push(new Particle(x, y, color)); }
+
+class Bullet {
+    constructor(x, y, dx, dy, isPlayer, ownerId, isDrone = false) {
+        this.x = x; this.y = y; this.dx = dx; this.dy = dy;
+        this.speed = (isPlayer && ownerId.weaponLevel >= 1 && !isDrone) ? 450 : 350;
+        this.isPlayer = isPlayer; this.ownerId = ownerId;
+        this.isDrone = isDrone;
+        this.radius = 4; this.markForDeletion = false;
+    }
+
+    update(dt) {
+        this.x += this.dx * this.speed * (dt / 1000); this.y += this.dy * this.speed * (dt / 1000);
+
+        if (this.x < 0 || this.x > COLS * TILE_SIZE || this.y < 0 || this.y > ROWS * TILE_SIZE) {
+            this.markForDeletion = true; createExplosion(this.x, this.y, '#aaa', 5); sfx.playArmorHit(); return;
+        }
+
+        let isFriendlyShooter = this.isDrone || (this.ownerId && (this.ownerId.isAllyAI || this.ownerId.constructor.name === 'Turret'));
+        
+        let checkFriendlyStructure = (r, c) => {
+            for (let br = Math.max(0, r - 2); br <= Math.min(ROWS - 1, r + 2); br++) {
+                for (let bc = Math.max(0, c - 2); bc <= Math.min(COLS - 1, c + 2); bc++) {
+                    if (grid[br][bc] === BASE || grid[br][bc] === RADAR) return true;
+                }
+            }
+            return false;
+        };
+
+        let col = Math.floor(this.x / TILE_SIZE); let row = Math.floor(this.y / TILE_SIZE);
+        if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+            let cell = grid[row][col];
+            if (cell !== EMPTY && cell !== WATER && cell !== BUSH && cell !== RAIL && cell !== BTN_OFF && cell !== BTN_ON) {
+                if (cell === BRICK) {
+                    if (isFriendlyShooter && checkFriendlyStructure(row, col)) {
+                        this.markForDeletion = true; 
+                        createExplosion(this.x, this.y, '#ff9900', 5);
+                        return; 
+                    }
+
+                    let state = brickState[row][col];
+                    let px = col * TILE_SIZE; let py = row * TILE_SIZE;
+                    let hit = false;
+                    let newState = state;
+
+                    let dbx = this.x - this.radius; let dby = this.y - this.radius;
+                    let dbw = this.radius * 2; let dbh = this.radius * 2;
+                    if (this.dy < 0) { dby -= 8; dbh += 8; dbx -= 4; dbw += 8; } 
+                    else if (this.dy > 0) { dbh += 8; dbx -= 4; dbw += 8; } 
+                    else if (this.dx < 0) { dbx -= 8; dbw += 8; dby -= 4; dbh += 8; } 
+                    else if (this.dx > 0) { dbw += 8; dby -= 4; dbh += 8; } 
+
+                    let quarters = [
+                        {bit: 1, x: px, y: py}, {bit: 2, x: px+16, y: py},
+                        {bit: 4, x: px, y: py+16}, {bit: 8, x: px+16, y: py+16}
+                    ];
+                    
+                    for (let q of quarters) {
+                        if ((state & q.bit) && rectIntersect(dbx, dby, dbw, dbh, q.x, q.y, 16, 16)) {
+                            hit = true; newState &= ~q.bit; 
+                        }
+                    }
+                    
+                    if (hit) {
+                        this.markForDeletion = true; 
+                        createExplosion(this.x, this.y, '#ff9900', 10);
+                        sfx.playExplosion(false);
+                        brickState[row][col] = newState;
+                        if (newState === 0) grid[row][col] = EMPTY;
+                        return;
+                    }
+                } else {
+                    if (isFriendlyShooter && (cell === BASE || cell === RADAR)) {
+                        this.markForDeletion = true; 
+                        createExplosion(this.x, this.y, '#ffaa00', 5);
+                        return; 
+                    }
+
+                    this.markForDeletion = true; createExplosion(this.x, this.y, '#ff9900', 10);
+                    if (cell === STEEL || cell === GATE) { sfx.playArmorHit(); }
+                    else if (cell === BASE) { baseAlive = false; createExplosion(this.x, this.y, '#ff0000', 40); sfx.playExplosion(true); levelFailed(t('baseDestroyed')); return; }
+                    else if (cell === SUBSTATION && this.isPlayer) {
+                        grid[row][col] = EMPTY; substationAlive = false;
+                        createExplosion(this.x, this.y, '#0ea5e9', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
+                    }
+                    else if (cell === GENERATOR && this.isPlayer) {
+                        grid[row][col] = EMPTY; generatorAlive = false; isShocking = false;
+                        createExplosion(this.x, this.y, '#f59e0b', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
+                    }
+                    else if (cell === RADAR) {
+                        grid[row][col] = EMPTY; radarsAlive--;
+                        createExplosion(this.x, this.y, '#0ea5e9', 40); sfx.playExplosion(true); updateObjectiveUI();
+                        return;
+                    }
+                    else if (cell === ENEMY_BASE && this.isPlayer) { 
+                        if (assaultMode === 'SUBSTATION' && substationAlive) {
+                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#3b82f6', 15);
+                        } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
+                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#f59e0b', 15);
+                        } else if (levelType === 'ELECTRO' && generatorAlive) {
+                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#fde047', 15);
+                        } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
+                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#ef4444', 15);
+                        } else {
+                            grid[row][col] = EMPTY; createExplosion(this.x, this.y, '#ff00ff', 50); sfx.playExplosion(true); winLevel(); 
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
+        for (let other of bullets) {
+            if (other !== this && !other.markForDeletion && this.ownerId !== other.ownerId) {
+                let dist = Math.hypot(this.x - other.x, this.y - other.y);
+                if (dist < this.radius + other.radius + 4) {
+                    this.markForDeletion = true; other.markForDeletion = true;
+                    createExplosion((this.x + other.x) / 2, (this.y + other.y) / 2, '#fff', 6); return;
+                }
+            }
+        }
+
+        if (this.isPlayer) {
+            for (let enemy of enemies) {
+                if (!enemy.markForDeletion && this.checkTankHit(enemy)) {
+                    this.markForDeletion = true; enemy.hp--;
+                    if (enemy.hp <= 0) {
+                        enemy.markForDeletion = true; 
+                        score += (enemy.isBoss ? 1000 : (enemy.isMiniBoss ? 500 : (enemy.eType === 'NORMAL' ? 100 : 300)));
+                        document.getElementById('scoreUI').innerText = score;
+                        createExplosion(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff4400', enemy.isBoss ? 80 : 25); sfx.playExplosion(true);
+                        updateObjectiveUI();
+                        
+                        if (Math.random() < 0.20) {
+                            let bType; let roll = Math.random();
+                            if (roll < 0.05) bType = 'BOMB';
+                            else if (roll < 0.15) bType = 'TIME';
+                            else if (roll < 0.35) bType = Math.random() < 0.5 ? 'ALLY' : 'TURRET';
+                            else { const std = ['LIFE', 'SHIELD', 'FIRE', 'BASE']; bType = std[Math.floor(Math.random() * std.length)]; }
+                            bonuses.push(new Bonus(enemy.x + 10, enemy.y + 10, bType));
+                        }
+                    } else { 
+                        createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); 
+                        if (enemy.isBoss && Math.random() < 0.05) {
+                            let dropTypes = ['FIRE', 'LIFE', 'ALLY', 'TURRET', 'SHIELD', 'TIME'];
+                            bonuses.push(new Bonus(this.x, this.y, dropTypes[Math.floor(Math.random() * dropTypes.length)]));
+                        }
+                    }
+                    break;
+                }
+            }
+        } else {
+            if (player && !player.markForDeletion && this.checkTankHit(player)) {
+                this.markForDeletion = true;
+                if (player.shieldTimer > 0) { createExplosion(this.x, this.y, '#3b82f6', 10); sfx.playArmorHit(); }
+                else playerDeath();
+            }
+            for (let ally of allies) {
+                if (!ally.markForDeletion && this.checkTankHit(ally)) {
+                    this.markForDeletion = true;
+                    if (ally.shieldTimer > 0) { createExplosion(this.x, this.y, '#3b82f6', 10); sfx.playArmorHit(); }
+                    else {
+                        ally.hp--;
+                        if (ally.hp <= 0) { ally.markForDeletion = true; createExplosion(ally.x + ally.w/2, ally.y + ally.h/2, '#0ea5e9', 25); sfx.playExplosion(true); }
+                        else { createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); }
+                    }
+                    break;
+                }
+            }
+            for (let t of turrets) {
+                if (!t.markForDeletion && this.x > t.x && this.x < t.x + TILE_SIZE && this.y > t.y && this.y < t.y + TILE_SIZE) {
+                    this.markForDeletion = true; t.hp--;
+                    if (t.hp <= 0) { t.markForDeletion = true; createExplosion(t.x + TILE_SIZE/2, t.y + TILE_SIZE/2, '#a855f7', 30); sfx.playExplosion(true); }
+                    else { createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); }
+                    break;
+                }
+            }
+        }
+    }
+    checkTankHit(tank) { return this.x > tank.x && this.x < tank.x + tank.w && this.y > tank.y && this.y < tank.y + tank.h; }
+    draw(ctx) { ctx.fillStyle = this.isPlayer ? '#fff' : '#fca5a5'; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); }
+}
+
+class LaserBeam {
+    constructor(startX, startY, endX, endY) {
+        this.startX = startX; this.startY = startY;
+        this.endX = endX; this.endY = endY;
+        this.lifeTime = 200; 
+        this.maxLife = 200;
+        this.markForDeletion = false;
+    }
+    update(dt) {
+        this.lifeTime -= dt;
+        if (this.lifeTime <= 0) this.markForDeletion = true;
+    }
+    draw(ctx) {
+        ctx.save();
+        let alpha = this.lifeTime / this.maxLife;
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 8;
+        ctx.beginPath(); ctx.moveTo(this.startX, this.startY); ctx.lineTo(this.endX, this.endY); ctx.stroke();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(this.startX, this.startY); ctx.lineTo(this.endX, this.endY); ctx.stroke();
+        ctx.restore();
+    }
+}
+
+class Mine {
+    constructor(x, y, isEnemy = false) {
+        this.x = x; this.y = y;
+        this.radius = 6;
+        this.isEnemy = isEnemy;
+        this.markForDeletion = false;
+    }
+    update(dt) {
+        if (this.isEnemy) {
+            let targets = [];
+            if (player && !player.markForDeletion) targets.push(player);
+            targets = targets.concat(allies);
+            
+            for (let t of targets) {
+                if (Math.hypot(t.x + t.w/2 - this.x, t.y + t.h/2 - this.y) < 18) {
+                    this.markForDeletion = true;
+                    createExplosion(this.x, this.y, '#ff0000', 30);
+                    sfx.playExplosion(true);
+                    if (t.shieldTimer > 0) {
+                        sfx.playArmorHit();
+                        createExplosion(this.x, this.y, '#3b82f6', 10);
+                    } else {
+                        if (t === player) playerDeath();
+                        else { t.hp = 0; t.markForDeletion = true; }
+                    }
+                }
+            }
+        } else {
+            for (let e of enemies) {
+                if (!e.markForDeletion && Math.hypot(e.x + e.w/2 - this.x, e.y + e.h/2 - this.y) < 18) {
+                    this.markForDeletion = true;
+                    e.hp -= 10;
+                    if (e.hp <= 0) {
+                        e.markForDeletion = true;
+                        createExplosion(this.x, this.y, '#ff0000', 30);
+                        sfx.playExplosion(true);
+                        score += (e.isBoss ? 1000 : (e.isMiniBoss ? 500 : (e.eType === 'NORMAL' ? 100 : 300)));
+                        document.getElementById('scoreUI').innerText = score;
+                        updateObjectiveUI();
+                    } else {
+                        createExplosion(this.x, this.y, '#ff9900', 15);
+                        sfx.playArmorHit();
+                    }
+                }
+            }
+        }
+    }
+    draw(ctx) {
+        if (levelType === 'COMMAND' && this.isEnemy && player && !player.markForDeletion) {
+             let dist = Math.hypot(this.x - (player.x + player.w/2), this.y - (player.y + player.h/2));
+             let visRadius = radarsAlive === 3 ? 9999 : (radarsAlive === 2 ? 250 : (radarsAlive === 1 ? 150 : 80));
+             if (dist > visRadius) return;
+        }
+
+        ctx.fillStyle = this.isEnemy ? '#374151' : '#ef4444';
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
+        if (Math.floor(Date.now() / 250) % 2 === 0) {
+            ctx.fillStyle = this.isEnemy ? '#ef4444' : '#fff';
+            ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
+        }
+    }
+}
+
+class Bonus {
+    constructor(x, y, type) {
+        this.x = x; this.y = y; this.w = 20; this.h = 20;
+        this.type = type;
+        this.blinkTimer = 0; this.markForDeletion = false;
+        this.lifeTime = 15000; 
+    }
+    update(dt) {
+        this.lifeTime -= dt;
+        if (this.lifeTime <= 0) this.markForDeletion = true;
+        this.blinkTimer += dt;
+    }
+    draw(ctx) {
+        if (this.blinkTimer % 400 < 200 && this.lifeTime > 3000) return; 
+        if (this.blinkTimer % 200 < 100 && this.lifeTime <= 3000) return;
+
+        ctx.fillStyle = '#fff'; ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.font = 'bold 16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        
+        let char = '';
+        if(this.type === 'LIFE') { ctx.fillStyle = '#ef4444'; char = '♥'; }
+        else if(this.type === 'SHIELD') { ctx.fillStyle = '#3b82f6'; char = 'S'; }
+        else if(this.type === 'FIRE') { ctx.fillStyle = '#eab308'; char = '★'; ctx.font = '18px sans-serif'; }
+        else if(this.type === 'BASE') { ctx.fillStyle = '#22c55e'; char = 'B'; }
+        else if(this.type === 'ALLY') { ctx.fillStyle = '#0ea5e9'; char = 'A'; }
+        else if(this.type === 'TURRET') { ctx.fillStyle = '#a855f7'; char = 'T'; }
+        else if(this.type === 'BOMB') { ctx.fillStyle = '#111827'; char = '💣'; ctx.font = '12px sans-serif'; }
+        else if(this.type === 'TIME') { ctx.fillStyle = '#f59e0b'; char = '⏱'; ctx.font = '12px sans-serif'; }
+        
+        ctx.fillRect(this.x+2, this.y+2, this.w-4, this.h-4);
+        ctx.fillStyle = '#fff'; ctx.fillText(char, this.x + this.w/2, this.y + this.h/2 + ((this.type==='BOMB'||this.type==='TIME')?1:2));
+    }
+}
+
+class Turret {
+    constructor(c, r) {
+        this.x = c * TILE_SIZE; this.y = r * TILE_SIZE;
+        this.hp = 5; this.lifeTime = 25000; this.cooldown = 0;
+        this.dir = DIR_UP; this.markForDeletion = false;
+    }
+    update(dt) {
+        this.lifeTime -= dt;
+        if (this.lifeTime <= 0) {
+            this.markForDeletion = true; createExplosion(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, '#a855f7', 20);
+            return;
+        }
+        this.cooldown -= dt;
+        if (this.cooldown <= 0 && enemies && enemies.length > 0) {
+            let closest = enemies[0]; let minDist = Infinity;
+            for (let e of enemies) {
+                let d = Math.hypot(e.x - this.x, e.y - this.y);
+                if (d < minDist) { minDist = d; closest = e; }
+            }
+            let diffX = closest.x - this.x; let diffY = closest.y - this.y;
+            if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
+            else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
+            this.shoot(); this.cooldown = 600; 
+        }
+    }
+    shoot() {
+        let bx = this.x + TILE_SIZE / 2; let by = this.y + TILE_SIZE / 2; let bdx = 0, bdy = 0;
+        if (this.dir === DIR_UP) { bdy = -1; by -= 12; }
+        if (this.dir === DIR_DOWN) { bdy = 1; by += 12; }
+        if (this.dir === DIR_LEFT) { bdx = -1; bx -= 12; }
+        if (this.dir === DIR_RIGHT) { bdx = 1; bx += 12; }
+        bullets.push(new Bullet(bx, by, bdx, bdy, true, this)); sfx.playShoot(true);
+    }
+    draw(ctx) {
+        ctx.save(); ctx.translate(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2);
+        if (this.lifeTime < 3000 && Math.floor(Date.now() / 150) % 2 === 0) ctx.fillStyle = '#ffaaaa';
+        else ctx.fillStyle = '#6b7280';
+        ctx.fillRect(-12, -12, 24, 24); ctx.fillStyle = '#4b5563'; ctx.fillRect(-8, -8, 16, 16);
+        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI*2); ctx.fill();
+        if (this.dir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.dir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.dir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#a855f7'; ctx.fillRect(-3, -16, 6, 16); ctx.restore();
+        ctx.fillStyle = '#ef4444'; ctx.fillRect(this.x + 2, this.y - 6, 28, 4);
+        ctx.fillStyle = '#22c55e'; ctx.fillRect(this.x + 2, this.y - 6, 28 * (this.hp / 5), 4);
+    }
+}
+
+class Tank {
+    constructor(x, y, isPlayer, eType = 'NORMAL', isAllyAI = false) {
+        this.eType = eType; 
+        this.isBoss = (eType === 'BOSS');
+        this.isMiniBoss = (eType === 'MINIBOSS');
+        
+        this.w = this.isBoss ? 48 : 28; 
+        this.h = this.isBoss ? 48 : 28;
+        this.x = x * TILE_SIZE + (TILE_SIZE - this.w)/2; 
+        this.y = y * TILE_SIZE + (TILE_SIZE - this.h)/2;
+        this.isPlayer = isPlayer; this.isAllyAI = isAllyAI;
+        this.dir = DIR_UP; 
+        
+        if (this.isBoss) this.speed = 60;
+        else if (this.isMiniBoss) this.speed = 70;
+        else this.speed = isPlayer && !isAllyAI ? 120 : (isAllyAI ? 100 : 80); 
+        
+        this.cooldown = 0; this.markForDeletion = false;
+        
+        this.hp = isAllyAI ? 3 : (this.isBoss ? 30 : (this.isMiniBoss ? 15 : 1)); 
+        this.maxHp = this.hp;
+        this.shieldTimer = (isPlayer && !isAllyAI) ? 3000 : (isAllyAI ? 2000 : 0); 
+        this.weaponLevel = (isPlayer && !isAllyAI) ? playerWeaponLevel : 0; 
+        
+        this.droneTimer = 0;
+        this.droneCooldown = 0;
+        this.droneDir = DIR_UP;
+
+        this.revealedTimer = 0;
+        this.isHidden = false;
+
+        if (!isPlayer || isAllyAI) {
+            this.dir = isAllyAI ? DIR_UP : DIR_DOWN;
+            this.aiTimer = 0; this.blockedTimer = 0;
+            if (eType === 'FAST') this.speed = 140;
+            if (eType === 'ARMORED') this.hp = 3;
+            if (eType === 'RAPID') this.speed = 70;
+        }
+    }
+
+    update(dt) {
+        if (this.cooldown > 0) this.cooldown -= dt;
+        if (this.shieldTimer > 0) this.shieldTimer -= dt;
+        if (this.revealedTimer > 0) this.revealedTimer -= dt;
+
+        if (this.isPlayer && !this.isAllyAI) {
+            let pr = Math.floor((this.y + this.h/2) / TILE_SIZE);
+            let pc = Math.floor((this.x + this.w/2) / TILE_SIZE);
+            let inBush = (pr >= 0 && pr < ROWS && pc >= 0 && pc < COLS && grid[pr][pc] === BUSH);
+            this.isHidden = inBush && this.revealedTimer <= 0;
+            
+            if (pr >= 0 && pr < ROWS && pc >= 0 && pc < COLS) {
+                if (grid[pr][pc] === BTN_OFF) {
+                    grid[pr][pc] = BTN_ON;
+                    sfx.playBonus();
+                    buttonsLeft--;
+                    updateObjectiveUI();
+                    if (buttonsLeft <= 0) {
+                        for(let r=0; r<ROWS; r++) {
+                            for(let c=0; c<COLS; c++) {
+                                if(grid[r][c] === GATE) grid[r][c] = EMPTY;
+                            }
+                        }
+                        sfx.playExplosion(true);
+                    }
+                }
+            }
+        }
+        
+        if (!this.isPlayer && !this.isAllyAI && timeStopTimer > 0) return;
+
+        let dx = 0, dy = 0; let moving = false;
+
+        if (this.isPlayer && !this.isAllyAI) {
+            if (keys.ArrowUp || keys.w || keys.W || keys['ц'] || keys['Ц'] || touchDirs.up) { dy = -1; this.dir = DIR_UP; moving = true; }
+            else if (keys.ArrowDown || keys.s || keys.S || keys['ы'] || keys['Ы'] || touchDirs.down) { dy = 1; this.dir = DIR_DOWN; moving = true; }
+            else if (keys.ArrowLeft || keys.a || keys.A || keys['ф'] || keys['Ф'] || touchDirs.left) { dx = -1; this.dir = DIR_LEFT; moving = true; }
+            else if (keys.ArrowRight || keys.d || keys.D || keys['в'] || keys['В'] || touchDirs.right) { dx = 1; this.dir = DIR_RIGHT; moving = true; }
+            
+            if ((keys[' '] || touchFire) && this.cooldown <= 0) this.shoot();
+            
+            if (this.droneTimer > 0) {
+                this.droneTimer -= dt;
+                this.droneCooldown -= dt;
+                if (this.droneCooldown <= 0 && enemies && enemies.length > 0) {
+                    let closest = enemies[0]; let minDist = Infinity;
+                    for (let e of enemies) {
+                        let d = Math.hypot(e.x - this.x, e.y - this.y);
+                        if (d < minDist) { minDist = d; closest = e; }
+                    }
+                    let diffX = closest.x - this.x; let diffY = closest.y - this.y;
+                    if (Math.abs(diffX) > Math.abs(diffY)) this.droneDir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
+                    else this.droneDir = diffY > 0 ? DIR_DOWN : DIR_UP;
+
+                    let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
+                    let offset = 14; 
+                    if (this.droneDir === DIR_UP) { bdy = -1; by -= offset; }
+                    if (this.droneDir === DIR_DOWN) { bdy = 1; by += offset; }
+                    if (this.droneDir === DIR_LEFT) { bdx = -1; bx -= offset; }
+                    if (this.droneDir === DIR_RIGHT) { bdx = 1; bx += offset; }
+                    
+                    bullets.push(new Bullet(bx, by, bdx, bdy, true, this, true));
+                    sfx.playShoot(true);
+                    this.revealedTimer = 2000;
+                    this.droneCooldown = 600;
+                }
+            }
+
+            if (moving && gameState === 'PLAYING') sfx.startEngine(); else sfx.stopEngine();
+        } else {
+            moving = true; this.aiTimer -= dt;
+            
+            let isAlerted = (levelType === 'STEALTH' && spottedTimer > 0);
+            let isPatrol = (levelType === 'STEALTH' && spottedTimer <= 0);
+
+            if (this.aiTimer <= 0) {
+                this.aiTimer = 500 + Math.random() * 800;
+                if (this.isAllyAI) {
+                    if (enemies && enemies.length > 0) {
+                        let target = enemies[Math.floor(Math.random() * enemies.length)];
+                        let diffX = target.x - this.x; let diffY = target.y - this.y;
+                        if (Math.random() < 0.8) {
+                            if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
+                            else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
+                        } else this.dir = Math.floor(Math.random() * 4);
+                    } else this.dir = Math.floor(Math.random() * 4);
+                } else {
+                    let targetX = (player && !player.isHidden) ? player.x : null; 
+                    let targetY = (player && !player.isHidden) ? player.y : null;
+                    
+                    if ((levelType === 'CLASSIC' || isAlerted) && baseAlive && Math.random() < 0.4) { 
+                        targetX = 7 * TILE_SIZE; targetY = (levelType === 'STEALTH' ? ROWS - 1 : 14) * TILE_SIZE; 
+                    }
+
+                    if (isPatrol) {
+                        this.aiTimer = 1000; 
+                    } else if (targetX !== null && targetY !== null && Math.random() < 0.7) {
+                        let diffX = targetX - this.x; let diffY = targetY - this.y;
+                        if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
+                        else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
+                    } else this.dir = Math.floor(Math.random() * 4);
+                }
+            }
+            if (this.dir === DIR_UP) dy = -1; if (this.dir === DIR_DOWN) dy = 1;
+            if (this.dir === DIR_LEFT) dx = -1; if (this.dir === DIR_RIGHT) dx = 1;
+            
+            let shootChance = isPatrol ? 0.01 : (this.isBoss ? 0.08 : 0.05);
+            if (Math.random() < shootChance && this.cooldown <= 0) this.shoot();
+        }
+
+        if (moving) {
+            let purelyForwardX = this.x + dx * this.speed * (dt / 1000); let purelyForwardY = this.y + dy * this.speed * (dt / 1000);
+            let nextX = purelyForwardX; let nextY = purelyForwardY;
+
+            if (this.isPlayer && !this.isAllyAI) {
+                const alignSpeed = this.speed * 1.5 * (dt / 1000);
+                if (dy !== 0) { 
+                    let centerCol = Math.floor((this.x + this.w / 2) / TILE_SIZE); let idealX = centerCol * TILE_SIZE + (TILE_SIZE - this.w) / 2;
+                    let diffX = idealX - this.x;
+                    if (Math.abs(diffX) > 0.5) { let testX = this.x + Math.sign(diffX) * Math.min(Math.abs(diffX), alignSpeed); if (!this.checkCollision(testX, this.y)) nextX = testX; }
+                } else if (dx !== 0) { 
+                    let centerRow = Math.floor((this.y + this.h / 2) / TILE_SIZE); let idealY = centerRow * TILE_SIZE + (TILE_SIZE - this.h) / 2;
+                    let diffY = idealY - this.y;
+                    if (Math.abs(diffY) > 0.5) { let testY = this.y + Math.sign(diffY) * Math.min(Math.abs(diffY), alignSpeed); if (!this.checkCollision(this.x, testY)) nextY = testY; }
+                }
+            }
+
+            if (nextX < 0) nextX = 0; if (nextY < 0) nextY = 0;
+            if (nextX + this.w > COLS * TILE_SIZE) nextX = COLS * TILE_SIZE - this.w;
+            if (nextY + this.h > ROWS * TILE_SIZE) nextY = ROWS * TILE_SIZE - this.h;
+            if (purelyForwardX < 0) purelyForwardX = 0; if (purelyForwardY < 0) purelyForwardY = 0;
+            if (purelyForwardX + this.w > COLS * TILE_SIZE) purelyForwardX = COLS * TILE_SIZE - this.w;
+            if (purelyForwardY + this.h > ROWS * TILE_SIZE) purelyForwardY = ROWS * TILE_SIZE - this.h;
+
+            if (!this.checkCollision(nextX, nextY)) {
+                this.x = nextX; this.y = nextY; if(!this.isPlayer || this.isAllyAI) this.blockedTimer = 0;
+            } else if (!this.checkCollision(purelyForwardX, purelyForwardY)) {
+                this.x = purelyForwardX; this.y = purelyForwardY; if(!this.isPlayer || this.isAllyAI) this.blockedTimer = 0;
+            } else if (this.isPlayer && !this.isAllyAI) {
+                if (nextX !== purelyForwardX && !this.checkCollision(nextX, this.y)) this.x = nextX;
+                else if (nextY !== purelyForwardY && !this.checkCollision(this.x, nextY)) this.y = nextY;
+            }
+
+            if ((!this.isPlayer || this.isAllyAI) && this.checkCollision(purelyForwardX, purelyForwardY)) {
+                this.blockedTimer += dt;
+                if (this.blockedTimer > 200) {
+                    let possibleDirs = [DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT].filter(d => d !== this.dir);
+                    this.dir = possibleDirs[Math.floor(Math.random() * possibleDirs.length)];
+                    this.aiTimer = 600; this.blockedTimer = 0;
+                }
+            }
+        }
+    }
+
+    checkCollision(nextX, nextY) {
+        let leftCol = Math.floor(nextX / TILE_SIZE); let rightCol = Math.floor((nextX + this.w - 0.1) / TILE_SIZE);
+        let topRow = Math.floor(nextY / TILE_SIZE); let bottomRow = Math.floor((nextY + this.h - 0.1) / TILE_SIZE);
+
+        for (let r = topRow; r <= bottomRow; r++) {
+            for (let c = leftCol; c <= rightCol; c++) {
+                if (r >= 0 && r < ROWS && c >= 0 && c < COLS) { 
+                    let cell = grid[r][c];
+                    if (cell !== EMPTY && cell !== BUSH && cell !== RAIL && cell !== BTN_OFF && cell !== BTN_ON) { 
+                        if (this.isBoss && cell === BRICK) {
+                            grid[r][c] = EMPTY;
+                            brickState[r][c] = 0;
+                            createExplosion(c * TILE_SIZE + 16, r * TILE_SIZE + 16, '#ff9900', 5);
+                            continue;
+                        }
+                        
+                        if (cell === BRICK) {
+                            let state = brickState[r][c];
+                            let px = c * TILE_SIZE; let py = r * TILE_SIZE;
+                            let hit = false;
+                            if ((state & 1) && rectIntersect(nextX, nextY, this.w, this.h, px, py, 16, 16)) hit = true;
+                            if ((state & 2) && rectIntersect(nextX, nextY, this.w, this.h, px+16, py, 16, 16)) hit = true;
+                            if ((state & 4) && rectIntersect(nextX, nextY, this.w, this.h, px, py+16, 16, 16)) hit = true;
+                            if ((state & 8) && rectIntersect(nextX, nextY, this.w, this.h, px+16, py+16, 16, 16)) hit = true;
+                            if (hit) return true;
+                        } else {
+                            return true; 
+                        }
+                    }
+                }
+            }
+        }
+        const allTanks = [player, ...enemies, ...allies].filter(t => t && t !== this);
+        for (let other of allTanks) {
+            if (nextX < other.x + other.w && nextX + this.w > other.x && nextY < other.y + other.h && nextY + this.h > other.y) return true;
+        }
+        for (let t of turrets) {
+            if (nextX < t.x + TILE_SIZE && nextX + this.w > t.x && nextY < t.y + TILE_SIZE && nextY + this.h > t.y) return true;
+        }
+        return false;
+    }
+
+    shoot() {
+        if (this.isPlayer && !this.isAllyAI) {
+            this.revealedTimer = 2000; 
+            if (levelType === 'STEALTH') {
+                exposureTimer = 1500; 
+                spottedTimer = 3000;
+            }
+        }
+
+        if (this.isPlayer && !this.isAllyAI && this.weaponLevel >= 3) {
+            let bx = this.x + this.w / 2; let by = this.y + this.h / 2;
+            let stepX = 0, stepY = 0;
+            if (this.dir === DIR_UP) stepY = -4;
+            if (this.dir === DIR_DOWN) stepY = 4;
+            if (this.dir === DIR_LEFT) stepX = -4;
+            if (this.dir === DIR_RIGHT) stepX = 4;
+            
+            let curX = bx, curY = by;
+            let hitWall = false;
+            
+            while (!hitWall) {
+                curX += stepX; curY += stepY;
+                if (curX < 0 || curY < 0 || curX > COLS * TILE_SIZE || curY > ROWS * TILE_SIZE) break;
+                
+                let cCol = Math.floor(curX / TILE_SIZE); let cRow = Math.floor(curY / TILE_SIZE);
+                if (cRow >= 0 && cRow < ROWS && cCol >= 0 && cCol < COLS) {
+                    let cell = grid[cRow][cCol];
+                    if (cell === STEEL || cell === BASE || cell === SUBSTATION || cell === RADAR || cell === GENERATOR || cell === GATE || (cell === ENEMY_BASE && this.isPlayer)) {
+                        hitWall = true;
+                        if (cell === BASE) { baseAlive = false; levelFailed(t('baseDestroyed')); }
+                        
+                        if (cell === ENEMY_BASE) {
+                            if (assaultMode === 'SUBSTATION' && substationAlive) {
+                                sfx.playArmorHit(); createExplosion(curX, curY, '#3b82f6', 15);
+                            } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
+                                sfx.playArmorHit(); createExplosion(curX, curY, '#f59e0b', 15);
+                            } else if (levelType === 'ELECTRO' && generatorAlive) {
+                                sfx.playArmorHit(); createExplosion(curX, curY, '#fde047', 15);
+                            } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
+                                sfx.playArmorHit(); createExplosion(curX, curY, '#ef4444', 15);
+                            } else {
+                                grid[cRow][cCol] = EMPTY; createExplosion(curX, curY, '#ff00ff', 50); sfx.playExplosion(true); winLevel();
+                            }
+                        }
+                        
+                        if (cell === SUBSTATION) { grid[cRow][cCol] = EMPTY; substationAlive = false; updateObjectiveUI(); }
+                        if (cell === GENERATOR) { grid[cRow][cCol] = EMPTY; generatorAlive = false; isShocking = false; updateObjectiveUI(); }
+                        if (cell === RADAR) { grid[cRow][cCol] = EMPTY; radarsAlive--; updateObjectiveUI(); createExplosion(curX, curY, '#0ea5e9', 40); }
+                        if (cell !== ENEMY_BASE && cell !== RADAR && cell !== GATE) createExplosion(curX, curY, '#ffaa00', 10);
+                        if (cell === GATE) { sfx.playArmorHit(); createExplosion(curX, curY, '#ef4444', 10); }
+                        break;
+                    } else if (cell === BRICK) {
+                        grid[cRow][cCol] = EMPTY; 
+                        brickState[cRow][cCol] = 0;
+                        createExplosion(cCol*TILE_SIZE+16, cRow*TILE_SIZE+16, '#ff9900', 5);
+                    } 
+                }
+                
+                for (let enemy of enemies) {
+                    if (!enemy.markForDeletion && curX >= enemy.x && curX <= enemy.x+enemy.w && curY >= enemy.y && curY <= enemy.y+enemy.h) {
+                        if (enemy.isBoss) enemy.hp -= 5;
+                        else enemy.hp = 0; 
+                        
+                        if (enemy.hp <= 0) {
+                            enemy.markForDeletion = true;
+                            score += (enemy.isBoss ? 1000 : (enemy.isMiniBoss ? 500 : (enemy.eType === 'NORMAL' ? 100 : 300)));
+                            document.getElementById('scoreUI').innerText = score;
+                            createExplosion(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff4400', enemy.isBoss ? 80 : 30);
+                            updateObjectiveUI();
+                            
+                            if (Math.random() < 0.20) {
+                                let bType; let roll = Math.random();
+                                if (roll < 0.05) bType = 'BOMB';
+                                else if (roll < 0.15) bType = 'TIME';
+                                else if (roll < 0.35) bType = Math.random() < 0.5 ? 'ALLY' : 'TURRET';
+                                else { const std = ['LIFE', 'SHIELD', 'FIRE', 'BASE']; bType = std[Math.floor(Math.random() * std.length)]; }
+                                bonuses.push(new Bonus(enemy.x + 10, enemy.y + 10, bType));
+                            }
+                        } else {
+                            createExplosion(curX, curY, '#fff', 10); sfx.playArmorHit();
+                        }
+                    }
+                }
+            }
+            
+            lasers.push(new LaserBeam(bx, by, curX, curY));
+            sfx.playLaser();
+            this.cooldown = 450; 
+            return;
+        }
+
+        const activeBullets = bullets.filter(b => b.ownerId === this);
+        let maxBul = (this.isPlayer && !this.isAllyAI) ? (this.weaponLevel === 2 ? 6 : (this.weaponLevel >= 1 ? 3 : 1)) : (this.eType === 'RAPID' ? 2 : (this.isBoss ? 4 : (this.isMiniBoss ? 2 : 1)));
+        if (activeBullets.length >= maxBul) return;
+
+        if (this.isPlayer && !this.isAllyAI && this.weaponLevel === 2) {
+            let bx1 = this.x + this.w / 2; let by1 = this.y + this.h / 2; let bdx1 = 0, bdy1 = 0;
+            let bx2 = this.x + this.w / 2; let by2 = this.y + this.h / 2; let bdx2 = 0, bdy2 = 0;
+            let offset = 6; 
+            
+            if (this.dir === DIR_UP) { bdy1 = -1; by1 -= 4; bdy2 = -1; by2 -= 4; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_DOWN) { bdy1 = 1; by1 += 4; bdy2 = 1; by2 += 4; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_LEFT) { bdx1 = -1; bx1 -= 4; bdx2 = -1; bx2 -= 4; by1 -= offset; by2 += offset; }
+            if (this.dir === DIR_RIGHT) { bdx1 = 1; bx1 += 4; bdx2 = 1; bx2 += 4; by1 -= offset; by2 += offset; }
+
+            bullets.push(new Bullet(bx1, by1, bdx1, bdy1, this.isPlayer, this));
+            bullets.push(new Bullet(bx2, by2, bdx2, bdy2, this.isPlayer, this));
+            sfx.playShoot(true);
+            this.cooldown = 150; 
+            return;
+        }
+
+        if (this.isBoss) {
+            let bx1 = this.x + this.w / 2; let by1 = this.y + this.h / 2; let bdx1 = 0, bdy1 = 0;
+            let bx2 = this.x + this.w / 2; let by2 = this.y + this.h / 2; let bdx2 = 0, bdy2 = 0;
+            let offset = 12;
+            
+            if (this.dir === DIR_UP) { bdy1 = -1; by1 -= 20; bdy2 = -1; by2 -= 20; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_DOWN) { bdy1 = 1; by1 += 20; bdy2 = 1; by2 += 20; bx1 -= offset; bx2 += offset; }
+            if (this.dir === DIR_LEFT) { bdx1 = -1; bx1 -= 20; bdx2 = -1; bx2 -= 20; by1 -= offset; by2 += offset; }
+            if (this.dir === DIR_RIGHT) { bdx1 = 1; bx1 += 20; bdx2 = 1; bx2 += 20; by1 -= offset; by2 += offset; }
+
+            bullets.push(new Bullet(bx1, by1, bdx1, bdy1, false, this));
+            bullets.push(new Bullet(bx2, by2, bdx2, bdy2, false, this));
+            sfx.playShoot(false);
+            this.cooldown = 800; 
+        } else {
+            let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
+            if (this.dir === DIR_UP) { bdy = -1; by = this.y - 4; }
+            if (this.dir === DIR_DOWN) { bdy = 1; by = this.y + this.h + 4; }
+            if (this.dir === DIR_LEFT) { bdx = -1; bx = this.x - 4; }
+            if (this.dir === DIR_RIGHT) { bdx = 1; bx = this.x + this.w + 4; }
+
+            bullets.push(new Bullet(bx, by, bdx, bdy, this.isPlayer, this)); sfx.playShoot(this.isPlayer && !this.isAllyAI);
+            
+            if (this.isPlayer && !this.isAllyAI) this.cooldown = this.weaponLevel >= 1 ? 150 : 400;
+            else this.cooldown = (this.eType === 'RAPID' || this.isMiniBoss) ? 200 : 500;
+        }
+    }
+
+    draw(ctx) {
+        if (levelType === 'COMMAND' && radarsAlive < 3 && !this.isPlayer && !this.isAllyAI && player && !player.markForDeletion) {
+            let dist = Math.hypot(this.x - player.x, this.y - player.y);
+            let visRadius = radarsAlive === 2 ? 250 : (radarsAlive === 1 ? 150 : 80);
+            if (dist > visRadius) return;
+        }
+
+        ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+        
+        if (this.isPlayer && this.isHidden) {
+            ctx.globalAlpha = 0.5; 
+        }
+        
+        if (!this.isPlayer && !this.isAllyAI && timeStopTimer > 0) {
+            ctx.globalAlpha = 0.8;
+            ctx.fillStyle = '#60a5fa'; 
+            ctx.fillRect(-this.w/2 - 2, -this.h/2 - 2, this.w + 4, this.h + 4);
+            ctx.globalAlpha = 1.0;
+        }
+
+        if (this.dir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.dir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.dir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
+
+        if (this.isBoss) {
+            ctx.fillStyle = '#7f1d1d'; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); 
+            ctx.fillStyle = '#111'; ctx.fillRect(-this.w/2, -this.h/2, 12, this.h); 
+            ctx.fillRect(this.w/2 - 12, -this.h/2, 12, this.h); 
+            ctx.fillStyle = '#b91c1c'; 
+            ctx.fillRect(-16, -this.h/2 - 14, 8, 28); ctx.fillRect(8, -this.h/2 - 14, 8, 28);
+            ctx.fillStyle = '#991b1b'; 
+            ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
+        } else {
+            if (this.isPlayer && !this.isAllyAI) ctx.fillStyle = '#eab308'; 
+            else if (this.isAllyAI) ctx.fillStyle = '#0ea5e9'; 
+            else if (this.isMiniBoss) ctx.fillStyle = '#ea580c'; 
+            else if (this.eType === 'FAST') ctx.fillStyle = '#f472b6'; 
+            else if (this.eType === 'ARMORED') ctx.fillStyle = '#14532d'; 
+            else if (this.eType === 'RAPID') ctx.fillStyle = '#f97316'; 
+            else ctx.fillStyle = '#cbd5e1'; 
+
+            ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.fillStyle = '#222';
+            ctx.fillRect(-this.w/2, -this.h/2, 6, this.h); ctx.fillRect(this.w/2 - 6, -this.h/2, 6, this.h);
+            
+            ctx.fillStyle = this.isPlayer ? ((this.weaponLevel >= 3 && !this.isAllyAI) ? '#ef4444' : '#16a34a') : '#ef4444'; 
+            if (this.isPlayer && !this.isAllyAI && this.weaponLevel === 2) {
+                ctx.fillRect(-7, -this.h/2 - 8, 4, 18); 
+                ctx.fillRect(3, -this.h/2 - 8, 4, 18);  
+            } else if (this.isPlayer && !this.isAllyAI && this.weaponLevel >= 3) {
+                ctx.fillRect(-4, -this.h/2 - 10, 8, 20); 
+            } else {
+                ctx.fillRect(-3, -this.h/2 - 8, 6, 18);  
+            }
+            ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); 
+        }
+        
+        if (this.droneTimer > 0) {
+            ctx.restore(); 
+            ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+            if (this.droneDir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.droneDir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.droneDir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
+            
+            if (this.droneTimer < 3000 && Math.floor(Date.now() / 150) % 2 === 0) ctx.fillStyle = '#ffaaaa';
+            else ctx.fillStyle = '#a855f7'; 
+            
+            ctx.fillRect(-6, -6, 12, 12);
+            ctx.fillStyle = '#4b5563';
+            ctx.fillRect(-4, -4, 8, 8);
+            ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#a855f7';
+            ctx.fillRect(-1.5, -10, 3, 10);
+        }
+
+        ctx.restore();
+
+        if (this.isBoss || this.isMiniBoss) {
+            ctx.fillStyle = '#ef4444'; ctx.fillRect(this.x, this.y - 8, this.w, 4);
+            ctx.fillStyle = '#22c55e'; ctx.fillRect(this.x, this.y - 8, this.w * (this.hp / this.maxHp), 4);
+        }
+
+        if (this.shieldTimer > 0) {
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(this.x + this.w/2, this.y + this.h/2, this.w/2 + 6, 0, Math.PI * 2); ctx.stroke();
+        }
+    }
+}
+
 /**
  * СОХРАНЕНИЕ / ЗАГРУЗКА
  */
@@ -590,8 +1492,8 @@ function saveGame() {
         level, score, lives, continues, lastBossLevel, playerWeaponLevel,
         grid, brickState, savedGrid, savedBrickState, 
         savedLevelType: levelType, savedAssaultMode: assaultMode, 
-        savedEnemyBaseCol: enemyBaseCol, savedEnemiesToSpawn: savedEnemiesToSpawn, 
-        savedEnemyMinesCoords: savedEnemyMinesCoords, savedButtonsLeft: buttonsLeft,
+        savedEnemyBaseCol: enemyBaseCol, savedEnemiesToSpawn: enemiesToSpawn, 
+        savedEnemyMinesCoords: enemyMines.map(m => ({x: m.x, y: m.y})), savedButtonsLeft: buttonsLeft,
         enemiesToSpawn, radarsAlive, substationAlive, generatorAlive, buttonsLeft
     };
     localStorage.setItem('battleCityEvoSave', JSON.stringify(data));
@@ -795,7 +1697,7 @@ function generateLevel() {
                 for(let r=0; r<=2; r++) {
                     for(let c=enemyBaseCol-2; c<=enemyBaseCol+2; c++) {
                         if(r===1 && c===enemyBaseCol) continue;
-                        grid[r][c] = GATE; // Непробиваемые лазерные ворота
+                        grid[r][c] = GATE; 
                     }
                 }
                 buttonsLeft = 2;
@@ -879,7 +1781,7 @@ function generateLevel() {
             }
         }
 
-        // Карвинг краев (Делаем карты непрямоугольными - улучшенный алгоритм)
+        // Карвинг краев
         if (levelType !== 'CLASSIC' && levelType !== 'BOSS') {
             let leftW = Math.floor(Math.random() * 3);
             let rightW = Math.floor(Math.random() * 3);
@@ -889,7 +1791,7 @@ function generateLevel() {
                 if (leftW < 0) leftW = 0; if (leftW > 4) leftW = 4;
                 if (rightW < 0) rightW = 0; if (rightW > 4) rightW = 4;
 
-                if (r > 3 && r < ROWS - 4) { // Оставляем зоны спавна чистыми
+                if (r > 3 && r < ROWS - 4) { 
                     for (let c = 0; c < leftW; c++) {
                         if (grid[r][c] === EMPTY || grid[r][c] === BUSH) grid[r][c] = STEEL;
                     }
@@ -957,6 +1859,7 @@ function generateLevel() {
     savedEnemyBaseCol = enemyBaseCol;
     savedEnemiesToSpawn = enemiesToSpawn;
     savedEnemyMinesCoords = enemyMines.map(m => ({x: m.x, y: m.y}));
+    savedButtonsLeft = buttonsLeft;
 }
 
 function checkLevelPlayability() {
@@ -981,7 +1884,6 @@ function checkLevelPlayability() {
         for (let dir of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
             let nr = curr.r + dir[0]; let nc = curr.c + dir[1];
             if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
-                // Врата GATE считаем проходимыми для проверки (т.к. они откроются кнопками)
                 let isPassable = (grid[nr][nc] !== STEEL && grid[nr][nc] !== WATER);
                 if (grid[nr][nc] === GATE) isPassable = true;
 
@@ -1016,880 +1918,6 @@ function checkLevelPlayability() {
     return true; 
 }
 
-function updateObjectiveUI() {
-    const objUI = document.getElementById('objectiveUI');
-    let activeEnemies = enemies.filter(e => !e.markForDeletion).length; 
-
-    if (levelType === 'CLASSIC') {
-        objUI.innerText = t('objDefend', {n: enemiesToSpawn + activeEnemies});
-        objUI.className = "w-full text-center mb-2 font-bold text-green-300 bg-gray-800 rounded py-1 border border-green-700 text-[11px] sm:text-xs";
-    } else if (levelType === 'BOSS') {
-        objUI.innerText = t('objBoss');
-        objUI.className = "w-full text-center mb-2 font-bold text-yellow-300 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
-    } else if (levelType === 'COMMAND') {
-        objUI.innerText = t('objCommand', {n: radarsAlive});
-        objUI.className = "w-full text-center mb-2 font-bold text-cyan-300 bg-gray-800 rounded py-1 border border-cyan-700 text-[11px] sm:text-xs";
-    } else if (levelType === 'STEALTH') {
-        if (assaultMode === 'SUBSTATION' && substationAlive) {
-            objUI.innerText = t('objStealthSub');
-            objUI.className = "w-full text-center mb-2 font-bold text-emerald-400 bg-gray-800 rounded py-1 border border-emerald-700 text-[11px] sm:text-xs animate-pulse";
-        } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
-            objUI.innerText = t('objStealthBtn', {n: buttonsLeft});
-            objUI.className = "w-full text-center mb-2 font-bold text-red-400 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs animate-pulse";
-        } else {
-            objUI.innerText = t('objStealth');
-            objUI.className = "w-full text-center mb-2 font-bold text-emerald-300 bg-gray-800 rounded py-1 border border-emerald-700 text-[11px] sm:text-xs";
-        }
-    } else if (levelType === 'ELECTRO') {
-        if (generatorAlive) {
-            objUI.innerText = t('objElectro');
-            objUI.className = "w-full text-center mb-2 font-bold text-yellow-400 bg-gray-800 rounded py-1 border border-yellow-700 text-[11px] sm:text-xs animate-pulse";
-        } else {
-            objUI.innerText = t('objFort');
-            objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
-        }
-    } else {
-        if (assaultMode === 'SUBSTATION' && substationAlive) {
-            objUI.innerText = t('objSub');
-            objUI.className = "w-full text-center mb-2 font-bold text-blue-300 bg-gray-800 rounded py-1 border border-blue-700 text-[11px] sm:text-xs animate-pulse";
-        } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
-            objUI.innerText = t('objMiniBosses', {n: countMiniBosses()});
-            objUI.className = "w-full text-center mb-2 font-bold text-orange-400 bg-gray-800 rounded py-1 border border-orange-700 text-[11px] sm:text-xs animate-pulse";
-        } else {
-            objUI.innerText = t('objFort');
-            objUI.className = "w-full text-center mb-2 font-bold text-red-300 bg-gray-800 rounded py-1 border border-red-700 text-[11px] sm:text-xs";
-        }
-    }
-}
-
-/**
- * КЛАССЫ СУЩНОСТЕЙ
- */
-class Mine {
-    constructor(x, y, isEnemy = false) {
-        this.x = x; this.y = y;
-        this.radius = 6;
-        this.isEnemy = isEnemy;
-        this.markForDeletion = false;
-    }
-    update(dt) {
-        if (this.isEnemy) {
-            let targets = [];
-            if (player && !player.markForDeletion) targets.push(player);
-            targets = targets.concat(allies);
-            
-            for (let t of targets) {
-                if (Math.hypot(t.x + t.w/2 - this.x, t.y + t.h/2 - this.y) < 18) {
-                    this.markForDeletion = true;
-                    createExplosion(this.x, this.y, '#ff0000', 30);
-                    sfx.playExplosion(true);
-                    if (t.shieldTimer > 0) {
-                        sfx.playArmorHit();
-                        createExplosion(this.x, this.y, '#3b82f6', 10);
-                    } else {
-                        if (t === player) playerDeath();
-                        else { t.hp = 0; t.markForDeletion = true; }
-                    }
-                }
-            }
-        } else {
-            for (let e of enemies) {
-                if (!e.markForDeletion && Math.hypot(e.x + e.w/2 - this.x, e.y + e.h/2 - this.y) < 18) {
-                    this.markForDeletion = true;
-                    e.hp -= 10;
-                    if (e.hp <= 0) {
-                        e.markForDeletion = true;
-                        createExplosion(this.x, this.y, '#ff0000', 30);
-                        sfx.playExplosion(true);
-                        score += (e.isBoss ? 1000 : (e.isMiniBoss ? 500 : (e.eType === 'NORMAL' ? 100 : 300)));
-                        document.getElementById('scoreUI').innerText = score;
-                        updateObjectiveUI();
-                    } else {
-                        createExplosion(this.x, this.y, '#ff9900', 15);
-                        sfx.playArmorHit();
-                    }
-                }
-            }
-        }
-    }
-    draw(ctx) {
-        if (levelType === 'COMMAND' && this.isEnemy && player && !player.markForDeletion) {
-             let dist = Math.hypot(this.x - (player.x + player.w/2), this.y - (player.y + player.h/2));
-             let visRadius = radarsAlive === 3 ? 9999 : (radarsAlive === 2 ? 250 : (radarsAlive === 1 ? 150 : 80));
-             if (dist > visRadius) return;
-        }
-
-        ctx.fillStyle = this.isEnemy ? '#374151' : '#ef4444';
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-        if (Math.floor(Date.now() / 250) % 2 === 0) {
-            ctx.fillStyle = this.isEnemy ? '#ef4444' : '#fff';
-            ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI*2); ctx.fill();
-        }
-    }
-}
-
-class Bonus {
-    constructor(x, y, type) {
-        this.x = x; this.y = y; this.w = 20; this.h = 20;
-        this.type = type;
-        this.blinkTimer = 0; this.markForDeletion = false;
-        this.lifeTime = 15000; 
-    }
-    update(dt) {
-        this.lifeTime -= dt;
-        if (this.lifeTime <= 0) this.markForDeletion = true;
-        this.blinkTimer += dt;
-    }
-    draw(ctx) {
-        if (this.blinkTimer % 400 < 200 && this.lifeTime > 3000) return; 
-        if (this.blinkTimer % 200 < 100 && this.lifeTime <= 3000) return;
-
-        ctx.fillStyle = '#fff'; ctx.fillRect(this.x, this.y, this.w, this.h);
-        ctx.font = 'bold 16px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        
-        let char = '';
-        if(this.type === 'LIFE') { ctx.fillStyle = '#ef4444'; char = '♥'; }
-        else if(this.type === 'SHIELD') { ctx.fillStyle = '#3b82f6'; char = 'S'; }
-        else if(this.type === 'FIRE') { ctx.fillStyle = '#eab308'; char = '★'; ctx.font = '18px sans-serif'; }
-        else if(this.type === 'BASE') { ctx.fillStyle = '#22c55e'; char = 'B'; }
-        else if(this.type === 'ALLY') { ctx.fillStyle = '#0ea5e9'; char = 'A'; }
-        else if(this.type === 'TURRET') { ctx.fillStyle = '#a855f7'; char = 'T'; }
-        else if(this.type === 'BOMB') { ctx.fillStyle = '#111827'; char = '💣'; ctx.font = '12px sans-serif'; }
-        else if(this.type === 'TIME') { ctx.fillStyle = '#f59e0b'; char = '⏱'; ctx.font = '12px sans-serif'; }
-        
-        ctx.fillRect(this.x+2, this.y+2, this.w-4, this.h-4);
-        ctx.fillStyle = '#fff'; ctx.fillText(char, this.x + this.w/2, this.y + this.h/2 + ((this.type==='BOMB'||this.type==='TIME')?1:2));
-    }
-}
-
-class Turret {
-    constructor(c, r) {
-        this.x = c * TILE_SIZE; this.y = r * TILE_SIZE;
-        this.hp = 5; this.lifeTime = 25000; this.cooldown = 0;
-        this.dir = DIR_UP; this.markForDeletion = false;
-    }
-    update(dt) {
-        this.lifeTime -= dt;
-        if (this.lifeTime <= 0) {
-            this.markForDeletion = true; createExplosion(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, '#a855f7', 20);
-            return;
-        }
-        this.cooldown -= dt;
-        if (this.cooldown <= 0 && enemies.length > 0) {
-            let closest = enemies[0]; let minDist = Infinity;
-            for (let e of enemies) {
-                let d = Math.hypot(e.x - this.x, e.y - this.y);
-                if (d < minDist) { minDist = d; closest = e; }
-            }
-            let diffX = closest.x - this.x; let diffY = closest.y - this.y;
-            if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
-            else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
-            this.shoot(); this.cooldown = 600; 
-        }
-    }
-    shoot() {
-        let bx = this.x + TILE_SIZE / 2; let by = this.y + TILE_SIZE / 2; let bdx = 0, bdy = 0;
-        if (this.dir === DIR_UP) { bdy = -1; by -= 12; }
-        if (this.dir === DIR_DOWN) { bdy = 1; by += 12; }
-        if (this.dir === DIR_LEFT) { bdx = -1; bx -= 12; }
-        if (this.dir === DIR_RIGHT) { bdx = 1; bx += 12; }
-        bullets.push(new Bullet(bx, by, bdx, bdy, true, this)); sfx.playShoot(true);
-    }
-    draw(ctx) {
-        ctx.save(); ctx.translate(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2);
-        if (this.lifeTime < 3000 && Math.floor(Date.now() / 150) % 2 === 0) ctx.fillStyle = '#ffaaaa';
-        else ctx.fillStyle = '#6b7280';
-        ctx.fillRect(-12, -12, 24, 24); ctx.fillStyle = '#4b5563'; ctx.fillRect(-8, -8, 16, 16);
-        ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI*2); ctx.fill();
-        if (this.dir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.dir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.dir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
-        ctx.fillStyle = '#a855f7'; ctx.fillRect(-3, -16, 6, 16); ctx.restore();
-        ctx.fillStyle = '#ef4444'; ctx.fillRect(this.x + 2, this.y - 6, 28, 4);
-        ctx.fillStyle = '#22c55e'; ctx.fillRect(this.x + 2, this.y - 6, 28 * (this.hp / 5), 4);
-    }
-}
-
-class LaserBeam {
-    constructor(startX, startY, endX, endY) {
-        this.startX = startX; this.startY = startY;
-        this.endX = endX; this.endY = endY;
-        this.lifeTime = 200; 
-        this.maxLife = 200;
-        this.markForDeletion = false;
-    }
-    update(dt) {
-        this.lifeTime -= dt;
-        if (this.lifeTime <= 0) this.markForDeletion = true;
-    }
-    draw(ctx) {
-        ctx.save();
-        let alpha = this.lifeTime / this.maxLife;
-        ctx.globalAlpha = alpha;
-        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 8;
-        ctx.beginPath(); ctx.moveTo(this.startX, this.startY); ctx.lineTo(this.endX, this.endY); ctx.stroke();
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(this.startX, this.startY); ctx.lineTo(this.endX, this.endY); ctx.stroke();
-        ctx.restore();
-    }
-}
-
-class Tank {
-    constructor(x, y, isPlayer, eType = 'NORMAL', isAllyAI = false) {
-        this.eType = eType; 
-        this.isBoss = (eType === 'BOSS');
-        this.isMiniBoss = (eType === 'MINIBOSS');
-        
-        this.w = this.isBoss ? 48 : 28; 
-        this.h = this.isBoss ? 48 : 28;
-        this.x = x * TILE_SIZE + (TILE_SIZE - this.w)/2; 
-        this.y = y * TILE_SIZE + (TILE_SIZE - this.h)/2;
-        this.isPlayer = isPlayer; this.isAllyAI = isAllyAI;
-        this.dir = DIR_UP; 
-        
-        if (this.isBoss) this.speed = 60;
-        else if (this.isMiniBoss) this.speed = 70;
-        else this.speed = isPlayer && !isAllyAI ? 120 : (isAllyAI ? 100 : 80); 
-        
-        this.cooldown = 0; this.markForDeletion = false;
-        
-        this.hp = isAllyAI ? 3 : (this.isBoss ? 30 : (this.isMiniBoss ? 15 : 1)); 
-        this.maxHp = this.hp;
-        this.shieldTimer = (isPlayer && !isAllyAI) ? 3000 : (isAllyAI ? 2000 : 0); 
-        this.weaponLevel = (isPlayer && !isAllyAI) ? playerWeaponLevel : 0; 
-        
-        this.droneTimer = 0;
-        this.droneCooldown = 0;
-        this.droneDir = DIR_UP;
-
-        this.revealedTimer = 0;
-        this.isHidden = false;
-
-        if (!isPlayer || isAllyAI) {
-            this.dir = isAllyAI ? DIR_UP : DIR_DOWN;
-            this.aiTimer = 0; this.blockedTimer = 0;
-            if (eType === 'FAST') this.speed = 140;
-            if (eType === 'ARMORED') this.hp = 3;
-            if (eType === 'RAPID') this.speed = 70;
-        }
-    }
-
-    update(dt) {
-        if (this.cooldown > 0) this.cooldown -= dt;
-        if (this.shieldTimer > 0) this.shieldTimer -= dt;
-        if (this.revealedTimer > 0) this.revealedTimer -= dt;
-
-        if (this.isPlayer && !this.isAllyAI) {
-            let pr = Math.floor((this.y + this.h/2) / TILE_SIZE);
-            let pc = Math.floor((this.x + this.w/2) / TILE_SIZE);
-            let inBush = (pr >= 0 && pr < ROWS && pc >= 0 && pc < COLS && grid[pr][pc] === BUSH);
-            this.isHidden = inBush && this.revealedTimer <= 0;
-            
-            // Логика нажатия кнопок (Стелс)
-            if (pr >= 0 && pr < ROWS && pc >= 0 && pc < COLS) {
-                if (grid[pr][pc] === BTN_OFF) {
-                    grid[pr][pc] = BTN_ON;
-                    sfx.playBonus();
-                    buttonsLeft--;
-                    updateObjectiveUI();
-                    if (buttonsLeft <= 0) {
-                        for(let r=0; r<ROWS; r++) {
-                            for(let c=0; c<COLS; c++) {
-                                if(grid[r][c] === GATE) grid[r][c] = EMPTY;
-                            }
-                        }
-                        sfx.playExplosion(true);
-                    }
-                }
-            }
-        }
-        
-        if (!this.isPlayer && !this.isAllyAI && timeStopTimer > 0) return;
-
-        let dx = 0, dy = 0; let moving = false;
-
-        if (this.isPlayer && !this.isAllyAI) {
-            if (keys.ArrowUp || keys.w || keys.W || keys['ц'] || keys['Ц'] || touchDirs.up) { dy = -1; this.dir = DIR_UP; moving = true; }
-            else if (keys.ArrowDown || keys.s || keys.S || keys['ы'] || keys['Ы'] || touchDirs.down) { dy = 1; this.dir = DIR_DOWN; moving = true; }
-            else if (keys.ArrowLeft || keys.a || keys.A || keys['ф'] || keys['Ф'] || touchDirs.left) { dx = -1; this.dir = DIR_LEFT; moving = true; }
-            else if (keys.ArrowRight || keys.d || keys.D || keys['в'] || keys['В'] || touchDirs.right) { dx = 1; this.dir = DIR_RIGHT; moving = true; }
-            
-            if ((keys[' '] || touchFire) && this.cooldown <= 0) this.shoot();
-            
-            // Дрон-турель на танке игрока
-            if (this.droneTimer > 0) {
-                this.droneTimer -= dt;
-                this.droneCooldown -= dt;
-                if (this.droneCooldown <= 0 && enemies.length > 0) {
-                    let closest = enemies[0]; let minDist = Infinity;
-                    for (let e of enemies) {
-                        let d = Math.hypot(e.x - this.x, e.y - this.y);
-                        if (d < minDist) { minDist = d; closest = e; }
-                    }
-                    let diffX = closest.x - this.x; let diffY = closest.y - this.y;
-                    if (Math.abs(diffX) > Math.abs(diffY)) this.droneDir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
-                    else this.droneDir = diffY > 0 ? DIR_DOWN : DIR_UP;
-
-                    let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
-                    let offset = 14; 
-                    if (this.droneDir === DIR_UP) { bdy = -1; by -= offset; }
-                    if (this.droneDir === DIR_DOWN) { bdy = 1; by += offset; }
-                    if (this.droneDir === DIR_LEFT) { bdx = -1; bx -= offset; }
-                    if (this.droneDir === DIR_RIGHT) { bdx = 1; bx += offset; }
-                    
-                    bullets.push(new Bullet(bx, by, bdx, bdy, true, this, true));
-                    sfx.playShoot(true);
-                    this.revealedTimer = 2000;
-                    this.droneCooldown = 600;
-                }
-            }
-
-            if (moving && gameState === 'PLAYING') sfx.startEngine(); else sfx.stopEngine();
-        } else {
-            moving = true; this.aiTimer -= dt;
-            
-            let isAlerted = (levelType === 'STEALTH' && spottedTimer > 0);
-            let isPatrol = (levelType === 'STEALTH' && spottedTimer <= 0);
-
-            if (this.aiTimer <= 0) {
-                this.aiTimer = 500 + Math.random() * 800;
-                if (this.isAllyAI) {
-                    if (enemies.length > 0) {
-                        let target = enemies[Math.floor(Math.random() * enemies.length)];
-                        let diffX = target.x - this.x; let diffY = target.y - this.y;
-                        if (Math.random() < 0.8) {
-                            if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
-                            else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
-                        } else this.dir = Math.floor(Math.random() * 4);
-                    } else this.dir = Math.floor(Math.random() * 4);
-                } else {
-                    let targetX = (player && !player.isHidden) ? player.x : null; 
-                    let targetY = (player && !player.isHidden) ? player.y : null;
-                    
-                    if ((levelType === 'CLASSIC' || isAlerted) && baseAlive && Math.random() < 0.4) { 
-                        targetX = 7 * TILE_SIZE; targetY = (levelType === 'STEALTH' ? ROWS - 1 : 14) * TILE_SIZE; 
-                    }
-
-                    if (isPatrol) {
-                        this.aiTimer = 1000; 
-                    } else if (targetX !== null && targetY !== null && Math.random() < 0.7) {
-                        let diffX = targetX - this.x; let diffY = targetY - this.y;
-                        if (Math.abs(diffX) > Math.abs(diffY)) this.dir = diffX > 0 ? DIR_RIGHT : DIR_LEFT;
-                        else this.dir = diffY > 0 ? DIR_DOWN : DIR_UP;
-                    } else this.dir = Math.floor(Math.random() * 4);
-                }
-            }
-            if (this.dir === DIR_UP) dy = -1; if (this.dir === DIR_DOWN) dy = 1;
-            if (this.dir === DIR_LEFT) dx = -1; if (this.dir === DIR_RIGHT) dx = 1;
-            
-            let shootChance = isPatrol ? 0.01 : (this.isBoss ? 0.08 : 0.05);
-            if (Math.random() < shootChance && this.cooldown <= 0) this.shoot();
-        }
-
-        if (moving) {
-            let purelyForwardX = this.x + dx * this.speed * (dt / 1000); let purelyForwardY = this.y + dy * this.speed * (dt / 1000);
-            let nextX = purelyForwardX; let nextY = purelyForwardY;
-
-            if (this.isPlayer && !this.isAllyAI) {
-                const alignSpeed = this.speed * 1.5 * (dt / 1000);
-                if (dy !== 0) { 
-                    let centerCol = Math.floor((this.x + this.w / 2) / TILE_SIZE); let idealX = centerCol * TILE_SIZE + (TILE_SIZE - this.w) / 2;
-                    let diffX = idealX - this.x;
-                    if (Math.abs(diffX) > 0.5) { let testX = this.x + Math.sign(diffX) * Math.min(Math.abs(diffX), alignSpeed); if (!this.checkCollision(testX, this.y)) nextX = testX; }
-                } else if (dx !== 0) { 
-                    let centerRow = Math.floor((this.y + this.h / 2) / TILE_SIZE); let idealY = centerRow * TILE_SIZE + (TILE_SIZE - this.h) / 2;
-                    let diffY = idealY - this.y;
-                    if (Math.abs(diffY) > 0.5) { let testY = this.y + Math.sign(diffY) * Math.min(Math.abs(diffY), alignSpeed); if (!this.checkCollision(this.x, testY)) nextY = testY; }
-                }
-            }
-
-            if (nextX < 0) nextX = 0; if (nextY < 0) nextY = 0;
-            if (nextX + this.w > COLS * TILE_SIZE) nextX = COLS * TILE_SIZE - this.w;
-            if (nextY + this.h > ROWS * TILE_SIZE) nextY = ROWS * TILE_SIZE - this.h;
-            if (purelyForwardX < 0) purelyForwardX = 0; if (purelyForwardY < 0) purelyForwardY = 0;
-            if (purelyForwardX + this.w > COLS * TILE_SIZE) purelyForwardX = COLS * TILE_SIZE - this.w;
-            if (purelyForwardY + this.h > ROWS * TILE_SIZE) purelyForwardY = ROWS * TILE_SIZE - this.h;
-
-            if (!this.checkCollision(nextX, nextY)) {
-                this.x = nextX; this.y = nextY; if(!this.isPlayer || this.isAllyAI) this.blockedTimer = 0;
-            } else if (!this.checkCollision(purelyForwardX, purelyForwardY)) {
-                this.x = purelyForwardX; this.y = purelyForwardY; if(!this.isPlayer || this.isAllyAI) this.blockedTimer = 0;
-            } else if (this.isPlayer && !this.isAllyAI) {
-                if (nextX !== purelyForwardX && !this.checkCollision(nextX, this.y)) this.x = nextX;
-                else if (nextY !== purelyForwardY && !this.checkCollision(this.x, nextY)) this.y = nextY;
-            }
-
-            if ((!this.isPlayer || this.isAllyAI) && this.checkCollision(purelyForwardX, purelyForwardY)) {
-                this.blockedTimer += dt;
-                if (this.blockedTimer > 200) {
-                    let possibleDirs = [DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT].filter(d => d !== this.dir);
-                    this.dir = possibleDirs[Math.floor(Math.random() * possibleDirs.length)];
-                    this.aiTimer = 600; this.blockedTimer = 0;
-                }
-            }
-        }
-    }
-
-    checkCollision(nextX, nextY) {
-        let leftCol = Math.floor(nextX / TILE_SIZE); let rightCol = Math.floor((nextX + this.w - 0.1) / TILE_SIZE);
-        let topRow = Math.floor(nextY / TILE_SIZE); let bottomRow = Math.floor((nextY + this.h - 0.1) / TILE_SIZE);
-
-        for (let r = topRow; r <= bottomRow; r++) {
-            for (let c = leftCol; c <= rightCol; c++) {
-                if (r >= 0 && r < ROWS && c >= 0 && c < COLS) { 
-                    let cell = grid[r][c];
-                    // Кнопки (11, 12), рельсы (9) и кусты (8) можно переезжать
-                    if (cell !== EMPTY && cell !== BUSH && cell !== RAIL && cell !== BTN_OFF && cell !== BTN_ON) { 
-                        if (this.isBoss && cell === BRICK) {
-                            grid[r][c] = EMPTY;
-                            brickState[r][c] = 0;
-                            createExplosion(c * TILE_SIZE + 16, r * TILE_SIZE + 16, '#ff9900', 5);
-                            continue;
-                        }
-                        
-                        if (cell === BRICK) {
-                            let state = brickState[r][c];
-                            let px = c * TILE_SIZE; let py = r * TILE_SIZE;
-                            let hit = false;
-                            if ((state & 1) && rectIntersect(nextX, nextY, this.w, this.h, px, py, 16, 16)) hit = true;
-                            if ((state & 2) && rectIntersect(nextX, nextY, this.w, this.h, px+16, py, 16, 16)) hit = true;
-                            if ((state & 4) && rectIntersect(nextX, nextY, this.w, this.h, px, py+16, 16, 16)) hit = true;
-                            if ((state & 8) && rectIntersect(nextX, nextY, this.w, this.h, px+16, py+16, 16, 16)) hit = true;
-                            if (hit) return true;
-                        } else {
-                            return true; 
-                        }
-                    }
-                }
-            }
-        }
-        const allTanks = [player, ...enemies, ...allies].filter(t => t && t !== this);
-        for (let other of allTanks) {
-            if (nextX < other.x + other.w && nextX + this.w > other.x && nextY < other.y + other.h && nextY + this.h > other.y) return true;
-        }
-        for (let t of turrets) {
-            if (nextX < t.x + TILE_SIZE && nextX + this.w > t.x && nextY < t.y + TILE_SIZE && nextY + this.h > t.y) return true;
-        }
-        return false;
-    }
-
-    shoot() {
-        if (this.isPlayer && !this.isAllyAI) {
-            this.revealedTimer = 2000; 
-            if (levelType === 'STEALTH') {
-                exposureTimer = 1500; 
-                spottedTimer = 3000;
-            }
-        }
-
-        if (this.isPlayer && !this.isAllyAI && this.weaponLevel >= 3) {
-            let bx = this.x + this.w / 2; let by = this.y + this.h / 2;
-            let stepX = 0, stepY = 0;
-            if (this.dir === DIR_UP) stepY = -4;
-            if (this.dir === DIR_DOWN) stepY = 4;
-            if (this.dir === DIR_LEFT) stepX = -4;
-            if (this.dir === DIR_RIGHT) stepX = 4;
-            
-            let curX = bx, curY = by;
-            let hitWall = false;
-            
-            while (!hitWall) {
-                curX += stepX; curY += stepY;
-                if (curX < 0 || curY < 0 || curX > COLS * TILE_SIZE || curY > ROWS * TILE_SIZE) break;
-                
-                let cCol = Math.floor(curX / TILE_SIZE); let cRow = Math.floor(curY / TILE_SIZE);
-                if (cRow >= 0 && cRow < ROWS && cCol >= 0 && cCol < COLS) {
-                    let cell = grid[cRow][cCol];
-                    if (cell === STEEL || cell === BASE || cell === SUBSTATION || cell === RADAR || cell === GENERATOR || cell === GATE || (cell === ENEMY_BASE && this.isPlayer)) {
-                        hitWall = true;
-                        if (cell === BASE) { baseAlive = false; levelFailed(t('baseDestroyed')); }
-                        
-                        if (cell === ENEMY_BASE) {
-                            if (assaultMode === 'SUBSTATION' && substationAlive) {
-                                sfx.playArmorHit(); createExplosion(curX, curY, '#3b82f6', 15);
-                            } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
-                                sfx.playArmorHit(); createExplosion(curX, curY, '#f59e0b', 15);
-                            } else if (levelType === 'ELECTRO' && generatorAlive) {
-                                sfx.playArmorHit(); createExplosion(curX, curY, '#fde047', 15);
-                            } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
-                                sfx.playArmorHit(); createExplosion(curX, curY, '#ef4444', 15);
-                            } else {
-                                grid[cRow][cCol] = EMPTY; createExplosion(curX, curY, '#ff00ff', 50); sfx.playExplosion(true); winLevel();
-                            }
-                        }
-                        
-                        if (cell === SUBSTATION) { grid[cRow][cCol] = EMPTY; substationAlive = false; updateObjectiveUI(); }
-                        if (cell === GENERATOR) { grid[cRow][cCol] = EMPTY; generatorAlive = false; isShocking = false; updateObjectiveUI(); }
-                        if (cell === RADAR) { grid[cRow][cCol] = EMPTY; radarsAlive--; updateObjectiveUI(); createExplosion(curX, curY, '#0ea5e9', 40); }
-                        if (cell !== ENEMY_BASE && cell !== RADAR && cell !== GATE) createExplosion(curX, curY, '#ffaa00', 10);
-                        if (cell === GATE) { sfx.playArmorHit(); createExplosion(curX, curY, '#ef4444', 10); }
-                        break;
-                    } else if (cell === BRICK) {
-                        grid[cRow][cCol] = EMPTY; 
-                        brickState[cRow][cCol] = 0;
-                        createExplosion(cCol*TILE_SIZE+16, cRow*TILE_SIZE+16, '#ff9900', 5);
-                    } 
-                }
-                
-                for (let e of enemies) {
-                    if (!e.markForDeletion && curX >= e.x && curX <= e.x+e.w && curY >= e.y && curY <= e.y+e.h) {
-                        if (e.isBoss) e.hp -= 5;
-                        else e.hp = 0; 
-                        
-                        if (e.hp <= 0) {
-                            e.markForDeletion = true;
-                            score += (e.isBoss ? 1000 : (e.isMiniBoss ? 500 : (e.eType === 'NORMAL' ? 100 : 300)));
-                            document.getElementById('scoreUI').innerText = score;
-                            createExplosion(e.x + e.w/2, e.y + e.h/2, '#ff4400', e.isBoss ? 80 : 30);
-                            updateObjectiveUI();
-                            
-                            if (Math.random() < 0.20) {
-                                let bType; let roll = Math.random();
-                                if (roll < 0.05) bType = 'BOMB';
-                                else if (roll < 0.15) bType = 'TIME';
-                                else if (roll < 0.35) bType = Math.random() < 0.5 ? 'ALLY' : 'TURRET';
-                                else { const std = ['LIFE', 'SHIELD', 'FIRE', 'BASE']; bType = std[Math.floor(Math.random() * std.length)]; }
-                                bonuses.push(new Bonus(e.x + 10, e.y + 10, bType));
-                            }
-                        } else {
-                            createExplosion(curX, curY, '#fff', 10); sfx.playArmorHit();
-                        }
-                    }
-                }
-            }
-            
-            lasers.push(new LaserBeam(bx, by, curX, curY));
-            sfx.playLaser();
-            this.cooldown = 450; 
-            return;
-        }
-
-        const activeBullets = bullets.filter(b => b.ownerId === this);
-        let maxBul = (this.isPlayer && !this.isAllyAI) ? (this.weaponLevel === 2 ? 6 : (this.weaponLevel >= 1 ? 3 : 1)) : (this.eType === 'RAPID' ? 2 : (this.isBoss ? 4 : (this.isMiniBoss ? 2 : 1)));
-        if (activeBullets.length >= maxBul) return;
-
-        if (this.isPlayer && !this.isAllyAI && this.weaponLevel === 2) {
-            let bx1 = this.x + this.w / 2; let by1 = this.y + this.h / 2; let bdx1 = 0, bdy1 = 0;
-            let bx2 = this.x + this.w / 2; let by2 = this.y + this.h / 2; let bdx2 = 0, bdy2 = 0;
-            let offset = 6; 
-            
-            if (this.dir === DIR_UP) { bdy1 = -1; by1 -= 4; bdy2 = -1; by2 -= 4; bx1 -= offset; bx2 += offset; }
-            if (this.dir === DIR_DOWN) { bdy1 = 1; by1 += 4; bdy2 = 1; by2 += 4; bx1 -= offset; bx2 += offset; }
-            if (this.dir === DIR_LEFT) { bdx1 = -1; bx1 -= 4; bdx2 = -1; bx2 -= 4; by1 -= offset; by2 += offset; }
-            if (this.dir === DIR_RIGHT) { bdx1 = 1; bx1 += 4; bdx2 = 1; bx2 += 4; by1 -= offset; by2 += offset; }
-
-            bullets.push(new Bullet(bx1, by1, bdx1, bdy1, this.isPlayer, this));
-            bullets.push(new Bullet(bx2, by2, bdx2, bdy2, this.isPlayer, this));
-            sfx.playShoot(true);
-            this.cooldown = 150; 
-            return;
-        }
-
-        if (this.isBoss) {
-            let bx1 = this.x + this.w / 2; let by1 = this.y + this.h / 2; let bdx1 = 0, bdy1 = 0;
-            let bx2 = this.x + this.w / 2; let by2 = this.y + this.h / 2; let bdx2 = 0, bdy2 = 0;
-            let offset = 12;
-            
-            if (this.dir === DIR_UP) { bdy1 = -1; by1 -= 20; bdy2 = -1; by2 -= 20; bx1 -= offset; bx2 += offset; }
-            if (this.dir === DIR_DOWN) { bdy1 = 1; by1 += 20; bdy2 = 1; by2 += 20; bx1 -= offset; bx2 += offset; }
-            if (this.dir === DIR_LEFT) { bdx1 = -1; bx1 -= 20; bdx2 = -1; bx2 -= 20; by1 -= offset; by2 += offset; }
-            if (this.dir === DIR_RIGHT) { bdx1 = 1; bx1 += 20; bdx2 = 1; bx2 += 20; by1 -= offset; by2 += offset; }
-
-            bullets.push(new Bullet(bx1, by1, bdx1, bdy1, false, this));
-            bullets.push(new Bullet(bx2, by2, bdx2, bdy2, false, this));
-            sfx.playShoot(false);
-            this.cooldown = 800; 
-        } else {
-            let bx = this.x + this.w / 2; let by = this.y + this.h / 2; let bdx = 0, bdy = 0;
-            if (this.dir === DIR_UP) { bdy = -1; by = this.y - 4; }
-            if (this.dir === DIR_DOWN) { bdy = 1; by = this.y + this.h + 4; }
-            if (this.dir === DIR_LEFT) { bdx = -1; bx = this.x - 4; }
-            if (this.dir === DIR_RIGHT) { bdx = 1; bx = this.x + this.w + 4; }
-
-            bullets.push(new Bullet(bx, by, bdx, bdy, this.isPlayer, this)); sfx.playShoot(this.isPlayer && !this.isAllyAI);
-            
-            if (this.isPlayer && !this.isAllyAI) this.cooldown = this.weaponLevel >= 1 ? 150 : 400;
-            else this.cooldown = (this.eType === 'RAPID' || this.isMiniBoss) ? 200 : 500;
-        }
-    }
-
-    draw(ctx) {
-        if (levelType === 'COMMAND' && radarsAlive < 3 && !this.isPlayer && !this.isAllyAI && player && !player.markForDeletion) {
-            let dist = Math.hypot(this.x - player.x, this.y - player.y);
-            let visRadius = radarsAlive === 2 ? 250 : (radarsAlive === 1 ? 150 : 80);
-            if (dist > visRadius) return;
-        }
-
-        ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-        
-        if (this.isPlayer && this.isHidden) {
-            ctx.globalAlpha = 0.5; 
-        }
-        
-        if (!this.isPlayer && !this.isAllyAI && timeStopTimer > 0) {
-            ctx.globalAlpha = 0.8;
-            ctx.fillStyle = '#60a5fa'; 
-            ctx.fillRect(-this.w/2 - 2, -this.h/2 - 2, this.w + 4, this.h + 4);
-            ctx.globalAlpha = 1.0;
-        }
-
-        if (this.dir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.dir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.dir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
-
-        if (this.isBoss) {
-            ctx.fillStyle = '#7f1d1d'; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); 
-            ctx.fillStyle = '#111'; ctx.fillRect(-this.w/2, -this.h/2, 12, this.h); 
-            ctx.fillRect(this.w/2 - 12, -this.h/2, 12, this.h); 
-            ctx.fillStyle = '#b91c1c'; 
-            ctx.fillRect(-16, -this.h/2 - 14, 8, 28); ctx.fillRect(8, -this.h/2 - 14, 8, 28);
-            ctx.fillStyle = '#991b1b'; 
-            ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
-        } else {
-            if (this.isPlayer && !this.isAllyAI) ctx.fillStyle = '#eab308'; 
-            else if (this.isAllyAI) ctx.fillStyle = '#0ea5e9'; 
-            else if (this.isMiniBoss) ctx.fillStyle = '#ea580c'; 
-            else if (this.eType === 'FAST') ctx.fillStyle = '#f472b6'; 
-            else if (this.eType === 'ARMORED') ctx.fillStyle = '#14532d'; 
-            else if (this.eType === 'RAPID') ctx.fillStyle = '#f97316'; 
-            else ctx.fillStyle = '#cbd5e1'; 
-
-            ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h); ctx.fillStyle = '#222';
-            ctx.fillRect(-this.w/2, -this.h/2, 6, this.h); ctx.fillRect(this.w/2 - 6, -this.h/2, 6, this.h);
-            
-            ctx.fillStyle = this.isPlayer ? ((this.weaponLevel >= 3 && !this.isAllyAI) ? '#ef4444' : '#16a34a') : '#ef4444'; 
-            if (this.isPlayer && !this.isAllyAI && this.weaponLevel === 2) {
-                ctx.fillRect(-7, -this.h/2 - 8, 4, 18); 
-                ctx.fillRect(3, -this.h/2 - 8, 4, 18);  
-            } else if (this.isPlayer && !this.isAllyAI && this.weaponLevel >= 3) {
-                ctx.fillRect(-4, -this.h/2 - 10, 8, 20); 
-            } else {
-                ctx.fillRect(-3, -this.h/2 - 8, 6, 18);  
-            }
-            ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill(); 
-        }
-        
-        if (this.droneTimer > 0) {
-            ctx.restore(); 
-            ctx.save(); ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
-            if (this.droneDir === DIR_RIGHT) ctx.rotate(Math.PI / 2); else if (this.droneDir === DIR_DOWN) ctx.rotate(Math.PI); else if (this.droneDir === DIR_LEFT) ctx.rotate(-Math.PI / 2);
-            
-            if (this.droneTimer < 3000 && Math.floor(Date.now() / 150) % 2 === 0) ctx.fillStyle = '#ffaaaa';
-            else ctx.fillStyle = '#a855f7'; 
-            
-            ctx.fillRect(-6, -6, 12, 12);
-            ctx.fillStyle = '#4b5563';
-            ctx.fillRect(-4, -4, 8, 8);
-            ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#a855f7';
-            ctx.fillRect(-1.5, -10, 3, 10);
-        }
-
-        ctx.restore();
-
-        if (this.isBoss || this.isMiniBoss) {
-            ctx.fillStyle = '#ef4444'; ctx.fillRect(this.x, this.y - 8, this.w, 4);
-            ctx.fillStyle = '#22c55e'; ctx.fillRect(this.x, this.y - 8, this.w * (this.hp / this.maxHp), 4);
-        }
-
-        if (this.shieldTimer > 0) {
-            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(this.x + this.w/2, this.y + this.h/2, this.w/2 + 6, 0, Math.PI * 2); ctx.stroke();
-        }
-    }
-}
-
-class Bullet {
-    constructor(x, y, dx, dy, isPlayer, ownerId, isDrone = false) {
-        this.x = x; this.y = y; this.dx = dx; this.dy = dy;
-        this.speed = (isPlayer && ownerId.weaponLevel >= 1 && !isDrone) ? 450 : 350;
-        this.isPlayer = isPlayer; this.ownerId = ownerId;
-        this.isDrone = isDrone;
-        this.radius = 4; this.markForDeletion = false;
-    }
-
-    update(dt) {
-        this.x += this.dx * this.speed * (dt / 1000); this.y += this.dy * this.speed * (dt / 1000);
-
-        if (this.x < 0 || this.x > COLS * TILE_SIZE || this.y < 0 || this.y > ROWS * TILE_SIZE) {
-            this.markForDeletion = true; createExplosion(this.x, this.y, '#aaa', 5); sfx.playArmorHit(); return;
-        }
-
-        let isFriendlyShooter = this.isDrone || (this.ownerId && (this.ownerId.isAllyAI || this.ownerId.constructor.name === 'Turret'));
-        
-        let checkFriendlyStructure = (r, c) => {
-            for (let br = Math.max(0, r - 2); br <= Math.min(ROWS - 1, r + 2); br++) {
-                for (let bc = Math.max(0, c - 2); bc <= Math.min(COLS - 1, c + 2); bc++) {
-                    if (grid[br][bc] === BASE || grid[br][bc] === RADAR) return true;
-                }
-            }
-            return false;
-        };
-
-        let col = Math.floor(this.x / TILE_SIZE); let row = Math.floor(this.y / TILE_SIZE);
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
-            let cell = grid[row][col];
-            if (cell !== EMPTY && cell !== WATER && cell !== BUSH && cell !== RAIL && cell !== BTN_OFF && cell !== BTN_ON) {
-                if (cell === BRICK) {
-                    if (isFriendlyShooter && checkFriendlyStructure(row, col)) {
-                        this.markForDeletion = true; 
-                        createExplosion(this.x, this.y, '#ff9900', 5);
-                        return; 
-                    }
-
-                    let state = brickState[row][col];
-                    let px = col * TILE_SIZE; let py = row * TILE_SIZE;
-                    let hit = false;
-                    let newState = state;
-
-                    let dbx = this.x - this.radius; let dby = this.y - this.radius;
-                    let dbw = this.radius * 2; let dbh = this.radius * 2;
-                    if (this.dy < 0) { dby -= 8; dbh += 8; dbx -= 4; dbw += 8; } 
-                    else if (this.dy > 0) { dbh += 8; dbx -= 4; dbw += 8; } 
-                    else if (this.dx < 0) { dbx -= 8; dbw += 8; dby -= 4; dbh += 8; } 
-                    else if (this.dx > 0) { dbw += 8; dby -= 4; dbh += 8; } 
-
-                    let quarters = [
-                        {bit: 1, x: px, y: py}, {bit: 2, x: px+16, y: py},
-                        {bit: 4, x: px, y: py+16}, {bit: 8, x: px+16, y: py+16}
-                    ];
-                    
-                    for (let q of quarters) {
-                        if ((state & q.bit) && rectIntersect(dbx, dby, dbw, dbh, q.x, q.y, 16, 16)) {
-                            hit = true; newState &= ~q.bit; 
-                        }
-                    }
-                    
-                    if (hit) {
-                        this.markForDeletion = true; 
-                        createExplosion(this.x, this.y, '#ff9900', 10);
-                        sfx.playExplosion(false);
-                        brickState[row][col] = newState;
-                        if (newState === 0) grid[row][col] = EMPTY;
-                        return;
-                    }
-                } else {
-                    if (isFriendlyShooter && (cell === BASE || cell === RADAR)) {
-                        this.markForDeletion = true; 
-                        createExplosion(this.x, this.y, '#ffaa00', 5);
-                        return; 
-                    }
-
-                    this.markForDeletion = true; createExplosion(this.x, this.y, '#ff9900', 10);
-                    if (cell === STEEL || cell === GATE) { sfx.playArmorHit(); }
-                    else if (cell === BASE) { baseAlive = false; createExplosion(this.x, this.y, '#ff0000', 40); sfx.playExplosion(true); levelFailed(t('baseDestroyed')); return; }
-                    else if (cell === SUBSTATION && this.isPlayer) {
-                        grid[row][col] = EMPTY; substationAlive = false;
-                        createExplosion(this.x, this.y, '#0ea5e9', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
-                    }
-                    else if (cell === GENERATOR && this.isPlayer) {
-                        grid[row][col] = EMPTY; generatorAlive = false; isShocking = false;
-                        createExplosion(this.x, this.y, '#f59e0b', 50); sfx.playExplosion(true); sfx.playBonus(); updateObjectiveUI();
-                    }
-                    else if (cell === RADAR) {
-                        grid[row][col] = EMPTY; radarsAlive--;
-                        createExplosion(this.x, this.y, '#0ea5e9', 40); sfx.playExplosion(true); updateObjectiveUI();
-                        return;
-                    }
-                    else if (cell === ENEMY_BASE && this.isPlayer) { 
-                        if (assaultMode === 'SUBSTATION' && substationAlive) {
-                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#3b82f6', 15);
-                        } else if (assaultMode === 'MINIBOSSES' && countMiniBosses() > 0) {
-                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#f59e0b', 15);
-                        } else if (levelType === 'ELECTRO' && generatorAlive) {
-                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#fde047', 15);
-                        } else if (assaultMode === 'BUTTONS' && buttonsLeft > 0) {
-                            sfx.playArmorHit(); createExplosion(this.x, this.y, '#ef4444', 15);
-                        } else {
-                            grid[row][col] = EMPTY; createExplosion(this.x, this.y, '#ff00ff', 50); sfx.playExplosion(true); winLevel(); 
-                        }
-                    }
-                    return;
-                }
-            }
-        }
-
-        for (let other of bullets) {
-            if (other !== this && !other.markForDeletion && this.ownerId !== other.ownerId) {
-                let dist = Math.hypot(this.x - other.x, this.y - other.y);
-                if (dist < this.radius + other.radius + 4) {
-                    this.markForDeletion = true; other.markForDeletion = true;
-                    createExplosion((this.x + other.x) / 2, (this.y + other.y) / 2, '#fff', 6); return;
-                }
-            }
-        }
-
-        if (this.isPlayer) {
-            for (let enemy of enemies) {
-                if (!enemy.markForDeletion && this.checkTankHit(enemy)) {
-                    this.markForDeletion = true; enemy.hp--;
-                    if (enemy.hp <= 0) {
-                        enemy.markForDeletion = true; 
-                        score += (enemy.isBoss ? 1000 : (enemy.isMiniBoss ? 500 : (enemy.eType === 'NORMAL' ? 100 : 300)));
-                        document.getElementById('scoreUI').innerText = score;
-                        createExplosion(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff4400', enemy.isBoss ? 80 : 25); sfx.playExplosion(true);
-                        updateObjectiveUI();
-                        
-                        if (Math.random() < 0.20) {
-                            let bType; let roll = Math.random();
-                            if (roll < 0.05) bType = 'BOMB';
-                            else if (roll < 0.15) bType = 'TIME';
-                            else if (roll < 0.35) bType = Math.random() < 0.5 ? 'ALLY' : 'TURRET';
-                            else { const std = ['LIFE', 'SHIELD', 'FIRE', 'BASE']; bType = std[Math.floor(Math.random() * std.length)]; }
-                            bonuses.push(new Bonus(enemy.x + 10, enemy.y + 10, bType));
-                        }
-                    } else { 
-                        createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); 
-                        if (enemy.isBoss && Math.random() < 0.05) {
-                            let dropTypes = ['FIRE', 'LIFE', 'ALLY', 'TURRET', 'SHIELD', 'TIME'];
-                            bonuses.push(new Bonus(this.x, this.y, dropTypes[Math.floor(Math.random() * dropTypes.length)]));
-                        }
-                    }
-                    break;
-                }
-            }
-        } else {
-            if (player && !player.markForDeletion && this.checkTankHit(player)) {
-                this.markForDeletion = true;
-                if (player.shieldTimer > 0) { createExplosion(this.x, this.y, '#3b82f6', 10); sfx.playArmorHit(); }
-                else playerDeath();
-            }
-            for (let ally of allies) {
-                if (!ally.markForDeletion && this.checkTankHit(ally)) {
-                    this.markForDeletion = true;
-                    if (ally.shieldTimer > 0) { createExplosion(this.x, this.y, '#3b82f6', 10); sfx.playArmorHit(); }
-                    else {
-                        ally.hp--;
-                        if (ally.hp <= 0) { ally.markForDeletion = true; createExplosion(ally.x + ally.w/2, ally.y + ally.h/2, '#0ea5e9', 25); sfx.playExplosion(true); }
-                        else { createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); }
-                    }
-                    break;
-                }
-            }
-            for (let t of turrets) {
-                if (!t.markForDeletion && this.x > t.x && this.x < t.x + TILE_SIZE && this.y > t.y && this.y < t.y + TILE_SIZE) {
-                    this.markForDeletion = true; t.hp--;
-                    if (t.hp <= 0) { t.markForDeletion = true; createExplosion(t.x + TILE_SIZE/2, t.y + TILE_SIZE/2, '#a855f7', 30); sfx.playExplosion(true); }
-                    else { createExplosion(this.x, this.y, '#fff', 8); sfx.playArmorHit(); }
-                    break;
-                }
-            }
-        }
-    }
-    checkTankHit(tank) { return this.x > tank.x && this.x < tank.x + tank.w && this.y > tank.y && this.y < tank.y + tank.h; }
-    draw(ctx) { ctx.fillStyle = this.isPlayer ? '#fff' : '#fca5a5'; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); }
-}
-
-class Particle {
-    constructor(x, y, color) {
-        this.x = x; this.y = y; this.color = color; const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 80 + 30;
-        this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed; this.life = 1.0; this.decay = Math.random() * 2 + 1;
-    }
-    update(dt) { this.x += this.vx * (dt / 1000); this.y += this.vy * (dt / 1000); this.life -= this.decay * (dt / 1000); }
-    draw(ctx) { ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, 4, 4); ctx.globalAlpha = 1.0; }
-}
-
-function createExplosion(x, y, color, count) { for(let i=0; i<count; i++) particles.push(new Particle(x, y, color)); }
-
-/**
- * УПРАВЛЕНИЕ ИГРОЙ
- */
 function initGame() {
     sfx.init();
     score = 0; lives = 3; continues = 3; level = 1; lastBossLevel = 0; playerWeaponLevel = 0;
@@ -1997,6 +2025,13 @@ function winLevel() {
     setTimeout(() => { initLevel(false); }, 3500); 
 }
 
+function gameOver() {
+    gameState = 'GAMEOVER';
+    document.getElementById('headerPauseBtn').classList.add('hidden');
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+    document.getElementById('finalScore').innerText = score;
+}
+
 function levelFailed(reason) {
     if (gameState === 'DYING' || gameState === 'GAMEOVER' || gameState === 'LEVEL_TRANSITION') return;
     gameState = 'DYING'; sfx.stopEngine(); sfx.playLose();
@@ -2006,10 +2041,13 @@ function levelFailed(reason) {
             continues--; document.getElementById('continuesUI').innerText = continues;
             gameState = 'LEVEL_TRANSITION';
             let transitionText = document.getElementById('transitionText');
-            transitionText.innerHTML = reason + t('attemptsLeft', {n: continues});
+            let appendText = continues === 0 ? t('lastChance') : t('attemptsLeft', {n: continues});
+            transitionText.innerHTML = reason + appendText;
             document.getElementById('transitionScreen').classList.remove('hidden');
             setTimeout(() => { lives = 3; document.getElementById('livesUI').innerText = lives; initLevel(true); }, 3500);
-        } else gameOver();
+        } else {
+            gameOver();
+        }
     }, 1500); 
 }
 
@@ -2251,7 +2289,6 @@ function draw() {
     let startRow = Math.max(0, Math.floor(camera.y / TILE_SIZE));
     let endRow = Math.min(ROWS - 1, Math.floor((camera.y + canvas.height) / TILE_SIZE) + 1);
 
-    // Слой 1: Пол, Стены, Вода, Базы (без кустов)
     for (let r = startRow; r <= endRow; r++) {
         for (let c = 0; c < COLS; c++) {
             let cell = grid[r][c]; let px = c * TILE_SIZE; let py = r * TILE_SIZE;
@@ -2384,7 +2421,6 @@ function draw() {
         }
     }
 
-    // Слой 2: Сущности
     placedMines.forEach(m => m.draw(ctx));
     enemyMines.forEach(m => m.draw(ctx));
     bonuses.forEach(b => b.draw(ctx));
@@ -2396,21 +2432,20 @@ function draw() {
     lasers.forEach(l => l.draw(ctx));
     particles.forEach(p => p.draw(ctx));
 
-    // Слой 3: Кусты (перекрывают танки, полупрозрачные как в оригинале)
     ctx.globalAlpha = 0.75; 
     for (let r = startRow; r <= endRow; r++) {
         for (let c = 0; c < COLS; c++) {
             if (grid[r][c] === BUSH) {
                 let px = c * TILE_SIZE; let py = r * TILE_SIZE;
-                ctx.fillStyle = '#14532d'; // Темно-зеленая тень
+                ctx.fillStyle = '#14532d'; 
                 ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                ctx.fillStyle = '#22c55e'; // Яркие листья
+                ctx.fillStyle = '#22c55e'; 
                 ctx.fillRect(px + 2, py + 2, 6, 6);
                 ctx.fillRect(px + 14, py + 4, 8, 8);
                 ctx.fillRect(px + 24, py + 2, 6, 6);
                 ctx.fillRect(px + 4, py + 16, 8, 8);
                 ctx.fillRect(px + 18, py + 20, 8, 8);
-                ctx.fillStyle = '#16a34a'; // Средние листья
+                ctx.fillStyle = '#16a34a'; 
                 ctx.fillRect(px + 8, py + 10, 8, 8);
                 ctx.fillRect(px + 20, py + 12, 6, 6);
                 ctx.fillRect(px + 2, py + 24, 6, 6);
@@ -2421,9 +2456,6 @@ function draw() {
 
     ctx.restore();
 
-    // Отрисовка эффектов интерфейса поверх камеры
-    
-    // Индикатор обнаружения (Стелс) над игроком
     if (levelType === 'STEALTH' && exposureTimer > 0 && player && !player.markForDeletion) {
         let ratio = Math.min(exposureTimer / 1500, 1.0);
         let screenPx = player.x + player.w/2;
@@ -2438,13 +2470,11 @@ function draw() {
         ctx.fillText('?', screenPx, screenPy - 4);
     }
 
-    // Красный эффект тревоги при Стелсе
     if (levelType === 'STEALTH' && spottedTimer > 0) {
         ctx.fillStyle = `rgba(239, 68, 68, ${Math.abs(Math.sin(Date.now() / 200)) * 0.25})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Отрисовка затемнения для режима Командного центра
     if (levelType === 'COMMAND' && radarsAlive < 3 && player && !player.markForDeletion) {
         let darkness = radarsAlive === 2 ? 0.5 : (radarsAlive === 1 ? 0.8 : 1.0);
         let visRadius = radarsAlive === 2 ? 250 : (radarsAlive === 1 ? 150 : 80);
@@ -2496,23 +2526,109 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = false; });
 
 document.getElementById('startBtn').addEventListener('click', () => { initGame(); });
-document.getElementById('restartBtn').addEventListener('click', () => { window.location.reload(); });
+document.getElementById('restartBtn').addEventListener('click', goToGameMenu);
+document.getElementById('pauseToMenuBtn').addEventListener('click', goToGameMenu);
+
 document.getElementById('headerPauseBtn').addEventListener('click', togglePause);
 document.getElementById('resumeBtn').addEventListener('click', togglePause);
 
-// Сохранение и загрузка
+document.getElementById('muteBtnHeader').addEventListener('click', (e) => {
+    sfx.isMuted = !sfx.isMuted;
+    e.target.innerText = sfx.isMuted ? '🔇' : '🔊';
+    if (!sfx.isMuted && audioCtx.state === 'suspended') audioCtx.resume();
+});
+
+function toggleInfo() {
+    const encScreen = document.getElementById('encyclopediaScreen');
+    if (encScreen.classList.contains('hidden')) {
+        if (gameState === 'PLAYING') {
+            gameState = 'PAUSED';
+            sfx.stopEngine();
+        }
+        encScreen.classList.remove('hidden');
+    } else {
+        encScreen.classList.add('hidden');
+        if (gameState === 'PAUSED' &&
+            document.getElementById('pauseScreen').classList.contains('hidden') &&
+            document.getElementById('startScreen').classList.contains('hidden') &&
+            document.getElementById('transitionScreen').classList.contains('hidden') &&
+            document.getElementById('gameOverScreen').classList.contains('hidden')) {
+            gameState = 'PLAYING';
+            lastTime = performance.now();
+        }
+    }
+}
+document.getElementById('infoBtn').addEventListener('click', toggleInfo);
+document.getElementById('closeInfoBtn').addEventListener('click', toggleInfo);
+
+const mobileControls = document.getElementById('mobile-controls');
+const handleTouch = (e) => {
+    e.preventDefault(); 
+    
+    touchDirs.up = false;
+    touchDirs.down = false;
+    touchDirs.left = false;
+    touchDirs.right = false;
+    touchFire = false;
+    touchMine = false;
+
+    ['btn-up', 'btn-down', 'btn-left', 'btn-right', 'btn-fire', 'btn-mine'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active-btn');
+    });
+
+    for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (element) {
+            const btn = element.closest('.btn, .btn-fire, .btn-mine');
+            if (btn) {
+                if (btn.id === 'btn-up') touchDirs.up = true;
+                if (btn.id === 'btn-down') touchDirs.down = true;
+                if (btn.id === 'btn-left') touchDirs.left = true;
+                if (btn.id === 'btn-right') touchDirs.right = true;
+                if (btn.id === 'btn-fire') touchFire = true;
+                if (btn.id === 'btn-mine') touchMine = true;
+                btn.classList.add('active-btn');
+            }
+        }
+    }
+};
+
+if (mobileControls) {
+    mobileControls.addEventListener('touchstart', handleTouch, { passive: false });
+    mobileControls.addEventListener('touchmove', handleTouch, { passive: false });
+    mobileControls.addEventListener('touchend', handleTouch, { passive: false });
+    mobileControls.addEventListener('touchcancel', handleTouch, { passive: false });
+}
+
+const setupMouseBtn = (id, actionDown, actionUp) => {
+    const btn = document.getElementById(id);
+    const triggerDown = (e) => { e.preventDefault(); actionDown(); btn.classList.add('active-btn'); };
+    const triggerUp = (e) => { e.preventDefault(); actionUp(); btn.classList.remove('active-btn'); };
+    btn.addEventListener('mousedown', triggerDown);
+    btn.addEventListener('mouseup', triggerUp);
+    btn.addEventListener('mouseleave', triggerUp);
+};
+
+setupMouseBtn('btn-up', () => touchDirs.up = true, () => touchDirs.up = false);
+setupMouseBtn('btn-down', () => touchDirs.down = true, () => touchDirs.down = false);
+setupMouseBtn('btn-left', () => touchDirs.left = true, () => touchDirs.left = false);
+setupMouseBtn('btn-right', () => touchDirs.right = true, () => touchDirs.right = false);
+setupMouseBtn('btn-fire', () => touchFire = true, () => touchFire = false);
+setupMouseBtn('btn-mine', () => touchMine = true, () => touchMine = false);
+
 document.getElementById('saveBtn').addEventListener('click', saveGame);
 document.getElementById('startLoadBtn').addEventListener('click', () => { sfx.init(); loadGame('startLoadBtn'); });
 document.getElementById('pauseLoadBtn').addEventListener('click', () => { loadGame('pauseLoadBtn'); });
 
-// Экспорт в физический файл на ПК/Телефон
 document.getElementById('exportBtn').addEventListener('click', () => {
     const data = { 
         level, score, lives, continues, lastBossLevel, playerWeaponLevel,
         grid, brickState, savedGrid, savedBrickState, 
         savedLevelType: levelType, savedAssaultMode: assaultMode, 
-        savedEnemyBaseCol: enemyBaseCol, savedEnemiesToSpawn: savedEnemiesToSpawn, 
-        savedEnemyMinesCoords: savedEnemyMinesCoords, savedButtonsLeft: buttonsLeft,
+        savedEnemyBaseCol: enemyBaseCol, savedEnemiesToSpawn: enemiesToSpawn, 
+        savedEnemyMinesCoords: enemyMines.map(m => ({x: m.x, y: m.y})), savedButtonsLeft: buttonsLeft,
         enemiesToSpawn, radarsAlive, substationAlive, generatorAlive, buttonsLeft
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
@@ -2529,7 +2645,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     setTimeout(() => { btn.innerText = old; }, 2000);
 });
 
-// Импорт сохранения из файла
 const handleFileLoad = (event) => {
     sfx.init();
     const file = event.target.files[0];
@@ -2592,99 +2707,7 @@ const handleFileLoad = (event) => {
 document.getElementById('fileLoadStart').addEventListener('change', handleFileLoad);
 document.getElementById('fileLoadPause').addEventListener('change', handleFileLoad);
 
-// Обработчик кнопки звука (в заголовке)
-document.getElementById('muteBtnHeader').addEventListener('click', (e) => {
-    sfx.isMuted = !sfx.isMuted;
-    e.target.innerText = sfx.isMuted ? '🔇' : '🔊';
-    if (!sfx.isMuted && audioCtx.state === 'suspended') audioCtx.resume();
-});
-
-// Обработчик энциклопедии
-function toggleInfo() {
-    const encScreen = document.getElementById('encyclopediaScreen');
-    if (encScreen.classList.contains('hidden')) {
-        if (gameState === 'PLAYING') {
-            gameState = 'PAUSED';
-            sfx.stopEngine();
-        }
-        encScreen.classList.remove('hidden');
-    } else {
-        encScreen.classList.add('hidden');
-        if (gameState === 'PAUSED' &&
-            document.getElementById('pauseScreen').classList.contains('hidden') &&
-            document.getElementById('startScreen').classList.contains('hidden') &&
-            document.getElementById('transitionScreen').classList.contains('hidden') &&
-            document.getElementById('gameOverScreen').classList.contains('hidden')) {
-            gameState = 'PLAYING';
-            lastTime = performance.now();
-        }
-    }
-}
-document.getElementById('infoBtn').addEventListener('click', toggleInfo);
-document.getElementById('closeInfoBtn').addEventListener('click', toggleInfo);
-
-// Глобальная обработка тачей для "скольжения" (D-PAD)
-const mobileControls = document.getElementById('mobile-controls');
-const handleTouch = (e) => {
-    e.preventDefault(); 
-    
-    touchDirs.up = false;
-    touchDirs.down = false;
-    touchDirs.left = false;
-    touchDirs.right = false;
-    touchFire = false;
-    touchMine = false;
-
-    ['btn-up', 'btn-down', 'btn-left', 'btn-right', 'btn-fire', 'btn-mine'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('active-btn');
-    });
-
-    for (let i = 0; i < e.touches.length; i++) {
-        const touch = e.touches[i];
-        const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (element) {
-            const btn = element.closest('.btn, .btn-fire, .btn-mine');
-            if (btn) {
-                if (btn.id === 'btn-up') touchDirs.up = true;
-                if (btn.id === 'btn-down') touchDirs.down = true;
-                if (btn.id === 'btn-left') touchDirs.left = true;
-                if (btn.id === 'btn-right') touchDirs.right = true;
-                if (btn.id === 'btn-fire') touchFire = true;
-                if (btn.id === 'btn-mine') touchMine = true;
-                btn.classList.add('active-btn');
-            }
-        }
-    }
-};
-
-if (mobileControls) {
-    mobileControls.addEventListener('touchstart', handleTouch, { passive: false });
-    mobileControls.addEventListener('touchmove', handleTouch, { passive: false });
-    mobileControls.addEventListener('touchend', handleTouch, { passive: false });
-    mobileControls.addEventListener('touchcancel', handleTouch, { passive: false });
-}
-
-// Для мыши на компьютере
-const setupMouseBtn = (id, actionDown, actionUp) => {
-    const btn = document.getElementById(id);
-    const triggerDown = (e) => { e.preventDefault(); actionDown(); btn.classList.add('active-btn'); };
-    const triggerUp = (e) => { e.preventDefault(); actionUp(); btn.classList.remove('active-btn'); };
-    btn.addEventListener('mousedown', triggerDown);
-    btn.addEventListener('mouseup', triggerUp);
-    btn.addEventListener('mouseleave', triggerUp);
-};
-
-setupMouseBtn('btn-up', () => touchDirs.up = true, () => touchDirs.up = false);
-setupMouseBtn('btn-down', () => touchDirs.down = true, () => touchDirs.down = false);
-setupMouseBtn('btn-left', () => touchDirs.left = true, () => touchDirs.left = false);
-setupMouseBtn('btn-right', () => touchDirs.right = true, () => touchDirs.right = false);
-setupMouseBtn('btn-fire', () => touchFire = true, () => touchFire = false);
-setupMouseBtn('btn-mine', () => touchMine = true, () => touchMine = false);
-
-// Инициализация UI
 updateStaticUI();
-
 </script>
 </body>
 </html>
